@@ -359,12 +359,24 @@ class TestEasypaisaController extends Controller
         curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 120); // Connection timeout: 120 seconds
         curl_setopt($ch, CURLOPT_TIMEOUT, 180); // Total timeout: 180 seconds (3 minutes)
 
-        // Optional: For debugging
+        // Advanced debugging
         curl_setopt($ch, CURLOPT_VERBOSE, true);
+        curl_setopt($ch, CURLOPT_STDERR, fopen('php://temp', 'w+'));
+        
+        // DNS and connection settings
+        curl_setopt($ch, CURLOPT_DNS_CACHE_TIMEOUT, 120);
+        curl_setopt($ch, CURLOPT_FRESH_CONNECT, true);
+        
+        // SSL settings
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
 
         $startTime = microtime(true);
         $response = curl_exec($ch);
         $executionTime = microtime(true) - $startTime;
+        
+        // Get detailed connection info
+        $curlInfo = curl_getinfo($ch);
 
         $result = [];
         
@@ -375,7 +387,21 @@ class TestEasypaisaController extends Controller
                 'curl_errno' => curl_errno($ch),
                 'execution_time' => round($executionTime, 2) . 's',
                 'request_data' => $data,
-                'url' => $url
+                'url' => $url,
+                'diagnostic_info' => [
+                    'total_time' => $curlInfo['total_time'] ?? 0,
+                    'namelookup_time' => $curlInfo['namelookup_time'] ?? 0,
+                    'connect_time' => $curlInfo['connect_time'] ?? 0,
+                    'pretransfer_time' => $curlInfo['pretransfer_time'] ?? 0,
+                    'starttransfer_time' => $curlInfo['starttransfer_time'] ?? 0,
+                    'redirect_time' => $curlInfo['redirect_time'] ?? 0,
+                    'primary_ip' => $curlInfo['primary_ip'] ?? null,
+                    'primary_port' => $curlInfo['primary_port'] ?? null,
+                    'local_ip' => $curlInfo['local_ip'] ?? null,
+                    'local_port' => $curlInfo['local_port'] ?? null,
+                    'http_code' => $curlInfo['http_code'] ?? 0,
+                ],
+                'diagnosis' => $this->diagnoseCurlError($curlInfo, $executionTime)
             ];
             
             Log::channel($this->logChannel)->error('Simple cURL test failed', $result);
@@ -386,7 +412,16 @@ class TestEasypaisaController extends Controller
                 'decoded_response' => json_decode($response, true),
                 'execution_time' => round($executionTime, 2) . 's',
                 'request_data' => $data,
-                'url' => $url
+                'url' => $url,
+                'diagnostic_info' => [
+                    'total_time' => $curlInfo['total_time'] ?? 0,
+                    'namelookup_time' => $curlInfo['namelookup_time'] ?? 0,
+                    'connect_time' => $curlInfo['connect_time'] ?? 0,
+                    'pretransfer_time' => $curlInfo['pretransfer_time'] ?? 0,
+                    'starttransfer_time' => $curlInfo['starttransfer_time'] ?? 0,
+                    'primary_ip' => $curlInfo['primary_ip'] ?? null,
+                    'http_code' => $curlInfo['http_code'] ?? 0,
+                ]
             ];
             
             Log::channel($this->logChannel)->info('Simple cURL test success', $result);
@@ -395,6 +430,55 @@ class TestEasypaisaController extends Controller
         curl_close($ch);
 
         return response()->json($result);
+    }
+
+    /**
+     * Diagnose cURL connection error
+     */
+    private function diagnoseCurlError($curlInfo, $executionTime)
+    {
+        $namelookupTime = $curlInfo['namelookup_time'] ?? 0;
+        $connectTime = $curlInfo['connect_time'] ?? 0;
+        $primaryIp = $curlInfo['primary_ip'] ?? null;
+        
+        $diagnosis = [];
+        
+        // DNS Resolution Check
+        if ($namelookupTime == 0 || $namelookupTime >= $executionTime) {
+            $diagnosis[] = '❌ DNS Resolution Failed - Cannot resolve easypay.easypaisa.com.pk';
+            $diagnosis[] = '→ Your server cannot find the IP address of EasyPaisa';
+            $diagnosis[] = '→ Check DNS settings or use alternative DNS (8.8.8.8)';
+        } else {
+            $diagnosis[] = '✅ DNS Resolution OK - Took ' . round($namelookupTime * 1000, 2) . 'ms';
+            if ($primaryIp) {
+                $diagnosis[] = '→ Resolved to IP: ' . $primaryIp;
+            }
+        }
+        
+        // Connection Check
+        if ($connectTime == 0 || $connectTime >= $executionTime) {
+            $diagnosis[] = '❌ TCP Connection Failed - Cannot connect to EasyPaisa server';
+            $diagnosis[] = '→ Port 443 might be blocked by firewall';
+            $diagnosis[] = '→ Server IP might be blacklisted by EasyPaisa';
+            $diagnosis[] = '→ Network routing issue to Pakistan servers';
+        } else {
+            $diagnosis[] = '✅ TCP Connection OK - Took ' . round($connectTime * 1000, 2) . 'ms';
+        }
+        
+        // Timeout Analysis
+        if ($executionTime >= 119) { // Close to 120s timeout
+            $diagnosis[] = '⏱️ Hit Connection Timeout Limit (120s)';
+            $diagnosis[] = '→ Connection attempt timed out';
+            $diagnosis[] = '→ EasyPaisa server not responding';
+            
+            if ($namelookupTime > 0 && $namelookupTime < 5) {
+                $diagnosis[] = '→ DNS works but connection hangs';
+                $diagnosis[] = '→ Likely: Firewall blocking outbound connections';
+                $diagnosis[] = '→ Solution: Contact Hostinger to whitelist easypay.easypaisa.com.pk';
+            }
+        }
+        
+        return implode("\n", $diagnosis);
     }
 
     /**
