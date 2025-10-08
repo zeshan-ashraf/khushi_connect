@@ -356,7 +356,7 @@ class TestEasypaisaController extends Controller
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 
         // Timeout settings - Increased for EasyPaisa API (usually takes 60+ seconds)
-        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 120); // Connection timeout: 120 seconds
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 160); // Connection timeout: 120 seconds
         curl_setopt($ch, CURLOPT_TIMEOUT, 180); // Total timeout: 180 seconds (3 minutes)
 
         // Advanced debugging
@@ -364,7 +364,7 @@ class TestEasypaisaController extends Controller
         curl_setopt($ch, CURLOPT_STDERR, fopen('php://temp', 'w+'));
         
         // DNS and connection settings
-        curl_setopt($ch, CURLOPT_DNS_CACHE_TIMEOUT, 120);
+        curl_setopt($ch, CURLOPT_DNS_CACHE_TIMEOUT, 160);
         curl_setopt($ch, CURLOPT_FRESH_CONNECT, true);
         
         // SSL settings
