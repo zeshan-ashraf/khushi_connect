@@ -155,8 +155,9 @@ class PayinController extends Controller
             ]);
 
             $easypaisa = new Easypaisa;
+            // dd($post_data);
             $response = $easypaisa->sendRequest($post_data);
-        
+            // dd($response);
             // Decode the response into an array if needed
             if ($response instanceof \Illuminate\Http\JsonResponse) {
                 $response = $response->getData(true);
