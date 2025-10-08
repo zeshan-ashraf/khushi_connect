@@ -29,14 +29,14 @@ class PayinController extends Controller
 	{
 		$this->service = $service;
 	}
-	//Log::channel('payout')->info('Payout started for user', ['email' => $email]);
+	//Log::channel('payin')->info('Payout started for user', ['email' => $email]);
     public function checkout(Request $request)
     {
         $startTime = microtime(true);
         $requestId = uniqid();
         
         // Log all incoming request parameters
-        Log::channel('payout')->info('************** Payment checkout initiated', [
+        Log::channel('payin')->info('************** Payment checkout initiated', [
             'request_id' => $requestId,
             'request_params' => $request->all(),
             'client_ip' => $request->ip(),
@@ -73,7 +73,7 @@ class PayinController extends Controller
         if(($request->payment_method == "jazzcash" && $user->jc_api == 0) || 
            ($request->payment_method == "easypaisa" && $user->ep_api == 0)) {
             
-            /*Log::channel('payout')->error('API access suspended', [
+            /*Log::channel('payin')->error('API access suspended', [
                 'request_id' => $requestId,
                 'client_email' => $request->client_email,
                 'payment_method' => $request->payment_method,
@@ -101,7 +101,7 @@ class PayinController extends Controller
      */
     private function logBlockedNumber(string $phone, string $paymentMethod, string $responseCode, string $responseDesc, ?int $userId = null): void
     {
-        Log::channel('payout')->info('### Saving blocked number', [
+        Log::channel('payin')->info('### Saving blocked number', [
             'phone' => $phone,
             'payment_method' => $paymentMethod,
             'response_code' => $responseCode,
@@ -118,7 +118,7 @@ class PayinController extends Controller
      */
     private function processPayment(Request $request, User $user, float $startTime, string $requestId): JsonResponse
     {
-        /*Log::channel('payout')->info('Processing payment request', [
+        /*Log::channel('payin')->info('Processing payment request', [
             'request_id' => $requestId,
             'client_email' => $request->client_email,
             'payment_method' => $request->payment_method,
@@ -146,7 +146,7 @@ class PayinController extends Controller
                                             float $startTime, string $requestId): JsonResponse
     {
         try {
-            Log::channel('payout')->info('Initiating Easypaisa payment', [
+            Log::channel('payin')->info('Initiating Easypaisa payment', [
                 'request_id' => $requestId,
                 'client_email' => $request->client_email,
                 'request_params' => $request->all(),
@@ -164,7 +164,7 @@ class PayinController extends Controller
             }
             // Validate the structure of the response
             if (isset($response['responseCode'], $response['responseDesc'], $response['orderId'])) {
-                //Log::channel('payout')->info('Easypaisa response received', [
+                //Log::channel('payin')->info('Easypaisa response received', [
                 //    'request_id' => $requestId,
                 //    'order_id' => $response['orderId'],
                 //    'response_code' => $response['responseCode'],
@@ -196,7 +196,7 @@ class PayinController extends Controller
                 }*/
 
                 // Process failed response
-                Log::channel('payout')->warning('Easypaisa payment failed', [
+                Log::channel('payin')->warning('Easypaisa payment failed', [
                     'request_id' => $requestId,
                     'execution_time' => microtime(true) - $startTime,
                     'response_code' => $responseCode,
@@ -213,7 +213,7 @@ class PayinController extends Controller
                 return $this->getErrorResponse();
             }
     
-            Log::channel('payout')->error('Invalid Easypaisa response structure', [
+            Log::channel('payin')->error('Invalid Easypaisa response structure', [
                 'request_id' => $requestId,
                 'response' => json_encode($response),
                 'request_params' => $request->all(),
@@ -249,7 +249,7 @@ class PayinController extends Controller
                                            ?Transaction $transaction, User $user, 
                                            float $startTime, string $requestId): JsonResponse
     {
-        Log::channel('payout')->info('Initiating JazzCash payment', [
+        Log::channel('payin')->info('Initiating JazzCash payment', [
             'request_id' => $requestId,
             'client_email' => $request->client_email,
             'request_params' => $request->all(),
@@ -317,7 +317,7 @@ class PayinController extends Controller
             ], 500);
         }
 
-        //Log::channel('payout')->info('JazzCash response received', [
+        //Log::channel('payin')->info('JazzCash response received', [
         //    'request_id' => $requestId,
         //    'response_code' => $result->pp_ResponseCode ?? 'unknown',
         //    'transaction_ref' => $result->pp_TxnRefNo ?? 'unknown',
@@ -367,7 +367,7 @@ class PayinController extends Controller
             );
         }
         
-        Log::channel('payout')->warning('JazzCash payment failed', [
+        Log::channel('payin')->warning('JazzCash payment failed', [
             'request_id' => $requestId,
             'execution_time' => microtime(true) - $startTime,
             'response_code' => $result->pp_ResponseCode ?? 'unknown',
@@ -406,14 +406,14 @@ class PayinController extends Controller
 
 
         $updatedTransaction = $this->service->orderFinalProcess($response, $txnRefNo, $paymentMethod, $user, $transaction);
-        Log::channel('payout')->info("+++1 ");
+        Log::channel('payin')->info("+++1 ");
         if (1==1) { // as per this function will only call when status is success
             $executionTime = microtime(true) - $startTime;
-            Log::channel('payout')->info("+++2");
+            Log::channel('payin')->info("+++2");
             // Block the phone number for 5 minutes after successful transaction using cache
             $this->blockNumberAfterSuccess($request->phone, $paymentMethod, $user->id, $requestId);
-            Log::channel('payout')->info("+++3");
-            Log::channel('payout')->info("$paymentMethod payment completed successfully", [
+            Log::channel('payin')->info("+++3");
+            Log::channel('payin')->info("$paymentMethod payment completed successfully", [
                 'request_id' => $requestId,
                 'execution_time' => $executionTime,
                 'transaction_id' => $updatedTransaction->txn_ref_no,
@@ -438,10 +438,10 @@ class PayinController extends Controller
     private function blockNumberAfterSuccess(string $phone, string $paymentMethod, int $userId, string $requestId): void
     {
         try {
-            Log::channel('payout')->info("+++2.1");
+            Log::channel('payin')->info("+++2.1");
             BlockedNumber::handleSuccessfulTransaction($phone, $paymentMethod, $userId);
-            Log::channel('payout')->info("+++2.2");
-            Log::channel('payout')->info('Phone number cooldown set after successful transaction', [
+            Log::channel('payin')->info("+++2.2");
+            Log::channel('payin')->info('Phone number cooldown set after successful transaction', [
                 'request_id' => $requestId,
                 'phone' => $phone,
                 'payment_method' => $paymentMethod,
