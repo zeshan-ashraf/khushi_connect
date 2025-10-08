@@ -12,6 +12,11 @@ use DateTimeZone;
 class TestEasypaisaController extends Controller
 {
     /**
+     * Default log channel for this controller
+     */
+    protected $logChannel = 'payin';
+
+    /**
      * Test EasyPaisa API with custom cURL request
      */
     public function testEasypaisaRequest(Request $request)
@@ -19,7 +24,7 @@ class TestEasypaisaController extends Controller
         $startTime = microtime(true);
         $requestId = uniqid('test_');
         
-        Log::channel('payout')->info('========== TEST EASYPAISA REQUEST STARTED ==========', [
+        Log::channel($this->logChannel)->info('========== TEST EASYPAISA REQUEST STARTED ==========', [
             'request_id' => $requestId,
             'params' => $request->all()
         ]);
@@ -53,7 +58,7 @@ class TestEasypaisaController extends Controller
                 'emailAddress' => $request->email ?? 'testing@khushipay.com'
             ];
 
-            Log::channel('payout')->info('Test request prepared', [
+            Log::channel($this->logChannel)->info('Test request prepared', [
                 'request_id' => $requestId,
                 'api_url' => $apiUrl,
                 'api_mode' => $apiMode,
@@ -72,7 +77,7 @@ class TestEasypaisaController extends Controller
 
             $executionTime = microtime(true) - $startTime;
 
-            Log::channel('payout')->info('========== TEST COMPLETED ==========', [
+            Log::channel($this->logChannel)->info('========== TEST COMPLETED ==========', [
                 'request_id' => $requestId,
                 'execution_time' => $executionTime
             ]);
@@ -92,7 +97,7 @@ class TestEasypaisaController extends Controller
         } catch (\Exception $e) {
             $executionTime = microtime(true) - $startTime;
             
-            Log::channel('error')->error('Test EasyPaisa request failed', [
+            Log::channel($this->logChannel)->error('Test EasyPaisa request failed', [
                 'request_id' => $requestId,
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
@@ -114,7 +119,7 @@ class TestEasypaisaController extends Controller
     private function testWithLaravelHttp($apiUrl, $credentials, $postData, $requestId)
     {
         try {
-            Log::channel('payout')->info('Testing with Laravel HTTP Client', [
+            Log::channel($this->logChannel)->info('Testing with Laravel HTTP Client', [
                 'request_id' => $requestId,
                 'method' => 'Laravel HTTP'
             ]);
@@ -140,7 +145,7 @@ class TestEasypaisaController extends Controller
                 'headers' => $response->headers()
             ];
 
-            Log::channel('payout')->info('Laravel HTTP test completed', [
+            Log::channel($this->logChannel)->info('Laravel HTTP test completed', [
                 'request_id' => $requestId,
                 'result' => $result
             ]);
@@ -148,7 +153,7 @@ class TestEasypaisaController extends Controller
             return $result;
 
         } catch (\Exception $e) {
-            Log::channel('error')->error('Laravel HTTP test failed', [
+            Log::channel($this->logChannel)->error('Laravel HTTP test failed', [
                 'request_id' => $requestId,
                 'error' => $e->getMessage()
             ]);
@@ -166,7 +171,7 @@ class TestEasypaisaController extends Controller
     private function testWithRawCurl($apiUrl, $credentials, $postData, $requestId)
     {
         try {
-            Log::channel('payout')->info('Testing with raw cURL', [
+            Log::channel($this->logChannel)->info('Testing with raw cURL', [
                 'request_id' => $requestId,
                 'method' => 'Raw cURL'
             ]);
@@ -207,7 +212,7 @@ class TestEasypaisaController extends Controller
             $executionTime = microtime(true) - $startTime;
 
             if ($response === false) {
-                Log::channel('error')->error('Raw cURL request failed', [
+                Log::channel($this->logChannel)->error('Raw cURL request failed', [
                     'request_id' => $requestId,
                     'curl_error' => $curlError,
                     'curl_errno' => $curlErrno,
@@ -241,7 +246,7 @@ class TestEasypaisaController extends Controller
                 ]
             ];
 
-            Log::channel('payout')->info('Raw cURL test completed', [
+            Log::channel($this->logChannel)->info('Raw cURL test completed', [
                 'request_id' => $requestId,
                 'result' => $result
             ]);
@@ -249,7 +254,7 @@ class TestEasypaisaController extends Controller
             return $result;
 
         } catch (\Exception $e) {
-            Log::channel('error')->error('Raw cURL test failed', [
+            Log::channel($this->logChannel)->error('Raw cURL test failed', [
                 'request_id' => $requestId,
                 'error' => $e->getMessage()
             ]);
@@ -267,7 +272,7 @@ class TestEasypaisaController extends Controller
     private function testWithGuzzle($apiUrl, $credentials, $postData, $requestId)
     {
         try {
-            Log::channel('payout')->info('Testing with Guzzle', [
+            Log::channel($this->logChannel)->info('Testing with Guzzle', [
                 'request_id' => $requestId,
                 'method' => 'Guzzle'
             ]);
@@ -300,7 +305,7 @@ class TestEasypaisaController extends Controller
                 'headers' => $response->getHeaders()
             ];
 
-            Log::channel('payout')->info('Guzzle test completed', [
+            Log::channel($this->logChannel)->info('Guzzle test completed', [
                 'request_id' => $requestId,
                 'result' => $result
             ]);
@@ -308,7 +313,7 @@ class TestEasypaisaController extends Controller
             return $result;
 
         } catch (\Exception $e) {
-            Log::channel('error')->error('Guzzle test failed', [
+            Log::channel($this->logChannel)->error('Guzzle test failed', [
                 'request_id' => $requestId,
                 'error' => $e->getMessage()
             ]);
@@ -373,7 +378,7 @@ class TestEasypaisaController extends Controller
                 'url' => $url
             ];
             
-            Log::channel('error')->error('Simple cURL test failed', $result);
+            Log::channel($this->logChannel)->error('Simple cURL test failed', $result);
         } else {
             $result = [
                 'status' => 'success',
@@ -384,7 +389,7 @@ class TestEasypaisaController extends Controller
                 'url' => $url
             ];
             
-            Log::channel('payout')->info('Simple cURL test success', $result);
+            Log::channel($this->logChannel)->info('Simple cURL test success', $result);
         }
         
         curl_close($ch);
@@ -470,7 +475,7 @@ class TestEasypaisaController extends Controller
                 ];
             }
 
-            Log::channel('payout')->info('Connectivity test completed', [
+            Log::channel($this->logChannel)->info('Connectivity test completed', [
                 'request_id' => $requestId,
                 'results' => $results
             ]);
@@ -482,7 +487,7 @@ class TestEasypaisaController extends Controller
             ], 200);
 
         } catch (\Exception $e) {
-            Log::channel('error')->error('Connectivity test failed', [
+            Log::channel($this->logChannel)->error('Connectivity test failed', [
                 'request_id' => $requestId,
                 'error' => $e->getMessage()
             ]);
