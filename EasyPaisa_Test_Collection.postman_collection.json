@@ -1,0 +1,94 @@
+{
+	"info": {
+		"_postman_id": "easypaisa-test-collection",
+		"name": "EasyPaisa API Tests",
+		"description": "Collection to test and debug EasyPaisa API timeout issues",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "1. Test EasyPaisa Connectivity",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/api/test-easypaisa-connectivity",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"test-easypaisa-connectivity"
+					]
+				},
+				"description": "Test basic network connectivity to EasyPaisa server (DNS, Socket, HTTP)"
+			},
+			"response": []
+		},
+		{
+			"name": "2. Test EasyPaisa Full Request",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"orderId\": \"khushi-conn-08a\",\n    \"amount\": \"10\",\n    \"phone\": \"03316215445\",\n    \"email\": \"testing@khushipay.com\",\n    \"client_email\": \"testing@khushipay.com\",\n    \"payment_method\": \"easypaisa\",\n    \"callback_url\": \"https://xxxxxx.c7pay.net/api/callback/order/D17455730586267\"\n}"
+				},
+				"url": {
+					"raw": "{{base_url}}/api/test-easypaisa",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"test-easypaisa"
+					]
+				},
+				"description": "Test EasyPaisa API request using 3 different methods (Laravel HTTP, Raw cURL, Guzzle)"
+			},
+			"response": []
+		},
+		{
+			"name": "3. Original Payin Checkout (EasyPaisa)",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"orderId\": \"khushi-conn-08a\",\n    \"amount\": \"10\",\n    \"phone\": \"03316215445\",\n    \"email\": \"testing@khushipay.com\",\n    \"client_email\": \"testing@khushipay.com\",\n    \"payment_method\": \"easypaisa\",\n    \"callback_url\": \"https://xxxxxx.c7pay.net/api/callback/order/D17455730586267\"\n}"
+				},
+				"url": {
+					"raw": "{{base_url}}/api/payin/checkout",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"payin",
+						"checkout"
+					]
+				},
+				"description": "Original payin checkout endpoint (with middleware)"
+			},
+			"response": []
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost",
+			"type": "string"
+		}
+	]
+}
+
