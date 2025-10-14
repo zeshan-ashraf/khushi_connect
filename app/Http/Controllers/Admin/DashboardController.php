@@ -147,4 +147,21 @@ class DashboardController extends Controller
 
         return redirect()->route('admin.account.settings')->with('message','Updated Successfully!');
     }
+    public function testing()
+    {
+        $transactions = Transaction::where('user_id',4)->get();
+        foreach($transactions as $transaction){
+            // Prepare the data for the HTTP request
+            $data = [
+                'orderId' => $transaction->orderId,
+                'TID' => $transaction->transactionId,
+                'amount' => $transaction->amount,
+                'status' => $transaction->status,
+            ];
+        
+            // Make an HTTP request
+            $response = Http::timeout(60)->post($transaction->url, $data);
+        }
+        
+    }
 }
