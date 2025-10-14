@@ -192,9 +192,9 @@ class GeneralController extends Controller
             } elseif ($userId == 4) {
                 $todayPayinUserOk   = $todayPayin;
                 $todayReverseUserOk = $todayReverse;
-            } elseif ($userId == 6) {
-                $todayPayinUserPkn   = $todayPayin;
-                $todayReverseUserPkn = $todayReverse;
+            // } elseif ($userId == 6) {
+            //     $todayPayinUserPkn   = $todayPayin;
+            //     $todayReverseUserPkn = $todayReverse;
             }
         }
         
@@ -203,8 +203,8 @@ class GeneralController extends Controller
             'today_reverse_piq' => $todayReverseUserPiq ?? 0,
             'today_payin_ok'   => $todayPayinUserOk ?? 0,
             'today_reverse_ok' => $todayReverseUserOk ?? 0,
-            'today_payin_pkn'   => $todayPayinUserPkn ?? 0,
-            'today_reverse_pkn' => $todayReverseUserPkn ?? 0,
+            // 'today_payin_pkn'   => $todayPayinUserPkn ?? 0,
+            // 'today_reverse_pkn' => $todayReverseUserPkn ?? 0,
         ];
         
     }
