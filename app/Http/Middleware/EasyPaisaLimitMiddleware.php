@@ -90,9 +90,7 @@ class EasyPaisaLimitMiddleware
                 return response()->json([
                     'status' => 'error',
                     'message' => 'Monthly EasyPaisa limit has been reached. Please contact support.',
-                    'error_code' => 'MONTHLY_LIMIT_EXCEEDED',
-                    'current_monthly_total' => $totalPayin,
-                    'monthly_limit' => $monthlyLimit
+                    'error_code' => 'MONTHLY_LIMIT_EXCEEDED'
                 ], 429); // 429 Too Many Requests
             }
 
