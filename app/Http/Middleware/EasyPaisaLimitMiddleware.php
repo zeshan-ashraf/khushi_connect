@@ -12,6 +12,23 @@ use App\Models\{Transaction, ArcheiveTransaction, BackupTransaction, User};
 class EasyPaisaLimitMiddleware
 {
     /**
+     * Monthly limit for EasyPaisa payments (460M)
+     *
+     * @var int
+     */
+    private $monthlyLimit = 460000000;
+
+    /**
+     * Client IDs that should be checked for the monthly limit
+     *
+     * @var array
+     */
+    private $restrictedClientIds = [
+        4, // Add your specific client IDs here
+        // Add more client IDs as needed
+    ];
+
+    /**
      * Handle an incoming request.
      *
      * @param  \Illuminate\Http\Request  $request
@@ -25,30 +42,39 @@ class EasyPaisaLimitMiddleware
             return $next($request);
         }
 
-        // Get user from request (should be set by previous middleware)
-        $user = $request->user_model;
+        // Get email from request and find user
+        $clientEmail = $request->client_email   ;
         
-        if (!$user) {
-            Log::channel('payin')->error('EasyPaisaLimitMiddleware: User not found in request', [
-                'client_email' => $request->client_email,
+        if (!$clientEmail) {
+            Log::channel('payin')->error('EasyPaisaLimitMiddleware: Email not found in request', [
                 'payment_method' => $request->payment_method,
                 'ip' => $request->ip()
             ]);
             
             return response()->json([
                 'status' => 'error',
-                'message' => 'User authentication required.',
-            ], 401);
+                'message' => 'Email is required.',
+            ], 400);
+        }
+        
+        // Find user by email
+        $user = User::where('email', $clientEmail)->first();
+        
+        if (!$user) {
+            Log::channel('payin')->error('EasyPaisaLimitMiddleware: User not found with email', [
+                'client_email' => $clientEmail,
+                'payment_method' => $request->payment_method,
+                'ip' => $request->ip()
+            ]);
+            
+            return response()->json([
+                'status' => 'error',
+                'message' => 'User not found.',
+            ], 404);
         }
 
-        // Hardcoded client IDs that should be checked for the 460M limit
-        $restrictedClientIds = [
-            4, // Add your specific client IDs here
-            // Add more client IDs as needed
-        ];
-
         // Check if current user is in the restricted list
-        if (!in_array($user->id, $restrictedClientIds)) {
+        if (!in_array($user->id, $this->restrictedClientIds)) {
             return $next($request);
         }
 
@@ -67,23 +93,20 @@ class EasyPaisaLimitMiddleware
             // Calculate total EasyPaisa payin for current month from all tables
             $totalPayin = $this->calculateMonthlyEasyPaisaPayin($user->id, $currentMonthStart, $currentMonthEnd);
 
-            // 460M limit (460,000,000)
-            $monthlyLimit = 460000000;
-
             Log::channel('payin')->info('EasyPaisaLimitMiddleware: Monthly payin calculation', [
                 'user_id' => $user->id,
                 'total_payin' => $totalPayin,
-                'monthly_limit' => $monthlyLimit,
-                'limit_exceeded' => $totalPayin >= $monthlyLimit
+                'monthly_limit' => $this->monthlyLimit,
+                'limit_exceeded' => $totalPayin >= $this->monthlyLimit
             ]);
 
-            if ($totalPayin >= $monthlyLimit) {
+            if ($totalPayin >= $this->monthlyLimit) {
                 Log::channel('payin')->warning('EasyPaisaLimitMiddleware: Monthly limit exceeded', [
                     'user_id' => $user->id,
                     'client_email' => $user->email,
                     'total_payin' => $totalPayin,
-                    'monthly_limit' => $monthlyLimit,
-                    'excess_amount' => $totalPayin - $monthlyLimit,
+                    'monthly_limit' => $this->monthlyLimit,
+                    'excess_amount' => $totalPayin - $this->monthlyLimit,
                     'current_request_amount' => $request->amount ?? 0
                 ]);
 
