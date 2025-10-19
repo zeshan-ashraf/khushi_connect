@@ -148,21 +148,21 @@ class EasyPaisaLimitMiddleware
             // Query transactions table
             $transactionsTotal = Transaction::where('user_id', $userId)
                 ->where('status', 'success')
-                ->where('src', 'easypaisa') // Assuming 'src' field indicates payment method
+                ->where('txn_type', 'easypaisa') // Assuming 'src' field indicates payment method
                 ->whereBetween('created_at', [$monthStart, $monthEnd])
                 ->sum('amount');
 
             // Query archive_transactions table
             $archiveTotal = ArcheiveTransaction::where('user_id', $userId)
                 ->where('status', 'success')
-                ->where('src', 'easypaisa')
+                ->where('txn_type', 'easypaisa')
                 ->whereBetween('created_at', [$monthStart, $monthEnd])
                 ->sum('amount');
 
             // Query backup_transactions table
             $backupTotal = BackupTransaction::where('user_id', $userId)
                 ->where('status', 'success')
-                ->where('src', 'easypaisa')
+                ->where('txn_type', 'easypaisa')
                 ->whereBetween('created_at', [$monthStart, $monthEnd])
                 ->sum('amount');
 

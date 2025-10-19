@@ -158,6 +158,31 @@ return [
             'level' => 'debug',
             'days' => 30,
         ],
+        'payin' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/payin.log'),
+            'level' => env('LOG_LEVEL', 'debug'),
+            'days' => 60,
+        ],
+
+        'payout' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/payout.log'),
+            'level' => env('LOG_LEVEL', 'debug'),
+            'days' => 60,
+        ],
+        'rejected_requests' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/rejected_requests.log'),
+            'level' => env('LOG_LEVEL', 'debug'),
+            'days' => 14,
+        ],
+        'schedule_debug' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/schedule_debug.log'),
+            'level' => env('LOG_LEVEL', 'debug'),
+            'days' => 14,
+        ],
     ],
 
 ];
