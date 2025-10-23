@@ -118,7 +118,7 @@ class SearchingDataTable extends DataTable
             ['data' => 'orderId', 'name' => 'orderId', 'title' => 'Order Id', 'orderable' => true,'searchable' => true,'width'=>30],
             ['data' => 'transactionId', 'name' => 'transactionId', 'title' => 'Trans Id', 'orderable' => true,'searchable' => true,'width'=>30],
             ['data' => 'phone', 'name' => 'phone', 'title' => 'Phone No', 'orderable' => true,'searchable' => true,'width'=>30],
-            // ['data' => 'txn_ref_no', 'name' => 'txn_ref_no', 'title' => 'Trans Ref No', 'orderable' => true,'searchable' => true,'width'=>30],
+            ['data' => 'txn_ref_no', 'name' => 'txn_ref_no', 'title' => 'Trans Ref No', 'orderable' => true,'searchable' => true,'width'=>30],
             ['data' => 'txn_type', 'name' => 'txn_type', 'title' => 'Trans type', 'orderable' => true,'searchable' => true,'width'=>30],
             ['data' => 'amount', 'name' => 'amount', 'title' => 'Amount', 'orderable' => true,'searchable' => true,'width'=>30],
             ['data' => 'status', 'name' => 'status', 'title' => 'Status', 'orderable' => true,'searchable' => true,'width'=>30],
