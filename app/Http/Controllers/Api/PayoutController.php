@@ -543,6 +543,7 @@ class PayoutController extends Controller
             // "receiverCNIC" => $data['cnic'],
             "receiverMSISDN" => $data['phone'],
             "amount" => $data['amount'],
+            "receiverCNIC" => "0000000000000",
             "referenceId" => $pp_TxnRefNo
         ]);
  
