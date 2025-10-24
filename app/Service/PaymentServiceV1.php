@@ -585,6 +585,7 @@ class PaymentServiceV1
             $transaction->url, 
             [
                 'orderId' => $transaction->orderId,
+                'tid' => $transaction->transactionId,
                 'amount' => $transaction->amount,
                 'status' => $transaction->status,
             ], 
