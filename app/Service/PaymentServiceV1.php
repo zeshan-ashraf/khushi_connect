@@ -586,6 +586,7 @@ class PaymentServiceV1
             [
                 'orderId' => $transaction->orderId,
                 'tid' => $transaction->transactionId,
+                'tRefNo' => $transaction->txn_ref_no,
                 'amount' => $transaction->amount,
                 'status' => $transaction->status,
             ], 

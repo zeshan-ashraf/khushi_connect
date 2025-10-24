@@ -51,6 +51,7 @@ class JazzCashCheckTransactionStatus extends Command
                     $data = [
                         'orderId' => $item->orderId,
                         'tid' => $item->transactionId,
+                        'tRefNo' => $item->txn_ref_no,
                         'amount' => $item->amount,
                         'status' => 'success',
                     ];
