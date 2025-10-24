@@ -21,8 +21,10 @@ Route::as('payin.')->prefix('payin')->group(function () {
     
     
 Route::as('payout.')->prefix('payout')->group(function () {
-    Route::post('/checkout',[PayoutController::class, 'checkout']);
-    Route::post('/test-jc-dist',[PayoutController::class, 'testJc']);
+    Route::middleware('whitelist.ip')->group(function () {
+        Route::post('/checkout',[PayoutController::class, 'checkout']);
+    });
+    // Route::post('/test-jc-dist',[PayoutController::class, 'testJc']);
 });
 
 Route::post('/payin-status-check', [GeneralController::class , 'checkStatus']);
