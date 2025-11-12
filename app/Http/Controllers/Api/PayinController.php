@@ -59,9 +59,17 @@ class PayinController extends Controller
             $request->merge(['request_id' => $requestId]);
             
             // Process payment based on payment method
-            return $this->processPayment($request, $user, $startTime, $requestId);
+            $response = $this->processPayment($request, $user, $startTime, $requestId);
+
+            $this->logRequestCompletion($request, $requestId, microtime(true) - $startTime, $response);
+
+            return $response;
         } catch (\Exception $e) {
-            return $this->handleProcessingError($e, $requestId, $request);
+            $errorResponse = $this->handleProcessingError($e, $requestId, $request);
+
+            $this->logRequestCompletion($request, $requestId, microtime(true) - $startTime, $errorResponse, true);
+
+            return $errorResponse;
         }
     }
 
@@ -145,6 +153,8 @@ class PayinController extends Controller
                                             ?Transaction $transaction, User $user, 
                                             float $startTime, string $requestId): JsonResponse
     {
+        $carrierDuration = null;
+
         try {
             Log::channel('payin')->info('Initiating Easypaisa payment', [
                 'request_id' => $requestId,
@@ -156,7 +166,9 @@ class PayinController extends Controller
 
             $easypaisa = new Easypaisa;
             // dd($post_data);
+            $carrierStart = microtime(true);
             $response = $easypaisa->sendRequest($post_data);
+            $carrierDuration = microtime(true) - $carrierStart;
             // dd($response);
             // Decode the response into an array if needed
             if ($response instanceof \Illuminate\Http\JsonResponse) {
@@ -179,7 +191,7 @@ class PayinController extends Controller
                 // Process successful response
                 if ($responseCode == '0000') {
                     return $this->handleSuccessfulPayment($response, $response['orderId'], 'easypaisa', 
-                                                        $user, $transaction, $startTime, $requestId, $request);
+                                                        $user, $transaction, $startTime, $requestId, $request, $carrierDuration);
                 }
                 
                 // Log failed number if account doesn't exist
@@ -201,6 +213,7 @@ class PayinController extends Controller
                     'execution_time' => microtime(true) - $startTime,
                     'response_code' => $responseCode,
                     'response_desc' => $responseDesc,
+                    'carrier_latency_seconds' => $carrierDuration !== null ? $this->formatDuration($carrierDuration) : null,
                     'request_params' => $request->all(),
                     'api_request' => json_encode($post_data),
                     'complete_response' => json_encode($response),
@@ -215,6 +228,7 @@ class PayinController extends Controller
     
             Log::channel('payin')->error('Invalid Easypaisa response structure', [
                 'request_id' => $requestId,
+                'carrier_latency_seconds' => $carrierDuration !== null ? $this->formatDuration($carrierDuration) : null,
                 'response' => json_encode($response),
                 'request_params' => $request->all(),
                 'api_request' => json_encode($post_data)
@@ -229,6 +243,7 @@ class PayinController extends Controller
                 'request_id' => $requestId,
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
+                'carrier_latency_seconds' => $carrierDuration !== null ? $this->formatDuration($carrierDuration) : null,
                 'request_params' => $request->all(),
                 'api_request' => json_encode($post_data ?? []),
                 'api_url' => $url,
@@ -249,6 +264,8 @@ class PayinController extends Controller
                                            ?Transaction $transaction, User $user, 
                                            float $startTime, string $requestId): JsonResponse
     {
+        $carrierDuration = null;
+
         Log::channel('payin')->info('Initiating JazzCash payment', [
             'request_id' => $requestId,
             'client_email' => $request->client_email,
@@ -275,7 +292,9 @@ class PayinController extends Controller
             ],
         ]);
 
+        $carrierStart = microtime(true);
         $response = curl_exec($curl);
+        $carrierDuration = microtime(true) - $carrierStart;
         
         if ($response === false) {
             $error = curl_error($curl);
@@ -285,6 +304,7 @@ class PayinController extends Controller
                 'request_id' => $requestId,
                 'error' => $error,
                 'url' => $url,
+                'carrier_latency_seconds' => $this->formatDuration($carrierDuration),
                 'request_params' => $request->all(),
                 'api_request' => json_encode($post_data),
                 'curl_error_no' => curl_errno($curl),
@@ -306,6 +326,7 @@ class PayinController extends Controller
             Log::channel('error')->error('Invalid JazzCash response', [
                 'request_id' => $requestId,
                 'raw_response' => $response,
+                'carrier_latency_seconds' => $this->formatDuration($carrierDuration),
                 'request_params' => $request->all(),
                 'api_request' => json_encode($post_data),
                 'timestamp' => now()
@@ -327,7 +348,7 @@ class PayinController extends Controller
 
         if (isset($result->pp_ResponseCode) && $result->pp_ResponseCode == '000') {
             return $this->handleSuccessfulPayment($result, $result->pp_TxnRefNo, 'jazzcash', 
-                                                $user, $transaction, $startTime, $requestId, $request);
+                                                $user, $transaction, $startTime, $requestId, $request, $carrierDuration);
         }
         
         // Log failed number if account doesn't exist
@@ -372,6 +393,7 @@ class PayinController extends Controller
             'execution_time' => microtime(true) - $startTime,
             'response_code' => $result->pp_ResponseCode ?? 'unknown',
             'transaction_ref' => $result->pp_TxnRefNo ?? 'unknown',
+            'carrier_latency_seconds' => $this->formatDuration($carrierDuration),
             'request_params' => $request->all(),
             'api_request' => json_encode($post_data),
             'complete_response' => json_encode($result),
@@ -401,7 +423,7 @@ class PayinController extends Controller
     private function handleSuccessfulPayment($response, $txnRefNo, $paymentMethod, 
                                             User $user, ?Transaction $transaction, 
                                             float $startTime, string $requestId, 
-                                            Request $request): JsonResponse
+                                            Request $request, ?float $carrierDuration = null): JsonResponse
     {
 
 
@@ -416,6 +438,7 @@ class PayinController extends Controller
             Log::channel('payin')->info("$paymentMethod payment completed successfully", [
                 'request_id' => $requestId,
                 'execution_time' => $executionTime,
+                'carrier_latency_seconds' => $carrierDuration !== null ? $this->formatDuration($carrierDuration) : null,
                 'transaction_id' => $updatedTransaction->txn_ref_no,
                 'phone_cooldown_set' => true,
                 'cooldown_duration' => '5 minutes',
@@ -491,5 +514,36 @@ class PayinController extends Controller
             'status' => 'error',
             'message' => 'An error occurred during the transaction. Please try again.',
         ], 500);
+    }
+
+    private function logRequestCompletion(Request $request, string $requestId, float $duration, ?JsonResponse $response = null, bool $isException = false): void
+    {
+        $logPayload = [
+            'request_id' => $requestId,
+            'payment_method' => $request->payment_method,
+            'completion_status' => $isException ? 'exception' : 'completed',
+            'total_duration_seconds' => $this->formatDuration($duration),
+            'timestamp' => now(),
+        ];
+
+        if ($response instanceof JsonResponse) {
+            $logPayload['http_status'] = $response->getStatusCode();
+
+            try {
+                $decoded = $response->getData(true);
+                if (is_array($decoded) && array_key_exists('status', $decoded)) {
+                    $logPayload['response_status'] = $decoded['status'];
+                }
+            } catch (\Throwable $throwable) {
+                $logPayload['response_status'] = 'unavailable';
+            }
+        }
+
+        Log::channel('payin')->info('Checkout request completed', $logPayload);
+    }
+
+    private function formatDuration(float $duration): float
+    {
+        return round($duration, 4);
     }
 } 
