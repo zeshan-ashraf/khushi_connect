@@ -14,7 +14,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 Route::as('payin.')->prefix('payin')->group(function () {
     Route::post('/checkout',[PayinController::class, 'checkout'])
-        ->middleware(['payment.validate', 'check.blocked.numbers', 'easypaisa.limit']);
+        ->middleware(['payment.validate', 'check.blocked.numbers']);
 });
 
 
