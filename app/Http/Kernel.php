@@ -78,5 +78,6 @@ class Kernel extends HttpKernel
         'throttle.phone' => \App\Http\Middleware\ThrottlePhoneNumberMiddleware::class,
         'easypaisa.limit' => \App\Http\Middleware\EasyPaisaLimitMiddleware::class,
         'easypaisa.pending.limit' => \App\Http\Middleware\EasypaisaPendingRequestsMiddleware::class,
+        
     ];
 }

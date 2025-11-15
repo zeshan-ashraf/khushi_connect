@@ -6,6 +6,7 @@ use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Cache;
 use Carbon\Carbon;
 use App\Models\{Transaction, ArcheiveTransaction, BackupTransaction, User};
 
@@ -16,7 +17,7 @@ class EasyPaisaLimitMiddleware
      *
      * @var int
      */
-    private $monthlyLimit = 460000000;
+    private $monthlyLimit = 480000000;
 
     /**
      * Client IDs that should be checked for the monthly limit
@@ -143,6 +144,18 @@ class EasyPaisaLimitMiddleware
     private function calculateMonthlyEasyPaisaPayin(int $userId, Carbon $monthStart, Carbon $monthEnd): float
     {
         $totalPayin = 0;
+        $cacheKey = sprintf('easypaisa_monthly_total_%s', $monthStart->format('Y_m'));
+
+        $cachedTotal = Cache::get($cacheKey);
+        if ($cachedTotal !== null) {
+            Log::channel('payin')->info('EasyPaisaLimitMiddleware: Using cached EasyPaisa total', [
+                'cache_key' => $cacheKey,
+                'grand_total' => $cachedTotal,
+                'cache_ttl_minutes' => 10,
+            ]);
+
+            return (float) $cachedTotal;
+        }
 
         try {
             // Query transactions table
@@ -164,6 +177,13 @@ class EasyPaisaLimitMiddleware
                 ->sum('amount');
 
             $totalPayin = ($transactionsTotal ?? 0) + ($archiveTotal ?? 0) + ($backupTotal ?? 0);
+
+            Cache::put($cacheKey, $totalPayin, now()->addMinutes(10));
+            Log::channel('payin')->info('EasyPaisaLimitMiddleware: Cached EasyPaisa total', [
+                'cache_key' => $cacheKey,
+                'grand_total' => $totalPayin,
+                'cache_ttl_minutes' => 10,
+            ]);
 
             Log::channel('payin')->info('EasyPaisaLimitMiddleware: Detailed payin calculation', [
                 'user_id' => $userId,
