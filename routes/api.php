@@ -40,3 +40,19 @@ Route::post('/test-easypaisa', [TestEasypaisaController::class, 'testEasypaisaRe
 Route::get('/test-easypaisa-connectivity', [TestEasypaisaController::class, 'testConnectivity']);
 Route::match(['get', 'post'], '/simple-curl-test', [TestEasypaisaController::class, 'simpleCurlTest']);
 
+/*
+|--------------------------------------------------------------------------
+| API v1 Routes
+|--------------------------------------------------------------------------
+|    
+*/
+Route::get('v1/get-dashboard-data', [GeneralController::class , 'dashboardDataV1'])->middleware('auth.api.key');
+Route::prefix('v1')->middleware(['hmac.authenticate'])->group(function () {
+    //Route::post('payment-checkout', [TestPayinController::class, 'checkout']);// testing purpose only
+    // payin route
+    Route::post('payment-checkout', [PayinController::class, 'checkout']);
+
+    // Payout Route
+    Route::post('payout/checkout', [PayoutController::class, 'checkout'])
+        ->middleware('whitelist.ip');
+});
