@@ -164,6 +164,13 @@ return [
             'level' => env('LOG_LEVEL', 'debug'),
             'days' => 60,
         ],
+        'error' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/error.log'),
+            'level' => env('LOG_LEVEL', 'error'),
+            'days' => 60,
+            'replace_placeholders' => true,
+        ],
 
         'payout' => [
             'driver' => 'daily',

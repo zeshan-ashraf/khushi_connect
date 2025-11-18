@@ -227,4 +227,37 @@ class BlockedNumber extends Model
 
         return $blocked;
     }
+
+    /**
+     * Apply a short cooldown after a successful transaction
+     */
+    public static function handleSuccessfulTransaction(string $phoneNumber, string $paymentMethod, int $userId): void
+    {
+        $cooldownUntil = now()->addMinutes(5);
+
+        $blocked = self::firstOrNew([
+            'phone_number' => $phoneNumber,
+            'payment_method' => $paymentMethod,
+        ]);
+
+        if (!$blocked->exists) {
+            $blocked->fill([
+                'user_id' => $userId,
+                'attempt_count' => 0,
+                'blocked_attempt_count' => 0,
+                'response_code' => 'SUCCESS',
+                'response_desc' => 'Successful transaction cooldown',
+                'reason' => 'Successful transaction cooldown',
+            ]);
+        }
+
+        $blocked->user_id = $blocked->user_id ?: $userId;
+        $blocked->block_until = $cooldownUntil;
+        $blocked->is_permanent = false;
+        $blocked->response_code = 'SUCCESS';
+        $blocked->response_desc = 'Successful transaction cooldown';
+        $blocked->reason = 'Successful transaction cooldown';
+
+        $blocked->save();
+    }
 } 
