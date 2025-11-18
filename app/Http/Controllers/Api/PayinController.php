@@ -45,6 +45,26 @@ class PayinController extends Controller
 
         // Get user from request (added by middleware)
         $user = $request->user_model;
+        if (!$user instanceof User && $request->filled('client_email')) {
+            $user = User::where('email', $request->client_email)->first();
+            if ($user) {
+                $request->merge(['user_model' => $user]);
+            }
+        }
+
+        if (!$user instanceof User) {
+            Log::channel('payin')->error('Missing user model on request', [
+                'request_id' => $requestId,
+                'client_email' => $request->client_email,
+                'middleware_applied' => $request->attributes->get('middleware_ran', 'unknown'),
+                'request_params' => $request->all(),
+            ]);
+
+            return response()->json([
+                'status' => 'error',
+                'message' => 'User not resolved for request. Please contact support.',
+            ], 400);
+        }
         
         // Validate if API access is enabled for the payment method
         if (!$this->validateApiAccess($request, $user, $requestId)) {
