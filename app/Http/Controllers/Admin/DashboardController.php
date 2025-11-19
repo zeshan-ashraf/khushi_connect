@@ -34,7 +34,7 @@ class DashboardController extends Controller
             $payinSuccess= Transaction::where('user_id', $userId)->where('status', 'success')->whereDate('created_at', today())->sum('amount');
             $payoutSuccess= Payout::where('user_id', $userId)->where('status', 'success')->whereDate('created_at', today())->sum('amount');
             $prevUsdt= Settlement::where('user_id', $userId)->whereDate('date', today())->value('usdt') ?? 0;
-
+            $settlement=Settlement::where('user_id', $userId)->whereDate('date', today())->first();
             $payinFee=$client->payin_fee;
             $payoutFee=$client->payout_fee;
             $unsettletdAmount=$prevBal + $payinSuccess - ($payinSuccess*$payinFee + $payoutSuccess + $payoutSuccess*$payoutFee + $prevUsdt);
