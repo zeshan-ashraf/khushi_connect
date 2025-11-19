@@ -47,12 +47,12 @@ class ReportGenerate extends Command
                     ->value('usdt');
                 
                 // Sum of successful transaction amounts
-                // $transactionSumJC = DB::table('transactions')
-                //     ->where('user_id', $user->id)
-                //     ->whereIn('status', ['success', 'reverse'])
-                //     ->where('txn_type', 'jazzcash')
-                //     ->whereDate('created_at', Carbon::today())
-                //     ->sum('amount');
+                $transactionSumJC = DB::table('transactions')
+                    ->where('user_id', $user->id)
+                    ->whereIn('status', ['success', 'reverse'])
+                    ->where('txn_type', 'jazzcash')
+                    ->whereDate('created_at', Carbon::today())
+                    ->sum('amount');
 
                 $transactionReverse = DB::table('transactions')
                     ->where('user_id', $user->id)
@@ -102,13 +102,14 @@ class ReportGenerate extends Command
             
                 $payoutSumEP = $sumamry->ep_payout;
                 
-                // $payinFeeJC = $user->payin_fee;
+                $payinFeeJC = $user->payin_fee;
                 $payinFeeEP = $user->payin_fee;
                 // $PayoutFeeJC = $user->payout_fee;
                 // $PayoutFeeEP = $user->payout_fee;
             
                 // Calculate balances
-                $payinBal = $closingBal + $transactionSumEP - ($transactionSumEP * $payinFeeEP) - $transactionReverseHalf;
+                $payinBal = $closingBal + $transactionSumJC + $transactionSumEP - ($transactionSumJC * $payinFeeJC) - ($transactionSumEP * $payinFeeEP) - $transactionReverseHalf;
+                // $payinBal = $closingBal + $transactionSumEP - ($transactionSumEP * $payinFeeEP) - $transactionReverseHalf;
                 $settleAmount = $payoutSumEP + $todayUsdt;
             
                 // Create a summary for the user
@@ -116,9 +117,9 @@ class ReportGenerate extends Command
                     'date' => Carbon::today()->format('y-m-d'),
                     'user_id' => $user->id,
                     'opening_bal'  => $closingBal,
-                    // 'jc_payin' => $transactionSumJC,
+                    'jc_payin' => $transactionSumJC,
                     'ep_payin' => $transactionSumEP,
-                    // 'jc_payin_fee' => $transactionSumJC * $payinFeeJC,
+                    'jc_payin_fee' => $transactionSumJC * $payinFeeJC,
                     'ep_payin_fee' => $transactionSumEP * $payinFeeEP,
                     'reverse_amount' =>$transactionReverseHalf,
                     'payin_bal' => $payinBal,
