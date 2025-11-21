@@ -86,12 +86,12 @@ class ReportGenerate extends Command
                     ->sum('amount');
                 
                 // Sum of successful payout amounts
-                // $payoutSumJC = DB::table('payouts')
-                //     ->where('user_id', $user->id)
-                //     ->where('status', 'success')
-                //     ->where('transaction_type', 'jazzcash')
-                //     ->whereDate('created_at', Carbon::today())
-                //     ->sum('amount');
+                $payoutSumJC = DB::table('payouts')
+                    ->where('user_id', $user->id)
+                    ->where('status', 'success')
+                    ->where('transaction_type', 'jazzcash')
+                    ->whereDate('created_at', Carbon::today())
+                    ->sum('amount');
                 
                 // $payoutSumEP = DB::table('payouts')
                 //     ->where('user_id', $user->id)
@@ -104,7 +104,7 @@ class ReportGenerate extends Command
                 
                 $payinFeeJC = $user->payin_fee;
                 $payinFeeEP = $user->payin_fee;
-                // $PayoutFeeJC = $user->payout_fee;
+                $PayoutFeeJC = $user->payout_fee;
                 // $PayoutFeeEP = $user->payout_fee;
             
                 // Calculate balances
@@ -123,9 +123,9 @@ class ReportGenerate extends Command
                     'ep_payin_fee' => $transactionSumEP * $payinFeeEP,
                     'reverse_amount' =>$transactionReverseHalf,
                     'payin_bal' => $payinBal,
-                    // 'jc_payout' => $payoutSumJC,
+                    'jc_payout' => $payoutSumJC,
                     'ep_payout' => $payoutSumEP,
-                    // 'jc_payout_fee' => $payoutSumJC * $PayoutFeeJC,
+                    'jc_payout_fee' => $payoutSumJC * $PayoutFeeJC,
                     // 'ep_payout_fee' => $payoutSumEP * $PayoutFeeEP,
                     'usdt' => $sumamry->usdt,
                     'settled' => $settleAmount,
