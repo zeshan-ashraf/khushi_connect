@@ -25,7 +25,7 @@ class EasyPaisaLimitMiddleware
      * @var array
      */
     private $restrictedClientIds = [
-        4, // Add your specific client IDs here
+        0, // Add your specific client IDs here
         // Add more client IDs as needed
     ];
 
