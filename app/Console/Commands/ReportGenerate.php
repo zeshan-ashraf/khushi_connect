@@ -110,7 +110,7 @@ class ReportGenerate extends Command
                 // Calculate balances
                 $payinBal = $closingBal + $transactionSumJC + $transactionSumEP - ($transactionSumJC * $payinFeeJC) - ($transactionSumEP * $payinFeeEP) - $transactionReverseHalf;
                 // $payinBal = $closingBal + $transactionSumEP - ($transactionSumEP * $payinFeeEP) - $transactionReverseHalf;
-                $settleAmount = $payoutSumEP + $todayUsdt;
+                $settleAmount = $payoutSumJC+ $payoutSumEP + $todayUsdt;
             
                 // Create a summary for the user
                 $sumamry->update([
