@@ -21,10 +21,12 @@ class SettlementController extends Controller
             ->orderBy('date', 'DESC')
             ->get();
 
-        // Get all dates for matching
-        $dates = $results->pluck('date')->toArray();
+        // Convert settlement dates to plain strings
+        $dates = $results->pluck('date')->map(function ($d) {
+            return is_string($d) ? $d : $d->format('Y-m-d');
+        })->toArray();
 
-        // Fetch counts in ONE QUERY
+        // Fetch counts grouped by date
         $transactionCounts = Transaction::where('user_id', $id)
             ->whereIn('status', ['success', 'failed'])
             ->whereIn(DB::raw('DATE(created_at)'), $dates)
@@ -32,13 +34,15 @@ class SettlementController extends Controller
             ->groupBy('date')
             ->pluck('total', 'date');
 
-        // Attach count to each settlement
+        // Attach counts
         foreach ($results as $summary) {
-            $summary->transaction_count = $transactionCounts[$summary->date] ?? 0;
+            $date = is_string($summary->date) ? $summary->date : $summary->date->format('Y-m-d');
+            $summary->transaction_count = $transactionCounts[$date] ?? 0;
         }
 
         return view('admin.settlement.list', compact('results'));
     }
+
 
     
 
