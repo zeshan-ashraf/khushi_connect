@@ -103,7 +103,7 @@ class ReportGenerate extends Command
                 $payoutSumEP = $sumamry->ep_payout;
                 
                 $payinFeeJC = $user->payin_fee;
-                $payinFeeEP = $user->payin_fee;
+                $payinFeeEP = $user->payin_ep_fee;
                 $PayoutFeeJC = $user->payout_fee;
                 $PayoutFeeEP = $user->payout_fee;
             
