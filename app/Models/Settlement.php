@@ -27,6 +27,7 @@ class Settlement extends Model
         'ep_payout_fee',
         'usdt',
         'settled',
+        'transfer_wallet',
         'closing_bal',
     ];
     

@@ -104,3 +104,4 @@ The `/checkout` route uses these middleware (see `routes/api.php` line 16):
 3. Consider making amount limits configurable via settings/database
 4. Review commented-out blocking logic to determine if it should be restored
 
+

@@ -40,6 +40,7 @@ class SettlementController extends Controller
         $html = view('admin.settlement.modal',get_defined_vars())->render();
         return response()->json(['html'=>$html]);
     }
+    
     public function store(Request $request)
     {
         $request->validate([
