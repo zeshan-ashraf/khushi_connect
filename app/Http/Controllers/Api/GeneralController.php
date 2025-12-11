@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
-use App\Models\{Transaction,ArcheiveTransaction,BackupTransaction,Payout,ArcheivePayout,Summary,Setting,Settlement,User};
+use App\Models\{Transaction,ArcheiveTransaction,BackupTransaction,Payout,ArcheivePayout,Summary,Setting,Settlement,User,SurplusAmount};
 use DB;
 use Carbon\Carbon;
 
@@ -213,10 +213,17 @@ class GeneralController extends Controller
     public function getSettlementData()
     {
         $activeUserIds = User::where('active', 1)->pluck('id');
-        $data = Settlement::whereIn('user_id', $activeUserIds)
+        $settlementData = Settlement::whereIn('user_id', $activeUserIds)
             ->where('date', '>=', now()->subDays(10))
             ->orderBy('date', 'desc')
             ->get();
-        return $data; 
+        $settingData=Setting::whereIn('user_id', $activeUserIds)->get();
+        $surplusData=SurplusAmount::where('id', 1)->get();
+        
+        return [
+            'settlements' => $settlementData,
+            'settings'    => $settingData,
+            'surplus'     => $surplusData,
+        ];
     }
 }
