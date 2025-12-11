@@ -34,6 +34,7 @@ Route::get('/get-payin-data', [GeneralController::class , 'getPayinData']);
 Route::post('/payout-status-check', [GeneralController::class , 'checkPayoutStatus']);
 Route::get('/get-dashboard-data', [GeneralController::class , 'dashboardData']);
 Route::get('/get-payout-data', [GeneralController::class , 'payoutData']);
+Route::get('/get-settlement-data', [GeneralController::class , 'getSettlementData']);
 
 // Test Routes for EasyPaisa
 Route::post('/test-easypaisa', [TestEasypaisaController::class, 'testEasypaisaRequest']);

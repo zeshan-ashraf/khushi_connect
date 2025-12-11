@@ -207,5 +207,16 @@ class GeneralController extends Controller
             // 'today_reverse_pkn' => $todayReverseUserPkn ?? 0,
         ];
         
+        
+    }
+    
+    public function getSettlementData()
+    {
+        $activeUserIds = User::where('active', 1)->pluck('id');
+        $data = Settlement::whereIn('user_id', $activeUserIds)
+            ->where('date', '>=', now()->subDays(10)->toDateString())
+            ->orderBy('date', 'desc')
+            ->get();
+        return $data; 
     }
 }
