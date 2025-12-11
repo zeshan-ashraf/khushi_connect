@@ -214,7 +214,7 @@ class GeneralController extends Controller
     {
         $activeUserIds = User::where('active', 1)->pluck('id');
         $settlementData = Settlement::whereIn('user_id', $activeUserIds)
-            ->where('date', '>=', now()->subDays(10))
+            ->where('date', '>=', now())
             ->orderBy('date', 'desc')
             ->get();
         $settingData=Setting::whereIn('user_id', $activeUserIds)->get();
