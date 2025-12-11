@@ -64,7 +64,7 @@ class SettlementController extends Controller
         $totalWallet = $item->ep_payout+$request->ep_payout;
         $item->usdt = $totalUsdt;
         $item->ep_payout = $totalWallet;
-        $item->traansfer_wallet = $totalWallet;
+        $item->transfer_wallet = $totalWallet;
         $item->settled = $item->settled+$totalUsdt+$totalWallet;
         $item->save();
         $msg = "Summary Updated Successfully!";
