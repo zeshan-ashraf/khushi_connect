@@ -14,9 +14,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Using raw SQL to add column after 'settled' (which is before 'closing_bal')
-        // MySQL doesn't support BEFORE keyword, so we use AFTER with the preceding column
-        DB::statement("ALTER TABLE settlements ADD COLUMN transfer_wallet DOUBLE DEFAULT 0 AFTER settled");
+        // First add the column using Schema builder (will be added at the end)
+        Schema::table('settlements', function (Blueprint $table) {
+            $table->double('transfer_wallet', 15, 2)->default(0)->after('settled');
+        });
     }
 
     /**
