@@ -3,19 +3,25 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
-use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
     /**
      * Run the migrations.
-     * 
-     * NOTE: Please change 'transfer_wallet' to your desired column name before running the migration.
      */
     public function up(): void
     {
-        // First add the column using Schema builder (will be added at the end)
         Schema::table('settlements', function (Blueprint $table) {
+            // Fix timestamps so MySQL stops throwing errors
+            if (Schema::hasColumn('settlements', 'created_at')) {
+                $table->timestamp('created_at')->nullable()->change();
+            }
+
+            if (Schema::hasColumn('settlements', 'updated_at')) {
+                $table->timestamp('updated_at')->nullable()->change();
+            }
+
+            // Add your new column
             $table->double('transfer_wallet', 15, 2)->default(0)->after('settled');
         });
     }
@@ -26,8 +32,9 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('settlements', function (Blueprint $table) {
-            $table->dropColumn('transfer_wallet');
+            if (Schema::hasColumn('settlements', 'transfer_wallet')) {
+                $table->dropColumn('transfer_wallet');
+            }
         });
     }
 };
-
