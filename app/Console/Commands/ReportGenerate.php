@@ -103,14 +103,14 @@ class ReportGenerate extends Command
                 $payoutSumEP = $sumamry->ep_payout;
                 
                 $payinFeeJC = $user->payin_fee;
-                $payinFeeEP = $user->payin_fee;
+                $payinFeeEP = $user->payin_ep_fee;
                 $PayoutFeeJC = $user->payout_fee;
-                // $PayoutFeeEP = $user->payout_fee;
+                $PayoutFeeEP = $user->payout_fee;
             
                 // Calculate balances
                 $payinBal = $closingBal + $transactionSumJC + $transactionSumEP - ($transactionSumJC * $payinFeeJC) - ($transactionSumEP * $payinFeeEP) - $transactionReverseHalf;
                 // $payinBal = $closingBal + $transactionSumEP - ($transactionSumEP * $payinFeeEP) - $transactionReverseHalf;
-                $settleAmount = $payoutSumEP + $todayUsdt;
+                $settleAmount = $payoutSumJC + $payoutSumEP + ($payoutSumJC * $PayoutFeeJC) + ($payoutSumEP * $PayoutFeeEP) + $todayUsdt;
             
                 // Create a summary for the user
                 $sumamry->update([

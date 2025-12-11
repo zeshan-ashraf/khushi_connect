@@ -20,17 +20,30 @@ class SettlementController extends Controller
         $results = Settlement::where('user_id', $id)
             ->orderBy('date', 'DESC')
             ->get();
-        
+
+        // Convert settlement dates to plain strings
+        $dates = $results->pluck('date')->map(function ($d) {
+            return is_string($d) ? $d : $d->format('Y-m-d');
+        })->toArray();
+
+        // Fetch counts grouped by date
+        $transactionCounts = Transaction::where('user_id', $id)
+            ->whereIn('status', ['success', 'failed'])
+            ->whereIn(DB::raw('DATE(created_at)'), $dates)
+            ->select(DB::raw('DATE(created_at) as date'), DB::raw('COUNT(*) as total'))
+            ->groupBy('date')
+            ->pluck('total', 'date');
+
+        // Attach counts
         foreach ($results as $summary) {
-            $date = $summary->date; // Use the date as is
-            $transactionCount = Transaction::where('user_id', $id)
-                ->whereDate('created_at', $date)
-                ->whereIn('status', ['success', 'failed'])
-                ->count();
-            $summary->transaction_count = $transactionCount;
+            $date = is_string($summary->date) ? $summary->date : $summary->date->format('Y-m-d');
+            $summary->transaction_count = $transactionCounts[$date] ?? 0;
         }
-        return view('admin.settlement.list', get_defined_vars());
+
+        return view('admin.settlement.list', compact('results'));
     }
+
+
     
 
     public function modal(Request $request)

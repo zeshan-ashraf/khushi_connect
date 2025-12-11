@@ -569,16 +569,16 @@ class PaymentServiceV1
      */
     private function handleSuccessfulTransaction(Transaction $transaction, string $type, string $requestId, ?User $user = null): void
     {
-        $userRates = config('payment.user_rates', [
-            18 => 0.9685,
-            19 => 0.971,
-            28 => 0.963,
-            30 => 0.963,
-        ]);
+        // $userRates = config('payment.user_rates', [
+        //     18 => 0.9685,
+        //     19 => 0.971,
+        //     28 => 0.963,
+        //     30 => 0.963,
+        // ]);
         
-        if (array_key_exists($transaction->user_id, $userRates)) {
-            $this->processUserBalance($transaction, $userRates, $type, $requestId, $user);
-        }
+        // if (array_key_exists($transaction->user_id, $userRates)) {
+            $this->processUserBalance($transaction, $type, $requestId, $user);
+        // }
         
         // Send callback
         $this->sendCallback(
@@ -604,7 +604,7 @@ class PaymentServiceV1
      * @param User|null $user
      * @return bool
      */
-    private function processUserBalance(Transaction $transaction, array $userRates, string $type, string $requestId, ?User $user = null): bool
+    private function processUserBalance(Transaction $transaction, string $type, string $requestId, ?User $user = null): bool
     {
         try {
             $rate = $user->per_payin_fee;
