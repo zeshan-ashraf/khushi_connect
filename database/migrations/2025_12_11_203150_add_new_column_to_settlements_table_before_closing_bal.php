@@ -14,8 +14,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Using raw SQL to add column before 'closing_bal' since Laravel Schema doesn't support column positioning
-        DB::statement("ALTER TABLE settlements ADD COLUMN transfer_wallet DOUBLE DEFAULT 0 BEFORE closing_bal");
+        // Using raw SQL to add column after 'settled' (which is before 'closing_bal')
+        // MySQL doesn't support BEFORE keyword, so we use AFTER with the preceding column
+        DB::statement("ALTER TABLE settlements ADD COLUMN transfer_wallet DOUBLE DEFAULT 0 AFTER settled");
     }
 
     /**
