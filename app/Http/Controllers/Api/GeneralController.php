@@ -214,7 +214,7 @@ class GeneralController extends Controller
     {
         $activeUserIds = User::where('user_role', 'Client')->where('active', 1)->pluck('id');
         $settlementData = Settlement::whereIn('user_id', $activeUserIds)
-            ->whereDate('date', Carbon::today())
+            ->whereDate('date', Carbon::today()->format('y-m-d'))
             ->orderBy('date', 'desc')
             ->get();
         $settingData=Setting::whereIn('user_id', $activeUserIds)->get();
