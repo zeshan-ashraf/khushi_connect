@@ -89,8 +89,7 @@ class Kernel extends ConsoleKernel
         // $wrapSchedule($event, 'transactions:auto-fail');
 		
 		// Auto-reverse transactions after 6 hours
-        $event = $schedule->command('transactions:auto-reverse')->everyFiveMinutes();
-        $wrapSchedule($event, 'transactions:auto-reverse');
+        $schedule->command('transactions:auto-reverse')->everyFiveMinutes();
     }
 
     /**

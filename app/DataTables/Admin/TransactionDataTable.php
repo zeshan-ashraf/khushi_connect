@@ -27,6 +27,7 @@ class TransactionDataTable extends DataTable
                 return $query->created_at ? $query->created_at->format('d-m-y H:i:s') : 'N/A';
             })
             ->editColumn('status-inqury', function ($query) {
+                $user = auth()->user();
                 $inquiryButton = '
                     <a href="' . route('admin.jazzcash.status-inquiry', ['id' => $query->txn_ref_no, 'type' => $query->txn_type]) . '" 
                     class="btn btn-primary btn-sm">Inquiry</a>
@@ -42,6 +43,17 @@ class TransactionDataTable extends DataTable
                         </select>
                     ';
                     return $inquiryButton . $dropdown;
+                }
+            
+                // Add Mark for Reversal button if user has permission and transaction is success
+                if ($user && method_exists($user, 'can') && $user->can('Reverse Transactions') && $query->status == 'success') {
+                    // Check if reverse_requested_at exists and is null (safely handle if column doesn't exist)
+                    $reverseRequested = isset($query->reverse_requested_at) ? $query->reverse_requested_at : null;
+                    
+                    if (!$reverseRequested) {
+                        $tableType = 'transactions'; // This is the transactions table
+                        $inquiryButton .= ' <button class="btn btn-warning btn-sm mt-1 mark-for-reversal-btn" data-id="' . $query->id . '" data-table-type="' . $tableType . '">Mark for Reversal</button>';
+                    }
                 }
             
                 return $inquiryButton;
