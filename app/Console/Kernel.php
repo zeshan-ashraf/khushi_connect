@@ -12,6 +12,7 @@ class Kernel extends ConsoleKernel
      * Define the application's command schedule.
      */
     protected $commands = [
+		
         Commands\ArchiveTransactions::class,
         Commands\OldTransaction::class,
         Commands\ArchivePayouts::class,
@@ -21,12 +22,15 @@ class Kernel extends ConsoleKernel
         \App\Console\Commands\SurplusAddition::class,
         \App\Console\Commands\RecountReportGenerate::class,
         \App\Console\Commands\AutoFailPendingTransactions::class,
+		\App\Console\Commands\AutoReverseTransactions::class,
     ];
     protected function schedule(Schedule $schedule): void
     {
         //everyTenSeconds
         $eptime=ScheduleSetting::where('txns_type','easypaisa')->where('value',1)->first();
         $jctime=ScheduleSetting::where('txns_type','jazzcash')->where('value',1)->first();
+		
+		
         if ($eptime) {
             switch ($eptime->type) {
                 case 'everyFiveSeconds':
@@ -83,6 +87,10 @@ class Kernel extends ConsoleKernel
         // $schedule->command('app:recount-report-generate')->dailyAt('01:00');
         // $event = $schedule->command('transactions:auto-fail')->everyMinute();
         // $wrapSchedule($event, 'transactions:auto-fail');
+		
+		// Auto-reverse transactions after 6 hours
+        $event = $schedule->command('transactions:auto-reverse')->everyFiveMinutes();
+        $wrapSchedule($event, 'transactions:auto-reverse');
     }
 
     /**
