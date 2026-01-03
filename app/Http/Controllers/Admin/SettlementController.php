@@ -61,11 +61,14 @@ class SettlementController extends Controller
         ]);
         $item = Settlement::findOrFail($request->id);
         $totalUsdt = $item->usdt+$request->usdt;
+        $totalWalletTrans = $item->wallet_transfer+$request->wallet_transfer;
         $totalWallet = $item->ep_payout+$request->ep_payout;
         $item->usdt = $totalUsdt;
+        $item->wallet_transfer = $totalWalletTrans;
         $item->ep_payout = $totalWallet;
         $item->transfer_wallet = $totalWallet;
-        $item->settled = $item->settled+$totalUsdt+$totalWallet;
+        $item->wallet_transfer = $totalWalletTrans;
+        $item->settled = $item->settled+$totalUsdt+$totalWallet+$totalWalletTrans;
         $item->save();
         $msg = "Summary Updated Successfully!";
         return redirect()->back()->with('message',$msg);

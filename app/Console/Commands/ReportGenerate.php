@@ -45,6 +45,11 @@ class ReportGenerate extends Command
                     ->where('user_id', $user->id)
                     ->whereDate('date', Carbon::today()->format('y-m-d'))
                     ->value('usdt');
+
+                $todayWalletTrans = DB::table('settlements')
+                    ->where('user_id', $user->id)
+                    ->whereDate('date', Carbon::today()->format('y-m-d'))
+                    ->value('wallet_transfer');
                 
                 // Sum of successful transaction amounts
                 $transactionSumJC = DB::table('transactions')
@@ -110,7 +115,7 @@ class ReportGenerate extends Command
                 // Calculate balances
                 $payinBal = $closingBal + $transactionSumJC + $transactionSumEP - ($transactionSumJC * $payinFeeJC) - ($transactionSumEP * $payinFeeEP) - $transactionReverseHalf;
                 // $payinBal = $closingBal + $transactionSumEP - ($transactionSumEP * $payinFeeEP) - $transactionReverseHalf;
-                $settleAmount = $payoutSumJC + $payoutSumEP + ($payoutSumJC * $PayoutFeeJC) + ($payoutSumEP * $PayoutFeeEP) + $todayUsdt;
+                $settleAmount = $payoutSumJC + $payoutSumEP + ($payoutSumJC * $PayoutFeeJC) + ($payoutSumEP * $PayoutFeeEP) + $todayUsdt +$todayWalletTrans;
             
                 // Create a summary for the user
                 $sumamry->update([
@@ -128,6 +133,7 @@ class ReportGenerate extends Command
                     'jc_payout_fee' => $payoutSumJC * $PayoutFeeJC,
                     // 'ep_payout_fee' => $payoutSumEP * $PayoutFeeEP,
                     'usdt' => $sumamry->usdt,
+                    'wallet_transfer' => $sumamry->wallet_transfer,
                     'settled' => $settleAmount,
                     'closing_bal' => $payinBal - $settleAmount,
                 ]);
@@ -148,6 +154,7 @@ class ReportGenerate extends Command
                     'jc_payout_fee' => '0',
                     'ep_payout_fee' => '0',
                     'usdt' => '0',
+                    'wallet_transfer' => '0',
                     'settled' => '0',
                     'closing_bal' => '0',
                 ]);

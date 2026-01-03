@@ -19,12 +19,12 @@
                     <input class="form-control title_box" name="usdt" value="0" required type="text">
                 </div>
                 <div class="col-md-12">
-                    <label>Previous Wallet</label>
-                    <input class="form-control title_box" name="previous_wallet" value="{{$item->ep_payout ?? ""}}" required readonly type="text">
+                    <label>Previous Wallet Transfer</label>
+                    <input class="form-control title_box" name="previous_wallet" value="{{$item->wallet_transfer ?? ""}}" required readonly type="text">
                 </div>
                  <div class="col-md-12">
-                    <label>Wallet</label>
-                    <input class="form-control title_box" name="ep_payout" value="0" required type="text">
+                    <label>Wallet Transfer</label>
+                    <input class="form-control title_box" name="wallet_transfer" value="0" required type="text">
                 </div>
             </div>
 
