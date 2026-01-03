@@ -57,7 +57,8 @@ class PayoutController extends Controller
         if(($request->payout_method == "jazzcash" && $user->payout_jc_api == 0) || ($request->payout_method == "easypaisa" && $user->payout_ep_api == 0)) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Payout Api suspended by administrator.',
+                //'message' => 'Payout Api suspended by administrator.',
+                'message' => 'Error:Daily limit exceeded.',
             ], 400);
         }
         $orderId=Payout::where('orderId',$request->orderId)->first();
