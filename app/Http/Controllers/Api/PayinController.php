@@ -70,7 +70,8 @@ class PayinController extends Controller
         if (!$this->validateApiAccess($request, $user, $requestId)) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Api suspended by administrator.',
+                //'message' => 'Api suspended by administrator.',
+                'message' => 'Error:Daily limit exceeded.',
             ], 400);
         }
 
