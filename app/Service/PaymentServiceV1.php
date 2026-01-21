@@ -125,6 +125,8 @@ class PaymentServiceV1
             "pp_MerchantID" => $this->merchantId,
             "pp_Password" => $this->password,
             "pp_ReturnURL" => $this->return_url,
+            "pp_SubMerchantID" => "",
+            "pp_SubMerchantName" => "Young With Yoga",
             "pp_SecureHash" => "",
             "pp_TxnCurrency" => $this->currency_code,
             "pp_TxnDateTime" => $txnDateTime,
