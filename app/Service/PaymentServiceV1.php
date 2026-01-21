@@ -66,6 +66,8 @@ class PaymentServiceV1
     public function jazzcash(Request $request): array
     {
         $requestId = $request->request_id ?? uniqid();
+        $user = $request->user_model ?? $request->user;
+        dd($user);
         /*Log::channel('payout')->info('[TestPaymentService] Initiating JazzCash payment processing', [
             'request_id' => $requestId,
             'service_step' => 'jazzcash_init',
@@ -81,7 +83,7 @@ class PaymentServiceV1
 
         // Create post data for JazzCash
         $post_data = $this->createJazzCashPostData($pp_Amount, $pp_TxnDateTime, $pp_TxnRefNo, $request->phone);
-        dd($post_data);
+
         /*
         Log::channel('payout')->info('[TestPaymentService] JazzCash request prepared', [
             'request_id' => $requestId,
