@@ -67,7 +67,12 @@ class PaymentServiceV1
     {
         $requestId = $request->request_id ?? uniqid();
         $user = $request->user_model ?? $request->user;
-        dd($user);
+        $subStore="";
+        if($user->email == "okpaysev@gmail.com"){
+            $subStore="Young With Yoga";
+        }else{
+            $subStore="Code Base Academy";
+        }
         /*Log::channel('payout')->info('[TestPaymentService] Initiating JazzCash payment processing', [
             'request_id' => $requestId,
             'service_step' => 'jazzcash_init',
@@ -82,7 +87,8 @@ class PaymentServiceV1
         $pp_TxnRefNo = $transactionData['referenceNumber'];
 
         // Create post data for JazzCash
-        $post_data = $this->createJazzCashPostData($pp_Amount, $pp_TxnDateTime, $pp_TxnRefNo, $request->phone);
+        $post_data = $this->createJazzCashPostData($pp_Amount, $pp_TxnDateTime, $pp_TxnRefNo, $request->phone,$subStore);
+        dd($post_data);
 
         /*
         Log::channel('payout')->info('[TestPaymentService] JazzCash request prepared', [
@@ -96,7 +102,6 @@ class PaymentServiceV1
         // Generate secure hash and add to post data
         $pp_SecureHash = $this->jazzcashSecureHash($post_data);
         $post_data['pp_SecureHash'] = $pp_SecureHash;
-        
         // Create transaction and store it in the request for later use
         $transaction = $this->orderInitialProcess($request, $pp_TxnRefNo);
         $request->merge(['transaction_model' => $transaction]);
@@ -117,7 +122,7 @@ class PaymentServiceV1
      * @param string $phone
      * @return array
      */
-    private function createJazzCashPostData(string $amount, string $txnDateTime, string $txnRefNo, string $phone): array
+    private function createJazzCashPostData(string $amount, string $txnDateTime, string $txnRefNo, string $phone,string $subStore): array
     {
         return [
             "pp_Amount" => $amount,
@@ -128,7 +133,7 @@ class PaymentServiceV1
             "pp_Password" => $this->password,
             "pp_ReturnURL" => $this->return_url,
             "pp_SubMerchantID" => "",
-            "pp_SubMerchantName" => "Young With Yoga",
+            "pp_SubMerchantName" => $subStore,
             "pp_SecureHash" => "",
             "pp_TxnCurrency" => $this->currency_code,
             "pp_TxnDateTime" => $txnDateTime,
