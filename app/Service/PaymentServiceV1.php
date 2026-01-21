@@ -88,8 +88,6 @@ class PaymentServiceV1
 
         // Create post data for JazzCash
         $post_data = $this->createJazzCashPostData($pp_Amount, $pp_TxnDateTime, $pp_TxnRefNo, $request->phone,$subStore);
-        dd($post_data);
-
         /*
         Log::channel('payout')->info('[TestPaymentService] JazzCash request prepared', [
             'request_id' => $requestId,
