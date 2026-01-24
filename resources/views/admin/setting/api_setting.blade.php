@@ -11,12 +11,49 @@
 @section('content')
 <div class="app-content content ">
     <div class="content-overlay"></div>
-    <div class="header-navbar-shadow"></div>
     <div class="content-wrapper container-xxl pt-0 px-0 pb-sm-0 pb-5">
         <div class="content-header row">
         </div>
         <div class="content-body">
             <section id="row-grouping-datatable">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header border-bottom d-flex justify-content-between">
+                                <h4 class="card-title text-capitalize">Test Payin</h4>
+                            </div>
+                            <div class="card-body p-0">
+                                <form action="{{route('admin.testing.payin')}}" method="post" class="submit_form">
+                                    @csrf
+                                    <input type="hidden" name="email" value="testing@khushipay.com">
+                                    <input type="hidden" name="client_email" value="testing@khushipay.com">
+                                    <input type="hidden" name="callback_url" value="www.example-testing.com">
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <label>Payment Method</label>
+                                            <select name="payment_method" id="payment_method" class="form-control">
+                                                <option value="" disabled selected>Select One ..</option>
+                                                <option value="easypaisa">Easypaisa</option>
+                                                <option value="jazzcash">Jazzcash</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label>Phone No</label>
+                                            <input class="form-control" name="phone" type="input">
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label>Amount</label>
+                                            <input class="form-control" name="amount" type="input">
+                                        </div>
+                                        <div class="col-md-3">
+                                            <buttton class="btn btn-primary" type="submit">
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 <div class="row">
                     <div class="col-12">
                         <div class="card">
