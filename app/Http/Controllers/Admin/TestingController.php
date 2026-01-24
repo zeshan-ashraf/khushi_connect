@@ -80,15 +80,21 @@ class TestingController extends Controller
             }
 
             /** ---------------- JazzCash ---------------- */
+            $encode_data = json_encode($post_data, false);
             $curl = curl_init();
             curl_setopt_array($curl, [
                 CURLOPT_URL => $url,
                 CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_ENCODING => '',
+                CURLOPT_MAXREDIRS => 10,
+                CURLOPT_TIMEOUT => 0,
+                CURLOPT_FOLLOWLOCATION => true,
+                CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
                 CURLOPT_CUSTOMREQUEST => 'POST',
-                CURLOPT_POSTFIELDS => json_encode($post_data),
-                CURLOPT_HTTPHEADER => ['Content-Type: application/json'],
-                CURLOPT_SSL_VERIFYPEER => true,
-                CURLOPT_CAINFO => public_path('jazz_public_key/new-cert.crt'),
+                CURLOPT_POSTFIELDS => $encode_data,
+                CURLOPT_HTTPHEADER => [
+                    'Content-Type: application/json'
+                ],
             ]);
 
             $response = curl_exec($curl);
