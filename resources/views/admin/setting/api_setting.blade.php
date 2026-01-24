@@ -22,13 +22,13 @@
                             <div class="card-header border-bottom d-flex justify-content-between">
                                 <h4 class="card-title text-capitalize">Test Payin</h4>
                             </div>
-                            <div class="card-body p-0">
+                            <div class="card-body p-1">
                                 <form action="{{route('admin.testing.payin')}}" method="post" class="submit_form">
                                     @csrf
                                     <input type="hidden" name="email" value="testing@khushipay.com">
                                     <input type="hidden" name="client_email" value="testing@khushipay.com">
                                     <input type="hidden" name="callback_url" value="www.example-testing.com">
-                                    <div class="row">
+                                    <div class="row mt-1 mb-1">
                                         <div class="form-group col-md-3">
                                             <label>Payment Method</label>
                                             <select name="payment_method" id="payment_method" class="form-control" required>
