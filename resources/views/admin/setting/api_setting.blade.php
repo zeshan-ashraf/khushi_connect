@@ -46,7 +46,7 @@
                                             <input class="form-control" name="amount" type="input">
                                         </div>
                                         <div class="col-md-3">
-                                            <buttton class="btn btn-primary" type="submit">
+                                            <buttton class="btn btn-primary" type="submit">Submit</buttton>
                                         </div>
                                     </div>
                                 </form>
