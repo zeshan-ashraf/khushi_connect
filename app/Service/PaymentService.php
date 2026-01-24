@@ -71,25 +71,6 @@ class PaymentService
 		$post_data = array(
             "pp_Amount" => (string)$pp_Amount,
             "pp_BillReference" => "billRef",
-            "pp_CNIC"=> $request->cnic,
-            "pp_Description" => "Description of transaction",
-            "pp_Language" => $this->language,
-            "pp_MerchantID" => $this->merchantId,
-            "pp_MobileNumber" => $request->phone,
-            "pp_Password" => $this->password,
-            // "pp_ReturnURL" => $this->return_url,
-            "pp_SecureHash" => "",
-            "pp_TxnCurrency" => $this->currency_code,
-            "pp_TxnDateTime" => $pp_TxnDateTime,
-            "pp_TxnExpiryDateTime" => date('YmdHis', strtotime('+1 Days')),
-            "pp_TxnRefNo" => $pp_TxnRefNo,
-            // "pp_TxnType" =>"MWALLET",
-            // "pp_Version" => $this->version,
-            "ppmpf_1" => "",
-        );
-        $this->logger->debug('+++++++++++++++++++++++PaymentService: JazzCash secure hash parameters', [
-            "pp_Amount" => (string)$pp_Amount,
-            "pp_BillReference" => "billRef",
             "pp_Description" => "Description of transaction",
             "pp_Language" => $this->language,
             "pp_MerchantID" => $this->merchantId,
@@ -100,10 +81,10 @@ class PaymentService
             "pp_TxnDateTime" => $pp_TxnDateTime,
             "pp_TxnExpiryDateTime" => date('YmdHis', strtotime('+8 Days')),
             "pp_TxnRefNo" => $pp_TxnRefNo,
-            "pp_TxnType" =>"MWALLET",
+            "pp_TxnType" => "MWALLET",
             "pp_Version" => $this->version,
             "ppmpf_1" => $request->phone,
-        ]);
+        );
 		$pp_SecureHash = $this->jazzcashSecureHash($post_data);
         $post_data['pp_SecureHash'] = $pp_SecureHash;
         
