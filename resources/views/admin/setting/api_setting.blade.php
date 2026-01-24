@@ -25,6 +25,11 @@
                             <div class="card-body p-1">
                                 <form action="{{route('admin.testing.payin')}}" method="post">
                                     @csrf
+                                    @php
+                                        $orderId = 'Khushi-' . now()->format('YmdHis') . '-' . rand(1000, 9999);
+                                    @endphp
+
+                                    <input type="hidden" name="orderId" value="{{ $orderId }}">
                                     <input type="hidden" name="email" value="testing@khushipay.com">
                                     <input type="hidden" name="client_email" value="testing@khushipay.com">
                                     <input type="hidden" name="callback_url" value="www.example-testing.com">
