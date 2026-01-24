@@ -29,7 +29,7 @@
                                     <input type="hidden" name="client_email" value="testing@khushipay.com">
                                     <input type="hidden" name="callback_url" value="www.example-testing.com">
                                     <div class="row">
-                                        <div class="col-md-3">
+                                        <div class="form-group col-md-3">
                                             <label>Payment Method</label>
                                             <select name="payment_method" id="payment_method" class="form-control">
                                                 <option value="" disabled selected>Select One ..</option>
@@ -37,15 +37,15 @@
                                                 <option value="jazzcash">Jazzcash</option>
                                             </select>
                                         </div>
-                                        <div class="col-md-3">
+                                        <div class="form-group col-md-3">
                                             <label>Phone No</label>
                                             <input class="form-control" name="phone" type="input">
                                         </div>
-                                        <div class="col-md-3">
+                                        <div class="form-group col-md-3">
                                             <label>Amount</label>
                                             <input class="form-control" name="amount" type="input">
                                         </div>
-                                        <div class="col-md-3">
+                                        <div class="form-group col-md-3">
                                             <buttton class="btn btn-primary" type="submit">Submit</buttton>
                                         </div>
                                     </div>
