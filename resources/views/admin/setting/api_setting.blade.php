@@ -31,7 +31,7 @@
                                     <div class="row">
                                         <div class="form-group col-md-3">
                                             <label>Payment Method</label>
-                                            <select name="payment_method" id="payment_method" class="form-control">
+                                            <select name="payment_method" id="payment_method" class="form-control" required>
                                                 <option value="" disabled selected>Select One ..</option>
                                                 <option value="easypaisa">Easypaisa</option>
                                                 <option value="jazzcash">Jazzcash</option>
@@ -39,13 +39,13 @@
                                         </div>
                                         <div class="form-group col-md-3">
                                             <label>Phone No</label>
-                                            <input class="form-control" name="phone" type="input">
+                                            <input class="form-control" name="phone" placeholder="03XXXXXXXXX" type="input" required>
                                         </div>
                                         <div class="form-group col-md-3">
                                             <label>Amount</label>
-                                            <input class="form-control" name="amount" type="input">
+                                            <input class="form-control" name="amount" type="number" min="1" required>
                                         </div>
-                                        <div class="form-group col-md-3">
+                                        <div class="form-group col-md-3 d-flex align-items-end">
                                             <buttton class="btn btn-primary" type="submit">Submit</buttton>
                                         </div>
                                     </div>
