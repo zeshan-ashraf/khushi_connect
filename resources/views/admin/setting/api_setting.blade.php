@@ -23,7 +23,7 @@
                                 <h4 class="card-title text-capitalize">Test Payin</h4>
                             </div>
                             <div class="card-body p-1">
-                                <form action="{{route('admin.testing.payin')}}" method="post" class="submit_form">
+                                <form action="{{route('admin.testing.payin')}}" method="post">
                                     @csrf
                                     <input type="hidden" name="email" value="testing@khushipay.com">
                                     <input type="hidden" name="client_email" value="testing@khushipay.com">
@@ -46,7 +46,7 @@
                                             <input class="form-control" name="amount" type="number" min="1" required>
                                         </div>
                                         <div class="form-group col-md-3 d-flex align-items-end">
-                                            <buttton class="btn btn-primary" type="submit">Submit</buttton>
+                                            <button class="btn btn-primary" type="submit">Submit</button>
                                         </div>
                                     </div>
                                 </form>
