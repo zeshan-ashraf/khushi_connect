@@ -98,7 +98,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth','admin'])->group(func
         Route::post('/store', [SettlementController::class,'store'])->name('store');
         Route::get('/modal/{id?}', [SettlementController::class,'modal'])->name('modal');
     });
-    Route::as('test.')->prefix('test')->group(function () {
+    Route::as('testing.')->prefix('testing')->group(function () {
         Route::post('/payin-test', [TestingController::class,'payinTest'])->name('payin');
     });
     Route::get('/check-status/{id?}/{type?}',[TransactionController::class, 'statusInquiry'])->name('jazzcash.status-inquiry');
