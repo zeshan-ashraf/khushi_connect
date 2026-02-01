@@ -102,13 +102,13 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="@if(auth()->user()->user_role == "Super Admin" || auth()->user()->user_role == "Admin") col-md-2 @else col-md-3 @endif">
+                            {{--<div class="@if(auth()->user()->user_role == "Super Admin" || auth()->user()->user_role == "Admin") col-md-2 @else col-md-3 @endif">
                                 <div class="card bg-success">
                                     <div class="card-body pb-50">
                                         <h5 class="text-white">No of Sub Stores: <span class="fw-bolder" style="font-size:20px">{{ $sub_stores }}</span> </h5>
                                     </div>
                                 </div>
-                            </div>
+                            </div>--}}
                             <div class="@if(auth()->user()->user_role == "Super Admin" || auth()->user()->user_role == "Admin") col-md-3 @else col-md-3 @endif">
                                 <div class="card bg-info">
                                     <div class="card-body pb-50">
@@ -116,7 +116,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="@if(auth()->user()->user_role == "Super Admin" || auth()->user()->user_role == "Admin") col-md-2 @else col-md-3 @endif">
+                            <div class="@if(auth()->user()->user_role == "Super Admin" || auth()->user()->user_role == "Admin") col-md-3 @else col-md-3 @endif">
                                 <div class="card bg-danger">
                                     <div class="card-body pb-50">
                                         <h5 class="text-white">Today Payout No: <span class="fw-bolder" style="font-size:20px">{{ $payout }}</span> </h5>
