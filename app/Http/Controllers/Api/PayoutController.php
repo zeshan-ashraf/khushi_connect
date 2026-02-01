@@ -378,7 +378,7 @@ class PayoutController extends Controller
                     //    'response' => $setting,
                     //    'user payout fee' => $user,
                     //]);
-                    if ($setting && $user->per_payout_fee && $setting->auto ==1) {
+                    if ($setting && $user->per_payout_fee) {
                         $rate = $user->per_payout_fee;
                         $amount = $request->amount * $rate;
                     
