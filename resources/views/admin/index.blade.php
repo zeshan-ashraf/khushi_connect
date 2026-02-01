@@ -147,7 +147,7 @@
                                                         <th colspan="@if (auth()->user()->user_role == "Super Admin") 12 @else 5 @endif"  rowspan="2">Surplus Amount Interface</th>
                                                         <th>JC</th>
                                                         <th>EP</th>
-                                                        <th colspan="3">Action</th>
+                                                        <th colspan="4">Action</th>
                                                     </tr>
                                                     <tr class="bg-warning">
                                                         <th>{{number_format(round($surplusAmount->jazzcash,0))}}</th>
