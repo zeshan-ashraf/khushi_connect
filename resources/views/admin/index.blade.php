@@ -124,7 +124,7 @@
                                 </div>
                             </div>
                              @if(auth()->user()->user_role == "Super Admin" || auth()->user()->user_role == "Manager")
-                            <div class="col-md-3">
+                            <div class="col-md-4">
                                 <div class="card bg-warning">
                                     <div class="card-body pb-50">
                                         <h5 class="text-black">Monthly EP Payin: <span class="fw-bolder" style="font-size:20px">{{ number_format(round($totalMonthlyAmount,0))}}</span> </h5>
