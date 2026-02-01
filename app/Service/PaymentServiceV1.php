@@ -625,7 +625,9 @@ class PaymentServiceV1
             }
             
             // Update balances based on payment type
-            $this->updateBalances($setting, $surplus, $amount, $type);
+            if($setting->auto ==0){
+                $this->updateBalances($setting, $surplus, $amount, $type);
+            }
 
             //Log::channel('payout')->info('[TestPaymentService] User balance updated successfully', [
             //    'request_id' => $requestId,
