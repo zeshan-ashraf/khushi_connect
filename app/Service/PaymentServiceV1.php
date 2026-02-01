@@ -625,7 +625,7 @@ class PaymentServiceV1
             }
             
             // Update balances based on payment type
-            if($setting->auto ==0){
+            if($setting->auto ==1){
                 $this->updateBalances($setting, $surplus, $amount, $type);
             }
 
