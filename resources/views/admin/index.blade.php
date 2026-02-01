@@ -109,14 +109,14 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="@if(auth()->user()->user_role == "Super Admin" || auth()->user()->user_role == "Admin") col-md-3 @else col-md-3 @endif">
+                            <div class="@if(auth()->user()->user_role == "Super Admin" || auth()->user()->user_role == "Admin") col-md-2 @else col-md-2 @endif">
                                 <div class="card bg-info">
                                     <div class="card-body pb-50">
                                         <h5 class="text-white">Today Payin No: <span class="fw-bolder" style="font-size:20px">{{ $transaction }}</span> </h5>
                                     </div>
                                 </div>
                             </div>
-                            <div class="@if(auth()->user()->user_role == "Super Admin" || auth()->user()->user_role == "Admin") col-md-2 @else col-md-3 @endif">
+                            <div class="@if(auth()->user()->user_role == "Super Admin" || auth()->user()->user_role == "Admin") col-md-3 @else col-md-3 @endif">
                                 <div class="card bg-danger">
                                     <div class="card-body pb-50">
                                         <h5 class="text-white">Today Payout No: <span class="fw-bolder" style="font-size:20px">{{ $payout }}</span> </h5>
@@ -144,7 +144,7 @@
                                                 <thead>
                                                     @if(auth()->user()->user_role == "Super Admin" || auth()->user()->user_role == "Manager")
                                                     <tr class="bg-warning">
-                                                        <th colspan="@if (auth()->user()->user_role == "Super Admin") 12 @else 5 @endif"  rowspan="2">Surplus Amount Interface</th>
+                                                        <th colspan="@if (auth()->user()->user_role == "Super Admin") 12 @else 5 @endif"  rowspan="3">Surplus Amount Interface</th>
                                                         <th>JC</th>
                                                         <th>EP</th>
                                                         <th colspan="3">Action</th>
