@@ -41,8 +41,8 @@
                                                 <td>{{$item->payin_fee}}</td>
                                                 <td>{{$item->payin_ep_fee}}</td>
                                                 <td>{{$item->payout_fee}}</td>
-                                                <td>{{$item->per_payin_fee}}</td>
                                                 <td>{{$item->payout_ep_fee}}</td>
+                                                <td>{{$item->per_payin_fee}}</td>
                                                 <td>{{$item->per_payout_fee}}</td>
                                                 <td>
                                                     <div class="d-flex justify-content-start">
