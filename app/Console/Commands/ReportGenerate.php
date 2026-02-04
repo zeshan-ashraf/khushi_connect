@@ -110,7 +110,7 @@ class ReportGenerate extends Command
                 $payinFeeJC = $user->payin_fee;
                 $payinFeeEP = $user->payin_ep_fee;
                 $PayoutFeeJC = $user->payout_fee;
-                $PayoutFeeEP = $user->payout_fee;
+                $PayoutFeeEP = $user->payout_ep_fee;
             
                 // Calculate balances
                 $payinBal = $closingBal + $transactionSumJC + $transactionSumEP - ($transactionSumJC * $payinFeeJC) - ($transactionSumEP * $payinFeeEP) - $transactionReverseHalf;

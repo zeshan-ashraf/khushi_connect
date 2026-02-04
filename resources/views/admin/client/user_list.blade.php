@@ -24,9 +24,10 @@
                                             <tr>
                                                 <th>#</th>
                                                 <th>Name</th>
-                                                <th>Overall Payin JC Fee</th>
-                                                <th>Overall Payin EP Fee</th>
-                                                <th>Overall Payout Fee</th>
+                                                <th>Payin JC Fee</th>
+                                                <th>Payin EP Fee</th>
+                                                <th>Payout JC Fee</th>
+                                                <th>Payout EP Fee</th>
                                                 <th>Per Transaction Payin Fee</th>
                                                 <th>Per Transaction Payout Fee</th>
                                                 <th>Action</th>
@@ -41,6 +42,7 @@
                                                 <td>{{$item->payin_ep_fee}}</td>
                                                 <td>{{$item->payout_fee}}</td>
                                                 <td>{{$item->per_payin_fee}}</td>
+                                                <td>{{$item->payout_ep_fee}}</td>
                                                 <td>{{$item->per_payout_fee}}</td>
                                                 <td>
                                                     <div class="d-flex justify-content-start">
