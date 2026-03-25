@@ -71,7 +71,7 @@
                         class="d-flex align-items-center" href="{{ route('admin.transaction.reversal.list') }}">
                         <i data-feather="rotate-ccw"></i>Pending Reversals</a>
                 </li>
-                @endcan
+            @endcan
 			
 			
             @if(auth()->user()->user_role == "Super Admin")
