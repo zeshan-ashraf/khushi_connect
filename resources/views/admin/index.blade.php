@@ -273,7 +273,7 @@
                                                                 <a data-target="#attributeModal"
                                                                     class="btn btn-primary waves-effect waves-float waves-light open_modal" 
                                                                     data-url="{{route('admin.settlement.modal',$item['set_id'])}}">
-                                                                    Manual
+                                                                    Adjustment
                                                                 </a>
                                                             </td>
                                                             @endif
