@@ -147,12 +147,12 @@
                                                         <th colspan="@if (auth()->user()->user_role == "Super Admin") 12 @else 5 @endif"  rowspan="2">Surplus Amount Interface</th>
                                                         <th>JC</th>
                                                         <th>EP</th>
-                                                        <th colspan="4">Action</th>
+                                                        <th colspan="5">Action</th>
                                                     </tr>
                                                     <tr class="bg-warning">
                                                         <th>{{number_format(round($surplusAmount->jazzcash,0))}}</th>
                                                         <th>{{number_format(round($surplusAmount->easypaisa,0))}}</th>
-                                                        <th colspan="4"><a data-target="#attributeModal" class="btn btn-primary waves-effect waves-float waves-light open_modal" data-url="{{route('admin.setting.modal_sec')}}">Add Amount</a></th>
+                                                        <th colspan="5"><a data-target="#attributeModal" class="btn btn-primary waves-effect waves-float waves-light open_modal" data-url="{{route('admin.setting.modal_sec')}}">Add Amount</a></th>
                                                     </tr>
                                                     @endif
                                                     <tr>
@@ -200,6 +200,7 @@
                                                         <th colspan="3">Wallet</th>
                                                         @if(auth()->user()->user_role == "Super Admin" || auth()->user()->user_role == "Manager" || auth()->user()->user_role == "Client")
                                                         <th colspan="3" rowspan="3">Balance</th>
+                                                        <th colspan="3" rowspan="2">USDT & Wallet</th>
                                                         @endif
                                                     </tr>
                                                     <tr>
@@ -267,6 +268,13 @@
                                                                         data-type="auto"
                                                                         @if($item['setting']->auto == 1) checked @endif>
                                                                 </div>
+                                                            </td>
+                                                            <td>
+                                                                <a data-target="#attributeModal"
+                                                                    class="btn btn-primary waves-effect waves-float waves-light open_modal" 
+                                                                    data-url="{{route('admin.settlement.modal',$item['set_id'])}}">
+                                                                    Manual
+                                                                </a>
                                                             </td>
                                                             @endif
                                                         </tr>
