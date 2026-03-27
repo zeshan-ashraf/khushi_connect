@@ -109,6 +109,7 @@
                                     </div>
                                 </div>
                             </div>--}}
+                            @if(auth()->user()->user_role == "Super Admin" || auth()->user()->user_role == "Manager")
                             <div class="@if(auth()->user()->user_role == "Super Admin" || auth()->user()->user_role == "Manager") col-md-3 @else col-md-3 @endif">
                                 <div class="card bg-info">
                                     <div class="card-body pb-50">
@@ -123,7 +124,7 @@
                                     </div>
                                 </div>
                             </div>
-                             @if(auth()->user()->user_role == "Super Admin" || auth()->user()->user_role == "Manager")
+                             
                             <div class="col-md-4">
                                 <div class="card bg-warning">
                                     <div class="card-body pb-50">
