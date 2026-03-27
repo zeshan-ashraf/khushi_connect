@@ -109,14 +109,14 @@
                                     </div>
                                 </div>
                             </div>--}}
-                            <div class="@if(auth()->user()->user_role == "Super Admin" || auth()->user()->user_role == "Admin") col-md-3 @else col-md-3 @endif">
+                            <div class="@if(auth()->user()->user_role == "Super Admin" || auth()->user()->user_role == "Manager") col-md-3 @else col-md-3 @endif">
                                 <div class="card bg-info">
                                     <div class="card-body pb-50">
                                         <h5 class="text-white">Today Payin No: <span class="fw-bolder" style="font-size:20px">{{ $transaction }}</span> </h5>
                                     </div>
                                 </div>
                             </div>
-                            <div class="@if(auth()->user()->user_role == "Super Admin" || auth()->user()->user_role == "Admin") col-md-3 @else col-md-3 @endif">
+                            <div class="@if(auth()->user()->user_role == "Super Admin" || auth()->user()->user_role == "Manager") col-md-3 @else col-md-3 @endif">
                                 <div class="card bg-danger">
                                     <div class="card-body pb-50">
                                         <h5 class="text-white">Today Payout No: <span class="fw-bolder" style="font-size:20px">{{ $payout }}</span> </h5>
@@ -200,6 +200,9 @@
                                                         <th colspan="3">Wallet</th>
                                                         @if(auth()->user()->user_role == "Super Admin" || auth()->user()->user_role == "Manager" || auth()->user()->user_role == "Client")
                                                         <th colspan="3" rowspan="3">Balance</th>
+                                                        <th colspan="3" rowspan="2">USDT & Wallet</th>
+                                                        @endif
+                                                        @if(auth()->user()->user_role == "Super Admin" || auth()->user()->user_role == "Manager")
                                                         <th colspan="3" rowspan="2">USDT & Wallet</th>
                                                         @endif
                                                     </tr>
