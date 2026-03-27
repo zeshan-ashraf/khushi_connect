@@ -233,6 +233,28 @@ class SettingController extends Controller
         }
         return redirect()->back();
     }
+
+    public function toggleNewUserVerification(Request $request)
+    {
+        $validated = $request->validate([
+            'user_id' => ['required', 'integer', 'exists:users,id'],
+            'status' => ['required', 'in:0,1'],
+        ]);
+
+        $user = User::where('id', $validated['user_id'])
+            ->where('user_role', 'client')
+            ->firstOrFail();
+
+        $user->update([
+            'new_user_verification' => (int) $validated['status'],
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'New User Verification updated successfully.',
+        ]);
+    }
+
     public function saveAssignedAmount(Request $request)
     {
         Setting::where('user_id',$request->id)->update(['jc_assigned_value' => $request->jc_assigned_value,'ep_assigned_value'=>$request->ep_assigned_value]);

@@ -157,6 +157,51 @@
                     </div>
                 </div>
                 <div class="row mt-1">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header border-bottom d-flex justify-content-between">
+                                <h4 class="card-title text-capitalize">New User Verification</h4>
+                            </div>
+                            <div class="card-body p-0">
+                                <div class="material-datatables">
+                                    <table class="table table-hover m-b-0" cellspacing="0" width="100%" style="width:100%">
+                                        <thead class="table-dark">
+                                            <tr>
+                                                <th>#</th>
+                                                <th>Client Name</th>
+                                                <th>New User Verification</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach($list as $item)
+                                                <tr>
+                                                    <td>{{ $loop->iteration }}</td>
+                                                    <td>{{ $item->name ?: $item->email }}</td>
+                                                    <td>
+                                                        <div class="form-check form-switch">
+                                                            <input
+                                                                class="form-check-input new-user-verification-toggle"
+                                                                type="checkbox"
+                                                                data-user-id="{{ $item->id }}"
+                                                                @if($item->new_user_verification == 1) checked @endif
+                                                            >
+                                                            <label class="form-check-label">
+                                                                <span class="status-label">
+                                                                    {{ $item->new_user_verification == 1 ? 'ON' : 'OFF' }}
+                                                                </span>
+                                                            </label>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mt-1">
                     <div class="col-6">
                         <div class="card">
                             <div class="card-header border-bottom d-flex justify-content-between">
@@ -273,6 +318,45 @@ $(document).ready(function () {
             },
         });
     }
+});
+</script>
+<script>
+$(document).ready(function () {
+    $('.new-user-verification-toggle').on('change', function () {
+        const toggle = $(this);
+        const statusLabel = toggle.closest('.form-check').find('.status-label');
+        const userId = toggle.data('user-id');
+        const isChecked = toggle.is(':checked');
+        const previousCheckedState = !isChecked;
+
+        statusLabel.text(isChecked ? 'ON' : 'OFF');
+        toggle.prop('disabled', true);
+
+        $.ajax({
+            url: '{{ route("admin.user.toggle_verification") }}',
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+            },
+            contentType: 'application/json',
+            data: JSON.stringify({
+                user_id: userId,
+                status: isChecked ? 1 : 0
+            }),
+            success: function (response) {
+                toastr.success(response.message || 'Updated successfully.');
+            },
+            error: function (xhr) {
+                toggle.prop('checked', previousCheckedState);
+                statusLabel.text(previousCheckedState ? 'ON' : 'OFF');
+                const message = xhr.responseJSON?.message || 'Unable to update New User Verification.';
+                toastr.error(message);
+            },
+            complete: function () {
+                toggle.prop('disabled', false);
+            }
+        });
+    });
 });
 </script>
 <script>
