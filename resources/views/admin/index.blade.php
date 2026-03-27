@@ -200,7 +200,6 @@
                                                         <th colspan="3">Wallet</th>
                                                         @if(auth()->user()->user_role == "Super Admin" || auth()->user()->user_role == "Manager" || auth()->user()->user_role == "Client")
                                                         <th colspan="3" rowspan="3">Balance</th>
-                                                        <th colspan="3" rowspan="2">USDT & Wallet</th>
                                                         @endif
                                                         @if(auth()->user()->user_role == "Super Admin" || auth()->user()->user_role == "Manager")
                                                         <th colspan="3" rowspan="2">USDT & Wallet</th>
