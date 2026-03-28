@@ -98,14 +98,14 @@ class ReportGenerate extends Command
                     ->whereDate('created_at', Carbon::today())
                     ->sum('amount');
                 
-                // $payoutSumEP = DB::table('payouts')
-                //     ->where('user_id', $user->id)
-                //     ->where('status', 'success')
-                //     ->where('transaction_type', 'easypaisa')
-                //     ->whereDate('created_at', Carbon::today())
-                //     ->sum('amount');
+                $payoutSumEP = DB::table('payouts')
+                    ->where('user_id', $user->id)
+                    ->where('status', 'success')
+                    ->where('transaction_type', 'easypaisa')
+                    ->whereDate('created_at', Carbon::today())
+                    ->sum('amount');
             
-                $payoutSumEP = $sumamry->ep_payout;
+                // $payoutSumEP = $sumamry->ep_payout;
                 
                 $payinFeeJC = $user->payin_fee;
                 $payinFeeEP = $user->payin_ep_fee;
