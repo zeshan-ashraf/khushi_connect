@@ -30,7 +30,12 @@ class EasypaisaTransactionRecheckStatus extends Command
     {
         $now=Carbon::now();
         
-        $list = Transaction::where('status', 'failed')->where('pp_message','INVALID ORDER ID')->where('pp_code','0003')->where('txn_type', 'easypaisa')->get();
+        $list = Transaction::where('status', 'failed')
+            ->where('pp_message', 'INVALID ORDER ID')
+            ->where('pp_code', '0003')
+            ->where('txn_type', 'easypaisa')
+            ->where('created_at', '>=', Carbon::now()->subMinutes(30))
+            ->get();
         // \Log::info('Response from notifyurl:', ['response' => $now]);
         
         set_time_limit(0);
