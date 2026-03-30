@@ -39,13 +39,13 @@
                                     <div class="toolbar w-100">
                                         <form method="GET" action="{{route('admin.searching.payout_list')}}">
                                             <input type="hidden" name="params" value="true">
-                                            <div class="row">
+                                            <div class="row g-1 align-items-end">
                                                 @if(auth()->user()->user_role == "Super Admin" || auth()->user()->user_role == "Manager")
-                                                <div class="col-md-3">
+                                                <div class="col-xl-2 col-lg-3 col-md-4">
                                                     <div class="form-group">
                                                         <label>Phone Number</label>
-                                                        <input type="text" name="phone" id="fp-range"
-                                                            class="form-control flatpickr-range  flatpickr-input"
+                                                        <input type="text" name="phone"
+                                                            class="form-control"
                                                             value="{{request()->phone}}">
                                                     </div>
                                                 </div>
@@ -58,15 +58,29 @@
                                                             value="{{request()->transaction_ref_no}}">
                                                     </div>
                                                 </div>--}}
-                                                <div class="col-md-3">
+                                                <div class="col-xl-2 col-lg-3 col-md-4">
                                                     <div class="form-group">
                                                         <label>Order Id</label>
-                                                        <input type="text" name="order_id" id="fp-range"
-                                                            class="form-control flatpickr-range  flatpickr-input"
+                                                        <input type="text" name="order_id"
+                                                            class="form-control"
                                                             value="{{request()->order_id}}">
                                                     </div>
                                                 </div>
-                                                <div class="col-md-3 mt-2">
+                                                <div class="col-xl-2 col-lg-3 col-md-4">
+                                                    <div class="form-group">
+                                                        <label>Date</label>
+                                                        <input type="date" name="start_date" class="form-control"
+                                                            value="{{ request()->start_date }}">
+                                                    </div>
+                                                </div>
+                                                <div class="col-xl-2 col-lg-3 col-md-4">
+                                                    <div class="form-group">
+                                                        <label>Amount</label>
+                                                        <input type="number" step="0.01" name="amount_min" class="form-control"
+                                                            value="{{ request()->amount_min }}">
+                                                    </div>
+                                                </div>
+                                                <div class="col-xl-2 col-lg-3 col-md-4 d-grid">
                                                     <button type="submit" class="btn btn-outline-primary waves-effect">
                                                         <i data-feather='search'></i>
                                                     </button>

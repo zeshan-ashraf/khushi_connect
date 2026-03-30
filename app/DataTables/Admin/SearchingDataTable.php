@@ -3,6 +3,7 @@
 namespace App\DataTables\Admin;
 
 use App\Models\{User,Transaction,ArcheiveTransaction,BackupTransaction};
+use Carbon\Carbon;
 use Yajra\DataTables\Html\Column;
 use Yajra\DataTables\Services\DataTable;
 
@@ -82,6 +83,7 @@ class SearchingDataTable extends DataTable
             ->when(request()->order_id, function ($q) {
                 $q->where('orderId', 'like', '%' . request()->order_id . '%');
             });
+        $this->applyExactFilters($transactionQuery);
     
         $archiveTransactionQuery = ArcheiveTransaction::query()
             ->when(request()->transaction_Id, function ($q) {
@@ -93,6 +95,7 @@ class SearchingDataTable extends DataTable
             ->when(request()->order_id, function ($q) {
                 $q->where('orderId', 'like', '%' . request()->order_id . '%');
             });
+        $this->applyExactFilters($archiveTransactionQuery);
         $backupTransactionQuery = BackupTransaction::query()
             ->when(request()->transaction_Id, function ($q) {
                 $q->where('transactionId', 'like', '%' . request()->transaction_Id . '%');
@@ -103,11 +106,30 @@ class SearchingDataTable extends DataTable
             ->when(request()->order_id, function ($q) {
                 $q->where('orderId', 'like', '%' . request()->order_id . '%');
             });
+        $this->applyExactFilters($backupTransactionQuery);
     
         $combinedQuery = $transactionQuery
         ->union($archiveTransactionQuery)
         ->union($backupTransactionQuery);
         return $this->applyScopes($combinedQuery);
+    }
+
+    private function applyExactFilters($query): void
+    {
+        $startDate = request()->start_date;
+        if (!empty($startDate)) {
+            try {
+                $normalizedDate = Carbon::parse($startDate)->toDateString();
+                $query->whereDate('created_at', '=', $normalizedDate);
+            } catch (\Throwable $e) {
+                // Ignore invalid date input to preserve existing search flow.
+            }
+        }
+
+        $amount = request()->amount_min;
+        if ($amount !== null && $amount !== '') {
+            $query->where('amount', '=', $amount);
+        }
     }
 
     public function html()

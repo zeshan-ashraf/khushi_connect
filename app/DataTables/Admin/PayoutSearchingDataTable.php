@@ -3,6 +3,7 @@
 namespace App\DataTables\Admin;
 
 use App\Models\{User,Payout,ArcheivePayout};
+use Carbon\Carbon;
 use Yajra\DataTables\Html\Column;
 use Yajra\DataTables\Services\DataTable;
 
@@ -62,6 +63,7 @@ class PayoutSearchingDataTable extends DataTable
             ->when(request()->order_id, function ($q) {
                 $q->where('orderId', 'like', '%' . request()->order_id . '%');
             });
+        $this->applyExactFilters($transactionQuery);
     
         $archiveTransactionQuery = ArcheivePayout::query()
             ->when(request()->phone, function ($q) {
@@ -73,10 +75,29 @@ class PayoutSearchingDataTable extends DataTable
             ->when(request()->order_id, function ($q) {
                 $q->where('orderId', 'like', '%' . request()->order_id . '%');
             });
+        $this->applyExactFilters($archiveTransactionQuery);
     
         $combinedQuery = $transactionQuery
         ->union($archiveTransactionQuery);
         return $this->applyScopes($combinedQuery);
+    }
+
+    private function applyExactFilters($query): void
+    {
+        $startDate = request()->start_date;
+        if (!empty($startDate)) {
+            try {
+                $normalizedDate = Carbon::parse($startDate)->toDateString();
+                $query->whereDate('created_at', '=', $normalizedDate);
+            } catch (\Throwable $e) {
+                // Ignore invalid date input to preserve existing search flow.
+            }
+        }
+
+        $amount = request()->amount_min;
+        if ($amount !== null && $amount !== '') {
+            $query->where('amount', '=', $amount);
+        }
     }
 
     public function html()
