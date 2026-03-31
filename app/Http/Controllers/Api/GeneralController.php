@@ -228,11 +228,28 @@ class GeneralController extends Controller
     public function addWalletAmount(Request $request)
     {
         return $request->all();
+        if($request->user_id == "2"){
+            $userId = 4;
+        }
+        // else{
 
-        // WalletTransfer::create([
-        //     'req_id' => $request->txn_id,
-        //     'store_name' => 'A',
-        //     'trans_amount' => $request->amount,
-        // ]);
+        // }
+        $trans_amount=$request->trans_amount * -1;
+
+        dd($trans_amount,$userId);
+        WalletTransfer::create([
+            'date'        => $request->date,
+            'time'        => $request->time,
+            'user_id'     => $userId,
+            'req_id'      => $request->req_id,
+            'store_name'  => $request->from_store_name,
+            'trans_amount'=> $trans_amount,
+        ]);
+
+        $summary=Settlement::where('user_id',$userId)->whereDate('date', Carbon::today()->format('y-m-d'))->first();
+        $sumamry->update([
+            'wallet_transfer' => $sumamry->wallet_transfer + ($trans_amount),
+            'settled' => $sumamry->settled + ($trans_amount),
+        ]);
     }
 }
