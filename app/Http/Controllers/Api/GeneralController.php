@@ -236,7 +236,7 @@ class GeneralController extends Controller
         // }
         $trans_amount=$request->trans_amount * -1;
 
-        dd($trans_amount,$userId);
+        return $trans_amount;
         WalletTransfer::create([
             'date'        => $request->date,
             'time'        => $request->time,
