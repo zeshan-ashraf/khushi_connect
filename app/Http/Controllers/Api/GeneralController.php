@@ -233,6 +233,15 @@ class GeneralController extends Controller
         // else{
 
         // }
+
+        $userId = null;
+
+        if ($request->from_store_name == "Monotech") {
+            $userId = $request->user_id == "2" ? 4 : ($request->user_id == "4" ? 36 : null);
+        } else {
+            $userId = $request->user_id == "19" ? 4 : ($request->user_id == "4" ? 36 : null);
+        }
+        
         $trans_amount=$request->trans_amount * -1;
 
         WalletTransfer::create([
