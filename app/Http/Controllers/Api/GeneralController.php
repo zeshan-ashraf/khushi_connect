@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
-use App\Models\{Transaction,ArcheiveTransaction,BackupTransaction,Payout,ArcheivePayout,Summary,Setting,Settlement,User,SurplusAmount};
+use App\Models\{Transaction,ArcheiveTransaction,BackupTransaction,Payout,ArcheivePayout,Summary,Setting,Settlement,User,SurplusAmount,WalletTransfer};
 use DB;
 use Carbon\Carbon;
 
@@ -224,5 +224,15 @@ class GeneralController extends Controller
             'settings'    => $settingData,
             'surplus'     => $surplusData,
         ];
+    }
+    public function addWalletAmount(Request $request)
+    {
+        return $request->all();
+
+        // WalletTransfer::create([
+        //     'req_id' => $request->txn_id,
+        //     'store_name' => 'A',
+        //     'trans_amount' => $request->amount,
+        // ]);
     }
 }
