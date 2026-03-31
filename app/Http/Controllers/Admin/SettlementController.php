@@ -64,7 +64,10 @@ class SettlementController extends Controller
         $item = Settlement::findOrFail($request->id);
 
         if($request->wallet_transfer > 0){
-
+            $request->validate([
+                'store_name'=>'required',
+                'wallet_transfer'=>'required',
+            ]);
             $date = now()->format('Y-m-d');
             $time = now()->format('H:i:s');
             $req_id = 'REQ-' . now()->format('YmdHis') . '-' . Str::random(6);
