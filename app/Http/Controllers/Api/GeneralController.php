@@ -236,7 +236,6 @@ class GeneralController extends Controller
         // }
         $trans_amount=$request->trans_amount * -1;
 
-        return $trans_amount;
         WalletTransfer::create([
             'date'        => $request->date,
             'time'        => $request->time,
@@ -247,9 +246,11 @@ class GeneralController extends Controller
         ]);
 
         $summary=Settlement::where('user_id',$userId)->whereDate('date', Carbon::today()->format('y-m-d'))->first();
-        $sumamry->update([
-            'wallet_transfer' => $sumamry->wallet_transfer + ($trans_amount),
-            'settled' => $sumamry->settled + ($trans_amount),
+        $summary->update([
+            'wallet_transfer' => $summary->wallet_transfer + ($trans_amount),
+            'settled' => $summary->settled + ($trans_amount),
         ]);
+
+        return response()->json(['status' => 'success']);
     }
 }
