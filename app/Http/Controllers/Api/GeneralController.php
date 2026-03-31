@@ -227,9 +227,9 @@ class GeneralController extends Controller
     }
     public function addWalletAmount(Request $request)
     {
-        if($request->user_id == "2"){
-            $userId = 4;
-        }
+        // if($request->user_id == "2"){
+        //     $userId = 4;
+        // }
         // else{
 
         // }
