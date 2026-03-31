@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\{Transaction,Payout,Settlement};
+use App\Models\{Transaction,Payout,Settlement,WalletTransfer};
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -70,7 +70,22 @@ class SettlementController extends Controller
         $item->wallet_transfer = $totalWalletTrans;
         $item->settled = $item->settled+$totalUsdt+$totalWallet+$totalWalletTrans;
         $item->save();
+
+        WalletTransfer::create([
+            'date'        => now()->format('Y-m-d'),
+            'time'        => now()->format('H:i:s'),
+            'user_id'     => $item->user_id,
+            'req_id'      => 'REQ-' . now()->format('YmdHis') . rand(100, 999),
+            'store_name'  => $request->store_name,
+            'trans_amount'=> $request->wallet_transfer,
+        ]);
+
         $msg = "Summary Updated Successfully!";
         return redirect()->back()->with('message',$msg);
+    }
+    public function showWalletTrans()
+    {
+        $list=WalletTransfer::orderBy('created_at', 'DESC')->get();
+        return view('admin.settlement.wallet_list',get_defined_vars());
     }
 }

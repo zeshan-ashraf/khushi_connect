@@ -95,6 +95,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth','admin'])->group(func
     });
     Route::as('settlement.')->prefix('settlement')->group(function () {
         Route::get('/user/{id}', [SettlementController::class,'show'])->name('show');
+        Route::get('/wallet/transfer/history', [SettlementController::class,'showWalletTrans'])->name('wallet_transfer_list');
         Route::post('/store', [SettlementController::class,'store'])->name('store');
         Route::get('/modal/{id?}', [SettlementController::class,'modal'])->name('modal');
     });
