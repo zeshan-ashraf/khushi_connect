@@ -7,6 +7,8 @@ use App\Models\{Transaction,Payout,Settlement,WalletTransfer};
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Str;
 
 class SettlementController extends Controller
 {
@@ -60,6 +62,43 @@ class SettlementController extends Controller
             'usdt'=>'required',
         ]);
         $item = Settlement::findOrFail($request->id);
+
+        if($request->wallet_transfer > 0){
+
+            $date = now()->format('Y-m-d');
+            $time = now()->format('H:i:s');
+            $req_id = 'REQ-' . now()->format('YmdHis') . '-' . Str::random(6);
+            if($request->store_name == "Monotech"){
+                $url = 'https://monotech.pk/api/add-wallet-transfer-amount';
+            }else{
+                $url = 'https://novapay.pk/api/add-wallet-transfer-amount';
+            }
+            $response = Http::timeout(10)->post($url, [
+                'date'        => $date,
+                'time'        => $time,
+                'user_id'     => $item->user_id,
+                'req_id'      => $req_id,
+                'store_name'  => $request->store_name,
+                'from_store_name' => "Khushi Connect",
+                'trans_amount'=> $request->wallet_transfer,
+            ]);
+    
+            $result = $response->json();
+
+            if ($result['status'] == 'success') {
+
+                WalletTransfer::create([
+                    'date'        => now()->format('Y-m-d'),
+                    'time'        => now()->format('H:i:s'),
+                    'user_id'     => $item->user_id,
+                    'req_id'      => 'REQ-' . now()->format('YmdHis') . '-' . Str::random(6),
+                    'store_name'  => $request->store_name,
+                    'trans_amount'=> $request->wallet_transfer,
+                ]);
+
+            }
+        }
+        
         $totalUsdt = $item->usdt+$request->usdt;
         $totalWalletTrans = $item->wallet_transfer+$request->wallet_transfer;
         $totalWallet = $item->ep_payout+$request->ep_payout;
@@ -71,14 +110,6 @@ class SettlementController extends Controller
         $item->settled = $item->settled+$totalUsdt+$totalWallet+$totalWalletTrans;
         $item->save();
 
-        WalletTransfer::create([
-            'date'        => now()->format('Y-m-d'),
-            'time'        => now()->format('H:i:s'),
-            'user_id'     => $item->user_id,
-            'req_id'      => 'REQ-' . now()->format('YmdHis') . rand(100, 999),
-            'store_name'  => $request->store_name,
-            'trans_amount'=> $request->wallet_transfer,
-        ]);
 
         $msg = "Summary Updated Successfully!";
         return redirect()->back()->with('message',$msg);
