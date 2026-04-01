@@ -262,6 +262,7 @@
                                                                         </a>
                                                                 </div>
                                                             </td>
+                                                            @if(auth()->user()->user_role == "Super Admin" || auth()->user()->user_role == "Manager")
                                                             <td class="bg-warning">
                                                                 <div class="form-check form-switch">
                                                                     <input 
