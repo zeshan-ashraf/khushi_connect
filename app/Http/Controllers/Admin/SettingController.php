@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\{User, Summary, Setting, ScheduleSetting,SurplusAmount,Transaction,ManualPayout};
+use App\Models\{User, Summary, Setting, ScheduleSetting,SurplusAmount,Transaction,ManualPayout,Settlement};
 use Illuminate\Http\Request;
 use DB;
 
@@ -185,17 +185,100 @@ class SettingController extends Controller
     }
     public function saveSetting(Request $request)
     {
-        $setting=Setting::where('user_id',$request->id)->first();
-        $setting->easypaisa = $setting->easypaisa+$request->easypaisa;
-        $setting->jazzcash = $setting->jazzcash+$request->jazzcash;
-        $setting->payout_balance = $setting->easypaisa+$setting->jazzcash;
+        $userid = auth()->user()->id;
+        $targetUserId = ($userid == 9) ? $userid : $request->id;
+        
+        // Calculate unsettled_amount_balance
+        $prevBal = Settlement::where('user_id', $targetUserId)->whereDate('date', today()->subDay())->value('closing_bal') ?? 0;
+        $settlement = Settlement::where('user_id', $targetUserId)->whereDate('date', today())->first();
+        
+        if (!$settlement) {
+            if ($request->ajax()) {
+                return response()->json(['error' => 'Settlement record not found for today.']);
+            }
+            return redirect()->back()->with('error', 'Settlement record not found for today.');
+        }
+        
+        $client = User::find($targetUserId);
+        if (!$client) {
+            if ($request->ajax()) {
+                return response()->json(['error' => 'User not found.']);
+            }
+            return redirect()->back()->with('error', 'User not found.');
+        }
+        
+        $epPayinAmount = $settlement->ep_payin ?? 0;
+        $jcPayinAmount = $settlement->jc_payin ?? 0;
+        $epPayoutAmount = $settlement->ep_payout ?? 0;
+        $jcPayoutAmount = $settlement->jc_payout ?? 0;
+        $payinSuccess = $epPayinAmount + $jcPayinAmount;
+        $payoutSuccess = $epPayoutAmount + $jcPayoutAmount;
+        $prevUsdt = $settlement->usdt ?? 0;
+        $payinFee = $client->payin_fee ?? 0;
+        $payoutFee = $client->payout_fee ?? 0;
+        
+        // Calculate unsettled amount
+        $unsettletdAmount = $prevBal + $payinSuccess - ($payinSuccess * $payinFee + $payoutSuccess + $payoutSuccess * $payoutFee + $prevUsdt);
+        
+        // Get current assigned amount
+        $currentSetting = Setting::where('user_id', $targetUserId)->first();
+        if (!$currentSetting) {
+            if ($request->ajax()) {
+                return response()->json(['error' => 'Setting record not found.']);
+            }
+            return redirect()->back()->with('error', 'Setting record not found.');
+        }
+        
+        $currentAssignedAmount = $currentSetting->payout_balance ?? 0;
+        
+        // Calculate unsettled_amount_balance
+        $unsettledAmountBalance = $unsettletdAmount - $currentAssignedAmount;
+        
+        // Get and validate submitted amounts
+        $submittedEasypaisa = floatval($request->easypaisa ?? 0);
+        $submittedJazzcash = floatval($request->jazzcash ?? 0);
+        
+        /*
+        // Ensure submitted amounts are non-negative
+        if ($submittedEasypaisa < 0 || $submittedJazzcash < 0) {
+            $errorMsg = 'Submitted amounts cannot be negative.';
+            if ($request->ajax()) {
+                return response()->json(['error' => $errorMsg]);
+            }
+            return redirect()->back()->with('error', $errorMsg);
+        }*/
+        
+        $submittedTotal = $submittedEasypaisa + $submittedJazzcash;
+       // dd($submittedTotal,$currentSetting->easypaisa ,  $currentSetting->jazzcash,( $submittedTotal +$currentSetting->easypaisa +  $currentSetting->jazzcash),$unsettletdAmount);
+        // Validate: submitted amount should not be greater than unsettled_amount_balance
+        // Skip this validation for Admin and Super Admin
+        $userRole = auth()->user()->user_role ?? '';
+        if ($userRole !== "Admin" && $userRole !== "Super Admin" && $userRole !== "Manager") {// this couold be Client role only
+            if ( ( $submittedTotal +$currentSetting->easypaisa +  $currentSetting->jazzcash) > $unsettletdAmount) {
+                $errorMsg = 'Submitted amount (Easypaisa + Jazzcash) cannot be greater than unsettled amount balance. Available balance: ' . number_format(round($unsettledAmountBalance, 0));
+                if ($request->ajax()) {
+                    return response()->json(['error' => $errorMsg]);
+                }
+                return redirect()->back()->with('error', $errorMsg);
+            }
+        }
+        
+        $setting = $currentSetting;
+        $setting->easypaisa += $submittedEasypaisa;
+        $setting->jazzcash += $submittedJazzcash;
+        $setting->payout_balance = $setting->easypaisa + $setting->jazzcash;
         $setting->save();
         
-        $surplus=SurplusAmount::where('id','1')->first();
-        $surplus->jazzcash=$surplus->jazzcash - $request->jazzcash;
-        $surplus->easypaisa=$surplus->easypaisa - $request->easypaisa;
+        $surplus = SurplusAmount::where('id','1')->first();
+        $surplus->jazzcash -= $submittedJazzcash;
+        $surplus->easypaisa -= $submittedEasypaisa;
         $surplus->save();
-        return redirect()->back();
+        
+        $successMsg = 'Amount assigned successfully.';
+        if ($request->ajax()) {
+            return response()->json(['success' => $successMsg]);
+        }
+        return redirect()->back()->with('success', $successMsg);
     }
     public function saveScheduleSetting(Request $request)
     {
