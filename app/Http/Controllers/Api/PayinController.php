@@ -244,7 +244,7 @@ class PayinController extends Controller
                 // Update transaction status
                 $this->service->orderFinalProcess($response, $response['orderId'], 'easypaisa', $user, $transaction);
                 
-                return $this->getErrorResponse();
+                return $this->getErrorResponse($responseDesc);
             }
     
             Log::channel('payin')->error('Invalid Easypaisa response structure', [
@@ -425,7 +425,7 @@ class PayinController extends Controller
         // Update transaction status
         $this->service->orderFinalProcess($result, $result->pp_TxnRefNo, 'jazzcash', $user, $transaction);
         
-        return $this->getErrorResponse();
+        return $this->getErrorResponse($result->pp_ResponseMessage ?? 'Payment checkout cannot be processed, please try again.');
     }
 
     /**
@@ -509,12 +509,18 @@ class PayinController extends Controller
     /**
      * Get standard error response for failed payments
      */
-    private function getErrorResponse(): JsonResponse
+    private function getErrorResponse(?string $message_desc = null): JsonResponse
     {
-        return response()->json([
+        $response = [
             'status' => 'error',
             'message' => 'Payment checkout cannot be processed, please try again.',
-        ], 400);
+        ];
+
+        if ($message_desc !== null && $message_desc !== '') {
+            $response['message_description'] = $message_desc;
+        }
+
+        return response()->json($response, 400);
     }
 
     /**
