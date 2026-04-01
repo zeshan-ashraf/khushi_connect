@@ -83,10 +83,10 @@ class Kernel extends ConsoleKernel
         $schedule->command('transactions:jazzcash-recheck-status')->everyMinute();
         $schedule->command('transactions:easypaisa-recheck-status')->everyMinute();
         $schedule->command('report:generate')->everyMinute();
-        $schedule->command('transactions:archive')->dailyAt('00:15');
-        $schedule->command('transactions:backup')->dailyAt('00:30');
-        $schedule->command('payouts:archive')->daily('00:45');
-        // $schedule->command('app:recount-report-generate')->dailyAt('01:00');
+        $schedule->command('recount-report-generate')->dailyAt('01:00');
+        $schedule->command('transactions:archive')->dailyAt('02:15');
+        $schedule->command('transactions:backup')->dailyAt('02:30');
+        $schedule->command('payouts:archive')->dailyAt('02:45');
         // $event = $schedule->command('transactions:auto-fail')->everyMinute();
         // $wrapSchedule($event, 'transactions:auto-fail');
 		
