@@ -31,6 +31,7 @@ class User extends Authenticatable
         'role',
         'user_role',
         'payout_ep_fee',
+        'new_user_verification',
     ];
 
     /**

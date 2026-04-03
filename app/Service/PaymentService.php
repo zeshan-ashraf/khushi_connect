@@ -5,7 +5,8 @@ use App\Models\OrderBilling;
 use Illuminate\Support\Facades\Http;
 use GuzzleHttp\Client;
 use Carbon\Carbon;
-use App\Models\{User, Transaction, Setting, SurplusAmount};
+use App\Models\{User, Transaction, Setting, SurplusAmount, BlockedNumber};
+use Illuminate\Http\Request;
 use DateTime;
 use DateTimeZone;
 use Illuminate\Support\Facades\DB;
@@ -269,5 +270,60 @@ class PaymentService
         ]);
 
 		return null;
+    }
+
+
+     /**
+     * Create a transaction for a blocked number attempt
+     *
+     * @param Request $request
+     * @param string $paymentMethod
+     * @return Transaction
+     */
+    public function createBlockedTransaction(Request $request, string $paymentMethod): Transaction
+    {
+        $DateTime = new \DateTime();
+        $pp_TxnDateTime = $DateTime->format('YmdHis');
+        $pp_TxnRefNo = 'T'.$pp_TxnDateTime . substr(uniqid(), -5);
+
+        // Get the blocked number record to determine the reason
+        $blocked = BlockedNumber::where('phone_number', $request->phone)
+            ->where('payment_method', $paymentMethod)
+            ->first();
+
+        // Determine the blocking message based on the reason and status
+        $blockMessage = 'Number is blocked';
+        if ($blocked) {
+            if ($blocked->is_permanent) {
+                $blockMessage = 'Number is permanently blocked due to multiple violations';
+            } else {
+                // Get the specific reason for blocking
+                if ($blocked->reason && stripos($blocked->reason, 'Insufficient balance') !== false) {
+                    $blockMessage = $blocked->reason;
+                } else if ($blocked->reason && stripos($blocked->reason, 'Manual cancellation') !== false) {
+                    $blockMessage = $blocked->reason;
+                } else if ($blocked->attempt_count > 1) {
+                    $blockMessage = "Number is temporarily blocked - Attempt {$blocked->attempt_count} of 4";
+                }
+
+                // Add block duration if applicable
+                if ($blocked->block_until) {
+                    $blockMessage .= " (Blocked until " . $blocked->block_until->format('Y-m-d H:i:s') . ")";
+                }
+            }
+        }
+
+        return Transaction::create([
+            'user_id' => $request->user_model->id,
+            'txn_ref_no' => $pp_TxnRefNo,
+            'amount' => $request->amount,
+            'orderId' => $request->orderId,
+            'status' => 'blocked',
+            'txn_type' => $paymentMethod,
+            'phone' => $request->phone,
+            'url' => $request->callback_url,
+            'pp_code' => 'BLOCKED',
+            'pp_message' => $blockMessage
+        ]);
     }
 }

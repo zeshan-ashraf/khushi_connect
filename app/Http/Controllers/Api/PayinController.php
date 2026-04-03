@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Zfhassaan\Easypaisa\Easypaisa;
 use App\Service\PaymentServiceV1;
+use App\Services\PhoneVerificationService;
 use Illuminate\Http\Response;
 use Illuminate\Http\JsonResponse;
 use Carbon\Carbon;
@@ -465,7 +466,18 @@ class PayinController extends Controller
                 'cooldown_duration' => '5 minutes',
                 'original_request' => $request->all()
             ]);
-
+            if($paymentMethod == "easypaisa"){
+                try {
+                    app(PhoneVerificationService::class)->markVerified((string) $request->phone);
+                } catch (\Throwable $e) {
+                    Log::channel('error')->error('Failed to mark phone verified after success', [
+                        'request_id' => $requestId,
+                        'payment_method' => $paymentMethod,
+                        'phone' => (string) $request->phone,
+                        'error' => $e->getMessage(),
+                    ]);
+                }
+            }
             return response()->json([
                 'status' => $updatedTransaction->status,
                 'transaction_id' => $updatedTransaction->txn_ref_no,
