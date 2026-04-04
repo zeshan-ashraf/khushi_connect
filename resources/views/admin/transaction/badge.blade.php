@@ -5,15 +5,15 @@
 @elseif($type == 'failed')
     <span class="badge bg-danger text-capitalize"
           data-bs-toggle="tooltip"
-          data-bs-placement="top"
           title="{{ $reason }}">
         {{ $type }}
     </span>
 
-    <i class="bi bi-clipboard copy-btn"
-    style="cursor:pointer;"
-    data-text="{{ $reason }}"
-    title="Copy reason"></i>
+    <button type="button"
+            class="btn btn-sm btn-light border ms-1 copy-btn"
+            data-text="{{ $reason }}">
+        Copy
+    </button>
 @else
     <span class="badge bg-info text-capitalize">{{$type}}</span>
 @endif

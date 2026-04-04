@@ -213,18 +213,42 @@
     </script>
     <script>
         document.addEventListener("DOMContentLoaded", function () {
+
             document.querySelectorAll(".copy-btn").forEach(button => {
                 button.addEventListener("click", function () {
                     let text = this.getAttribute("data-text");
 
-                    navigator.clipboard.writeText(text).then(() => {
-                        this.innerText = "✅";
-                        setTimeout(() => {
-                            this.innerText = "📋";
-                        }, 1000);
-                    });
+                    // Modern method
+                    if (navigator.clipboard && window.isSecureContext) {
+                        navigator.clipboard.writeText(text).then(() => {
+                            alert("Copied!");
+                        }).catch(() => {
+                            fallbackCopy(text);
+                        });
+                    } else {
+                        fallbackCopy(text);
+                    }
                 });
             });
+
+            function fallbackCopy(text) {
+                let textarea = document.createElement("textarea");
+                textarea.value = text;
+                textarea.style.position = "fixed"; // avoid scrolling
+                document.body.appendChild(textarea);
+                textarea.focus();
+                textarea.select();
+
+                try {
+                    document.execCommand("copy");
+                    alert("Copied!");
+                } catch (err) {
+                    alert("Failed to copy");
+                }
+
+                document.body.removeChild(textarea);
+            }
+
         });
     </script>
     
