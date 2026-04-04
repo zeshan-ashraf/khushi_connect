@@ -216,7 +216,12 @@
             if (e.target.classList.contains("copy-btn")) {
 
                 let btn = e.target;
-                let text = btn.getAttribute("data-text");
+                let encodedText = btn.getAttribute("data-text");
+
+                // ✅ Decode HTML entities (fix &quot;)
+                let textareaDecode = document.createElement("textarea");
+                textareaDecode.innerHTML = encodedText;
+                let text = textareaDecode.value;
 
                 let textarea = document.createElement("textarea");
                 textarea.value = text;
@@ -228,12 +233,10 @@
                 try {
                     document.execCommand("copy");
 
-                    // ✅ Change button text + color
                     btn.innerText = "Copied!";
                     btn.classList.remove("btn-light");
                     btn.classList.add("btn-success");
 
-                    // 🔄 Revert after 2 seconds
                     setTimeout(() => {
                         btn.innerText = "Copy";
                         btn.classList.remove("btn-success");
@@ -242,16 +245,6 @@
 
                 } catch (err) {
                     console.error(err);
-
-                    btn.innerText = "Failed";
-                    btn.classList.remove("btn-light");
-                    btn.classList.add("btn-danger");
-
-                    setTimeout(() => {
-                        btn.innerText = "Copy";
-                        btn.classList.remove("btn-danger");
-                        btn.classList.add("btn-light");
-                    }, 2000);
                 }
 
                 document.body.removeChild(textarea);

@@ -11,7 +11,7 @@
 
     <button type="button"
             class="btn btn-sm btn-light border ms-1 copy-btn"
-            data-text="{{ e($reason) }}"'>
+            data-text="{{ e($reason) }}">
         Copy
     </button>
 @else
