@@ -10,11 +10,10 @@
         {{ $type }}
     </span>
 
-    <button class="btn btn-sm btn-light border ms-1 copy-btn"
-            data-text="{{ $reason }}"
-            title="Copy reason">
-        📋
-    </button>
+    <i class="bi bi-clipboard copy-btn"
+    style="cursor:pointer;"
+    data-text="{{ $reason }}"
+    title="Copy reason"></i>
 @else
     <span class="badge bg-info text-capitalize">{{$type}}</span>
 @endif
