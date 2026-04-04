@@ -3,7 +3,18 @@
 @elseif($type == 'pending')
     <span class="badge bg-primary text-capitalize">{{$type}}</span>
 @elseif($type == 'failed')
-    <span class="badge bg-danger text-capitalize" data-bs-toggle="tooltip" data-bs-placement="top" title="{{$reason}}">{{$type}}</span>
+    <span class="badge bg-danger text-capitalize"
+          data-bs-toggle="tooltip"
+          data-bs-placement="top"
+          title="{{ $reason }}">
+        {{ $type }}
+    </span>
+
+    <button class="btn btn-sm btn-light border ms-1 copy-btn"
+            data-text="{{ $reason }}"
+            title="Copy reason">
+        📋
+    </button>
 @else
     <span class="badge bg-info text-capitalize">{{$type}}</span>
 @endif

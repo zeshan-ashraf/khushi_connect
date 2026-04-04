@@ -2,6 +2,7 @@
 @section('title', 'Payin')
 @push('css')
     <link rel="stylesheet" href="{{ asset('admin/assets/dashboard/css/dataTables.bootstrap4.min.css') }}" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
 @endpush
 @section('content')
     <div class="app-content content ">
@@ -207,6 +208,22 @@
                 error: function(xhr) {
                     alert('Error: ' + (xhr.responseJSON?.message || 'Failed to mark transaction for reversal'));
                 }
+            });
+        });
+    </script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            document.querySelectorAll(".copy-btn").forEach(button => {
+                button.addEventListener("click", function () {
+                    let text = this.getAttribute("data-text");
+
+                    navigator.clipboard.writeText(text).then(() => {
+                        this.innerText = "✅";
+                        setTimeout(() => {
+                            this.innerText = "📋";
+                        }, 1000);
+                    });
+                });
             });
         });
     </script>
