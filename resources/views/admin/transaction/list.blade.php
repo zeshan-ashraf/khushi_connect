@@ -212,44 +212,30 @@
         });
     </script>
     <script>
-        document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("click", function (e) {
+    if (e.target.classList.contains("copy-btn")) {
 
-            document.querySelectorAll(".copy-btn").forEach(button => {
-                button.addEventListener("click", function () {
-                    let text = this.getAttribute("data-text");
+        let text = e.target.getAttribute("data-text");
+        console.log("Copying:", text); // DEBUG
 
-                    // Modern method
-                    if (navigator.clipboard && window.isSecureContext) {
-                        navigator.clipboard.writeText(text).then(() => {
-                            alert("Copied!");
-                        }).catch(() => {
-                            fallbackCopy(text);
-                        });
-                    } else {
-                        fallbackCopy(text);
-                    }
-                });
-            });
+        let textarea = document.createElement("textarea");
+        textarea.value = text;
+        document.body.appendChild(textarea);
 
-            function fallbackCopy(text) {
-                let textarea = document.createElement("textarea");
-                textarea.value = text;
-                textarea.style.position = "fixed"; // avoid scrolling
-                document.body.appendChild(textarea);
-                textarea.focus();
-                textarea.select();
+        textarea.select();
+        textarea.setSelectionRange(0, 99999); // mobile support
 
-                try {
-                    document.execCommand("copy");
-                    alert("Copied!");
-                } catch (err) {
-                    alert("Failed to copy");
-                }
+        try {
+            document.execCommand("copy");
+            alert("Copied!");
+        } catch (err) {
+            alert("Copy failed");
+            console.error(err);
+        }
 
-                document.body.removeChild(textarea);
-            }
-
-        });
-    </script>
+        document.body.removeChild(textarea);
+    }
+});
+</script>
     
 @endpush
