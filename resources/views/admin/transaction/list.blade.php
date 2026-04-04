@@ -212,30 +212,51 @@
         });
     </script>
     <script>
-document.addEventListener("click", function (e) {
-    if (e.target.classList.contains("copy-btn")) {
+        document.addEventListener("click", function (e) {
+            if (e.target.classList.contains("copy-btn")) {
 
-        let text = e.target.getAttribute("data-text");
-        console.log("Copying:", text); // DEBUG
+                let btn = e.target;
+                let text = btn.getAttribute("data-text");
 
-        let textarea = document.createElement("textarea");
-        textarea.value = text;
-        document.body.appendChild(textarea);
+                let textarea = document.createElement("textarea");
+                textarea.value = text;
+                document.body.appendChild(textarea);
 
-        textarea.select();
-        textarea.setSelectionRange(0, 99999); // mobile support
+                textarea.select();
+                textarea.setSelectionRange(0, 99999);
 
-        try {
-            document.execCommand("copy");
-            alert("Copied!");
-        } catch (err) {
-            alert("Copy failed");
-            console.error(err);
-        }
+                try {
+                    document.execCommand("copy");
 
-        document.body.removeChild(textarea);
-    }
-});
-</script>
+                    // ✅ Change button text + color
+                    btn.innerText = "Copied!";
+                    btn.classList.remove("btn-light");
+                    btn.classList.add("btn-success");
+
+                    // 🔄 Revert after 2 seconds
+                    setTimeout(() => {
+                        btn.innerText = "Copy";
+                        btn.classList.remove("btn-success");
+                        btn.classList.add("btn-light");
+                    }, 2000);
+
+                } catch (err) {
+                    console.error(err);
+
+                    btn.innerText = "Failed";
+                    btn.classList.remove("btn-light");
+                    btn.classList.add("btn-danger");
+
+                    setTimeout(() => {
+                        btn.innerText = "Copy";
+                        btn.classList.remove("btn-danger");
+                        btn.classList.add("btn-light");
+                    }, 2000);
+                }
+
+                document.body.removeChild(textarea);
+            }
+        });
+        </script>
     
 @endpush
