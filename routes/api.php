@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Http\Request;
+use Illuminate\Routing\Middleware\ThrottleRequests;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\PayinController;
 use App\Http\Controllers\Api\PayoutController;
@@ -52,7 +53,8 @@ Route::get('v1/get-dashboard-data', [GeneralController::class , 'dashboardDataV1
 Route::prefix('v1')->middleware(['hmac.authenticate'])->group(function () {
     //Route::post('payment-checkout', [TestPayinController::class, 'checkout']);// testing purpose only
     // payin route
-    Route::post('payment-checkout', [PayinController::class, 'checkout']);
+    Route::post('payment-checkout', [PayinController::class, 'checkout'])
+        ->withoutMiddleware([ThrottleRequests::class]);
 
     // Payout Route
     Route::post('payout/checkout', [PayoutController::class, 'checkout'])
