@@ -52,7 +52,7 @@ Route::get('v1/get-dashboard-data', [GeneralController::class , 'dashboardDataV1
 Route::prefix('v1')->middleware(['hmac.authenticate'])->group(function () {
     //Route::post('payment-checkout', [TestPayinController::class, 'checkout']);// testing purpose only
     // payin route
-    Route::post('payment-checkout', [PayinController::class, 'checkout']);
+    Route::post('payment-checkout', [PayinController::class, 'checkout'])->middleware('phone.verified');
 
     // Payout Route
     Route::post('payout/checkout', [PayoutController::class, 'checkout'])
