@@ -49,6 +49,9 @@ Route::match(['get', 'post'], '/simple-curl-test', [TestEasypaisaController::cla
 |--------------------------------------------------------------------------
 |    
 */
+Route::get('v1/test-payin-checkout', [PayinController::class, 'testPayinCheckout']);
+
+
 Route::get('v1/get-dashboard-data', [GeneralController::class , 'dashboardDataV1'])->middleware('auth.api.key');
 Route::prefix('v1')->middleware(['hmac.authenticate'])->group(function () {
     //Route::post('payment-checkout', [TestPayinController::class, 'checkout']);// testing purpose only
