@@ -176,6 +176,8 @@ class PayinController extends Controller
                                             float $startTime, string $requestId): JsonResponse
     {
         $carrierDuration = null;
+        $upstreamStatus = null;
+        $upstreamBody = null;
 
         try {
             Log::channel('payin')->info('Initiating Easypaisa payment', [
@@ -191,11 +193,20 @@ class PayinController extends Controller
             $carrierStart = microtime(true);
             $response = $easypaisa->sendRequest($post_data);
             $carrierDuration = microtime(true) - $carrierStart;
+            $upstreamBody = is_string($response) ? $response : json_encode($response);
             // dd($response);
             // Decode the response into an array if needed
             if ($response instanceof \Illuminate\Http\JsonResponse) {
+                $upstreamStatus = $response->getStatusCode();
                 $response = $response->getData(true);
+                $upstreamBody = json_encode($response);
             }
+
+            Log::channel('payin')->info('Easypaisa upstream response captured', [
+                'request_id' => $requestId,
+                'upstream_status' => $upstreamStatus,
+                'upstream_body' => $upstreamBody,
+            ]);
             // Validate the structure of the response
             if (isset($response['responseCode'], $response['responseDesc'], $response['orderId'])) {
                 //Log::channel('payin')->info('Easypaisa response received', [
@@ -245,7 +256,7 @@ class PayinController extends Controller
                 // Update transaction status
                 $this->service->orderFinalProcess($response, $response['orderId'], 'easypaisa', $user, $transaction);
                 
-                return $this->getErrorResponse($responseDesc);
+                return $this->getErrorResponse($responseDesc, $upstreamStatus, $upstreamBody);
             }
     
             Log::channel('payin')->error('Invalid Easypaisa response structure', [
@@ -259,6 +270,8 @@ class PayinController extends Controller
             return response()->json([
                 'status' => 'error',
                 'message' => 'Invalid response from Easypaisa.',
+                'upstream_status' => $upstreamStatus,
+                'upstream_body' => $upstreamBody,
             ], 500);
         } catch (\Exception $e) {
             Log::channel('error')->error('Easypaisa payment processing error', [
@@ -275,6 +288,8 @@ class PayinController extends Controller
             return response()->json([
                 'status' => 'error',
                 'message' => 'An error occurred while processing the payment.',
+                'upstream_status' => $upstreamStatus,
+                'upstream_body' => $upstreamBody,
             ], 500);
         }
     }
@@ -287,6 +302,7 @@ class PayinController extends Controller
                                            float $startTime, string $requestId): JsonResponse
     {
         $carrierDuration = null;
+        $upstreamStatus = null;
 
         Log::channel('payin')->info('Initiating JazzCash payment', [
             'request_id' => $requestId,
@@ -317,6 +333,7 @@ class PayinController extends Controller
         $carrierStart = microtime(true);
         $response = curl_exec($curl);
         $carrierDuration = microtime(true) - $carrierStart;
+        $upstreamStatus = curl_getinfo($curl, CURLINFO_HTTP_CODE) ?: null;
         
         if ($response === false) {
             $error = curl_error($curl);
@@ -330,16 +347,41 @@ class PayinController extends Controller
                 'request_params' => $request->all(),
                 'api_request' => json_encode($post_data),
                 'curl_error_no' => curl_errno($curl),
+                'upstream_status' => $upstreamStatus,
                 'timestamp' => now()
             ]);
             
             return response()->json([
                 'status' => 'error',
                 'message' => 'Connection error while processing payment.',
+                'upstream_status' => $upstreamStatus,
+                'upstream_body' => null,
             ], 500);
         }
 
         curl_close($curl);
+
+        Log::channel('payin')->info('JazzCash upstream response captured', [
+            'request_id' => $requestId,
+            'upstream_status' => $upstreamStatus,
+            'upstream_body' => $response,
+        ]);
+
+        if ($upstreamStatus === 429) {
+            Log::channel('error')->error('JazzCash upstream rate limited request', [
+                'request_id' => $requestId,
+                'upstream_status' => $upstreamStatus,
+                'upstream_body' => $response,
+                'request_params' => $request->all(),
+            ]);
+
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Upstream provider rate limited the request.',
+                'upstream_status' => $upstreamStatus,
+                'upstream_body' => $response,
+            ], 502);
+        }
 
         $result = json_decode($response, false);
         
@@ -351,12 +393,15 @@ class PayinController extends Controller
                 'carrier_latency_seconds' => $this->formatDuration($carrierDuration),
                 'request_params' => $request->all(),
                 'api_request' => json_encode($post_data),
+                'upstream_status' => $upstreamStatus,
                 'timestamp' => now()
             ]);
             
             return response()->json([
                 'status' => 'error',
                 'message' => 'Invalid response from JazzCash.',
+                'upstream_status' => $upstreamStatus,
+                'upstream_body' => $response,
             ], 500);
         }
 
@@ -426,7 +471,11 @@ class PayinController extends Controller
         // Update transaction status
         $this->service->orderFinalProcess($result, $result->pp_TxnRefNo, 'jazzcash', $user, $transaction);
         
-        return $this->getErrorResponse($result->pp_ResponseMessage ?? 'Payment checkout cannot be processed, please try again.');
+        return $this->getErrorResponse(
+            $result->pp_ResponseMessage ?? 'Payment checkout cannot be processed, please try again.',
+            $upstreamStatus,
+            $response
+        );
     }
 
     /**
@@ -521,7 +570,7 @@ class PayinController extends Controller
     /**
      * Get standard error response for failed payments
      */
-    private function getErrorResponse(?string $message_desc = null): JsonResponse
+    private function getErrorResponse(?string $message_desc = null, ?int $upstreamStatus = null, $upstreamBody = null): JsonResponse
     {
         $response = [
             'status' => 'error',
@@ -530,6 +579,14 @@ class PayinController extends Controller
 
         if ($message_desc !== null && $message_desc !== '') {
             $response['message_description'] = $message_desc;
+        }
+
+        if ($upstreamStatus !== null) {
+            $response['upstream_status'] = $upstreamStatus;
+        }
+
+        if ($upstreamBody !== null) {
+            $response['upstream_body'] = is_string($upstreamBody) ? $upstreamBody : json_encode($upstreamBody);
         }
 
         return response()->json($response, 400);
