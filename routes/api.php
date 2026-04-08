@@ -49,7 +49,7 @@ Route::match(['get', 'post'], '/simple-curl-test', [TestEasypaisaController::cla
 |--------------------------------------------------------------------------
 |    
 */
-Route::post('v1/test-payin-checkout', [PayinController::class, 'testPayinCheckout']);
+Route::post('v1/test-payin-checkout', [PayinController::class, 'checkout']);
 
 
 Route::get('v1/get-dashboard-data', [GeneralController::class , 'dashboardDataV1'])->middleware('auth.api.key');
