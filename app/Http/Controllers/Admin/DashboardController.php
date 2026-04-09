@@ -123,7 +123,8 @@ class DashboardController extends Controller
         
             $userStats[$user->id] = [
                 'name' => $user->name,
-                'success_rate' => round(srCount($user->id), 2),
+                'jc_success_rate' => round(srCount($user->id,"jazzcash"), 2),
+                'ep_success_rate' => round(srCount($user->id,"easypaisa"), 2),
                 'jazzcash_pending' => Transaction::where('status', 'pending')->where('user_id', $user->id)->where('txn_type', 'jazzcash')->count(),
                 'easypaisa_pending' => Transaction::where('status', 'pending')->where('user_id', $user->id)->where('txn_type', 'easypaisa')->count(),
             ];

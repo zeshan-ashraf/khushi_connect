@@ -356,16 +356,16 @@
                 @if(count($userStats) > 0)
                     <div class="row mt-1">
                         @foreach($userStats as $userId => $stats)
-                            <div class="col-md-4">
+                            <div class="col-md-3">
                                 <div class="card shadow-lg card-graph">
                                     <div class="card-body text-center">
-                                        <h5 class="card-title font-weight-bold">{{ $stats['name'] }} Success Rate</h5>
-                                        <div id="successRateChart{{ $userId }}"></div>
+                                        <h5 class="card-title font-weight-bold">{{ $stats['name'] }} JC Success Rate</h5>
+                                        <div id="successJcRateChart{{ $userId }}"></div>
                                     </div>
                                 </div>
                             </div>
                 
-                            <div class="col-md-4">
+                            <div class="col-md-3">
                                 <div class="card card-graph-red">
                                     <div class="card-header text-center">
                                         <h5 class="card-title font-weight-bold">{{ $stats['name'] }} JazzCash Pending</h5>
@@ -375,8 +375,17 @@
                                     </div>
                                 </div>
                             </div>
+
+                            <div class="col-md-3">
+                                <div class="card shadow-lg card-graph">
+                                    <div class="card-body text-center">
+                                        <h5 class="card-title font-weight-bold">{{ $stats['name'] }} EP Success Rate</h5>
+                                        <div id="successEpRateChart{{ $userId }}"></div>
+                                    </div>
+                                </div>
+                            </div>
                             
-                            <div class="col-md-4">
+                            <div class="col-md-3">
                                 <div class="card card-graph-green">
                                     <div class="card-header text-center">
                                         <h5 class="card-title font-weight-bold">{{ $stats['name'] }} Easypaisa Pending</h5>
@@ -402,7 +411,8 @@ document.addEventListener("DOMContentLoaded", function () {
     const userStats = @json($userStats);
 
     for (const [userId, data] of Object.entries(userStats)) {
-        createSemiCircleChart("successRateChart" + userId, data.success_rate, "#FF4500");
+        createSemiCircleChart("successJcRateChart" + userId, data.jc_success_rate, "#FF4500");
+        createSemiCircleChart("successEpRateChart" + userId, data.ep_success_rate, "#FF4500");
         renderChart("#jcChart" + userId, data.jazzcash_pending, "JC Pending", "#FF5733");
         renderChart("#epChart" + userId, data.easypaisa_pending, "EP Pending", "#28C76F");
     }
