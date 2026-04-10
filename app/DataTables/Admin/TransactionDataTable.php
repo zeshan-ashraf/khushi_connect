@@ -34,16 +34,16 @@ class TransactionDataTable extends DataTable
                 ';
             
                 // Show dropdown only if status is 'pending'
-                // if ($query->status == 'pending') {
-                //     $dropdown = '
-                //         <select class="form-control status-dropdown mt-1" data-id="' . $query->id . '">
-                //             <option value="pending" selected>Pending</option>
-                //             <option value="success">Success</option>
-                //             <option value="failed">Failed</option>
-                //         </select>
-                //     ';
-                //     return $inquiryButton . $dropdown;
-                // }
+                if ($query->status == 'pending') {
+                    $dropdown = '
+                        <select class="form-control status-dropdown mt-1" data-id="' . $query->id . '">
+                            <option value="pending" selected>Pending</option>
+                            <option value="success">Success</option>
+                            <option value="failed">Failed</option>
+                        </select>
+                    ';
+                    return $inquiryButton . $dropdown;
+                }
             
                 // Add Mark for Reversal button if user has permission and transaction is success
                 // if ($user && method_exists($user, 'can') && $user->can('Reverse Transactions') && $query->status == 'success') {
