@@ -112,6 +112,7 @@ class ReportGenerate extends Command
                 $PayoutFeeJC = $user->payout_fee;
                 $PayoutFeeEP = $user->payout_ep_fee;
             
+                $op_cln=($transactionSumJC + $transactionSumEP) * 0.015 + ($payoutSumJC + $payoutSumEP) * 0.0075 +  $transactionReverseHalf;
                 // Calculate balances
                 $payinBal = $closingBal + $transactionSumJC + $transactionSumEP - ($transactionSumJC * $payinFeeJC) - ($transactionSumEP * $payinFeeEP) - $transactionReverseHalf;
                 // $payinBal = $closingBal + $transactionSumEP - ($transactionSumEP * $payinFeeEP) - $transactionReverseHalf;
@@ -131,6 +132,7 @@ class ReportGenerate extends Command
                     'jc_payout' => $payoutSumJC,
                     'ep_payout' => $payoutSumEP,
                     'jc_payout_fee' => $payoutSumJC * $PayoutFeeJC,
+                    'op_cln' => $op_cln,
                     // 'ep_payout_fee' => $payoutSumEP * $PayoutFeeEP,
                     'usdt' => $sumamry->usdt,
                     'wallet_transfer' => $sumamry->wallet_transfer,
