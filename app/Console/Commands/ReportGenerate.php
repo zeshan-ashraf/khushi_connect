@@ -155,6 +155,7 @@ class ReportGenerate extends Command
                     'ep_payout' => '0',
                     'jc_payout_fee' => '0',
                     'ep_payout_fee' => '0',
+                    'op_cln' => '0',
                     'usdt' => '0',
                     'wallet_transfer' => '0',
                     'settled' => '0',
