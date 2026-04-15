@@ -308,7 +308,7 @@ class IbftController extends Controller
                 $data=$request->all();
                 $token=$this->getToken();
                 $encryptionData=$this->encryptionFunc($request->all());
-                $transactionUrl=env('JAZZCASH_MATOIBFT_URL');
+                $transactionUrl=env('JAZZCASH_MATOIBFTINQ_URL');
                 // dd($transactionUrl);
                 $curl = curl_init();
                 curl_setopt_array($curl, [
@@ -568,79 +568,5 @@ class IbftController extends Controller
         $decryptedData = openssl_decrypt($binaryData, 'AES-128-CBC', $decryptionKey, OPENSSL_RAW_DATA, $iv);
         
         return $decryptedData;
-    }
-    public function login(Request $request)
-    {
-        // dd($request->LoginPayload);
-        $clientId = env('EASYPAY_CLIENT_ID');
-        $clientSecret = env('EASYPAY_CLIENT_SECRET');
-        $channel = env('EASYPAY_CHANNEL');
-        
-        $url = env('EASYPAY_LOGIN_URL');
-        $curl = curl_init();
-    
-        curl_setopt_array($curl, [
-            CURLOPT_URL => $url,
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_ENCODING => '',
-            CURLOPT_MAXREDIRS => 10,
-            CURLOPT_TIMEOUT => 0,
-            CURLOPT_FOLLOWLOCATION => true,
-            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-            CURLOPT_CUSTOMREQUEST => 'POST',
-            CURLOPT_POSTFIELDS => '{
-            "LoginPayload":"nfVaWB2QHW7noV79uxM7zgiWwggpVgPBtK66TNsACut62Ggz/RG8aCPA2pe/aO5qyKMvG0z3fhz+7TkYhk6IQigCkjW8DqMyhMVrYzvftHJe7kA+g3NHg5eHIVDEU/aGO3V0xCqEyxLO4FF3IebWTLohQosVmIRDMnSVE5vl5AAQdDByeWr6KeM9KRarfz6/Ty/PNQ23x3E7MSXjmTAMMh6bf/db1zJNiJYAWC6M4I/Y62DkmRitKml7X6s3a2sRD4j511n/J46I3uszdnEU0hZiMtZFENuoK8ummlm2lLQY4bpT56/h4brzWxjvDNDpOep6++Xw5XoxRUeSi+E2BA=="
-            }',
-            CURLOPT_HTTPHEADER => [
-                "X-IBM-Client-Id: $clientId",
-                "X-IBM-Client-Secret: $clientSecret",
-                "X-Channel: $channel",
-                'Content-Type: application/json',
-            ],
-        ]);
-    
-        $response = curl_exec($curl);
-        $data=json_decode($response, true);
-        $timeStamp=$data['Timestamp'];
-        // return $timeStamp;
-        // dd($timeStamp);
-        $xHashValue=$this->getXHashValue($timeStamp);
-        dd($xHashValue);
-    }
-    public function testJc(Request $request)
-    {
-        $data=$request->all();
-        // dd($data);
-        $token=$this->getToken();
-        // dd($token);
-        $encryptionData=$this->encryptionFunc($request->all());
-        $transactionUrl=env('JAZZCASH_MATOIBFTINQ_URL');
-        dd($transactionUrl);
-        $curl = curl_init();
-        curl_setopt_array($curl, [
-            CURLOPT_URL => $transactionUrl,
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_ENCODING => '',
-            CURLOPT_MAXREDIRS => 10,
-            CURLOPT_TIMEOUT => 0,
-            CURLOPT_FOLLOWLOCATION => true,
-            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-            CURLOPT_CUSTOMREQUEST => 'POST',
-            CURLOPT_POSTFIELDS => json_encode([
-                "data" => $encryptionData,
-            ]),
-            CURLOPT_HTTPHEADER => [
-                'Accept: application/json',
-                'Content-Type: application/json',
-                "Authorization: Bearer $token",
-            ],
-        ]);
-        
-        $response = curl_exec($curl);
-        curl_close($curl);
-        $decodeData=json_decode($response, true);
-        $decrptionData=$this->decrytionFunc($decodeData['data']);
-        $data2=json_decode($decrptionData, true);
-        dd($data,$data2);
     }
 }
