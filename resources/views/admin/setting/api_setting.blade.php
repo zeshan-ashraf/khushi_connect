@@ -170,6 +170,8 @@
                                                 <th>#</th>
                                                 <th>Client Name</th>
                                                 <th>New User Verification</th>
+                                                <th>Max Amount</th>
+                                                <th>Action</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -191,6 +193,26 @@
                                                                 </span>
                                                             </label>
                                                         </div>
+                                                    </td>
+                                                    <td style="max-width: 180px;">
+                                                        <input
+                                                            type="number"
+                                                            min="1"
+                                                            step="1"
+                                                            class="form-control new-user-max-amount"
+                                                            data-user-id="{{ $item->id }}"
+                                                            value="{{ (int) ($item->new_user_max_amount ?? 0) }}"
+                                                            placeholder="Enter max amount"
+                                                        >
+                                                    </td>
+                                                    <td>
+                                                        <button
+                                                            type="button"
+                                                            class="btn btn-primary btn-sm save-new-user-verification"
+                                                            data-user-id="{{ $item->id }}"
+                                                        >
+                                                            Save
+                                                        </button>
                                                     </td>
                                                 </tr>
                                             @endforeach
@@ -325,12 +347,27 @@ $(document).ready(function () {
     $('.new-user-verification-toggle').on('change', function () {
         const toggle = $(this);
         const statusLabel = toggle.closest('.form-check').find('.status-label');
-        const userId = toggle.data('user-id');
-        const isChecked = toggle.is(':checked');
-        const previousCheckedState = !isChecked;
+        statusLabel.text(toggle.is(':checked') ? 'ON' : 'OFF');
+    });
 
-        statusLabel.text(isChecked ? 'ON' : 'OFF');
+    $('.save-new-user-verification').on('click', function () {
+        const button = $(this);
+        const userId = button.data('user-id');
+        const toggle = $('.new-user-verification-toggle[data-user-id="' + userId + '"]');
+        const maxAmountInput = $('.new-user-max-amount[data-user-id="' + userId + '"]');
+        const statusLabel = toggle.closest('.form-check').find('.status-label');
+        const isChecked = toggle.is(':checked');
+        const maxAmountValue = maxAmountInput.val();
+
+        if (!/^\d+$/.test(String(maxAmountValue)) || parseInt(maxAmountValue, 10) <= 0) {
+            toastr.error('Max amount must be an integer greater than 0.');
+            maxAmountInput.focus();
+            return;
+        }
+
+        button.prop('disabled', true);
         toggle.prop('disabled', true);
+        maxAmountInput.prop('disabled', true);
 
         $.ajax({
             url: '{{ route("admin.user.toggle_verification") }}',
@@ -341,19 +378,22 @@ $(document).ready(function () {
             contentType: 'application/json',
             data: JSON.stringify({
                 user_id: userId,
-                status: isChecked ? 1 : 0
+                status: isChecked ? 1 : 0,
+                new_user_max_amount: parseInt(maxAmountValue, 10)
             }),
             success: function (response) {
                 toastr.success(response.message || 'Updated successfully.');
             },
             error: function (xhr) {
-                toggle.prop('checked', previousCheckedState);
-                statusLabel.text(previousCheckedState ? 'ON' : 'OFF');
-                const message = xhr.responseJSON?.message || 'Unable to update New User Verification.';
+                statusLabel.text(toggle.is(':checked') ? 'ON' : 'OFF');
+                const message = xhr.responseJSON?.message || xhr.responseJSON?.errors?.new_user_max_amount?.[0] || 'Unable to update New User Verification.';
                 toastr.error(message);
             },
             complete: function () {
+                statusLabel.text(toggle.is(':checked') ? 'ON' : 'OFF');
+                button.prop('disabled', false);
                 toggle.prop('disabled', false);
+                maxAmountInput.prop('disabled', false);
             }
         });
     });

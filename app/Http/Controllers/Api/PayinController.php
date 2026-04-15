@@ -553,7 +553,7 @@ class PayinController extends Controller
                 'user_id' => $userId,
                 'cooldown_until' => now()->addMinutes(5),
                 'method' => 'cache_based',
-                'timestamp' => now()
+                'timestamp' => now(),
             ]);
         } catch (\Exception $e) {
             Log::channel('error')->error('Failed to set cooldown after successful transaction', [
@@ -562,7 +562,7 @@ class PayinController extends Controller
                 'payment_method' => $paymentMethod,
                 'user_id' => $userId,
                 'error' => $e->getMessage(),
-                'timestamp' => now()
+                'timestamp' => now(),
             ]);
         }
     }
@@ -580,7 +580,7 @@ class PayinController extends Controller
         if ($message_desc !== null && $message_desc !== '') {
             $response['message_description'] = $message_desc;
         }
-
+ 
         if ($upstreamStatus !== null) {
             $response['upstream_status'] = $upstreamStatus;
         }

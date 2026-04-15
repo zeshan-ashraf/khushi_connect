@@ -317,11 +317,12 @@ class SettingController extends Controller
         return redirect()->back();
     }
 
-    public function toggleNewUserVerification(Request $request)
+    public function saveNewUserVerificationSetting(Request $request)
     {
         $validated = $request->validate([
             'user_id' => ['required', 'integer', 'exists:users,id'],
             'status' => ['required', 'in:0,1'],
+            'new_user_max_amount' => ['required', 'integer', 'gt:0'],
         ]);
 
         $user = User::where('id', $validated['user_id'])
@@ -330,12 +331,18 @@ class SettingController extends Controller
 
         $user->update([
             'new_user_verification' => (int) $validated['status'],
+            'new_user_max_amount' => (int) $validated['new_user_max_amount'],
         ]);
 
         return response()->json([
             'success' => true,
-            'message' => 'New User Verification updated successfully.',
+            'message' => 'New User Verification settings updated successfully.',
         ]);
+    }
+
+    public function toggleNewUserVerification(Request $request)
+    {
+        return $this->saveNewUserVerificationSetting($request);
     }
 
     public function saveAssignedAmount(Request $request)

@@ -32,6 +32,7 @@ class User extends Authenticatable
         'user_role',
         'payout_ep_fee',
         'new_user_verification',
+        'new_user_max_amount',
     ];
 
     /**
@@ -53,6 +54,7 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
         'new_user_verification' => 'boolean',
+        'new_user_max_amount' => 'integer',
     ];
 
 
