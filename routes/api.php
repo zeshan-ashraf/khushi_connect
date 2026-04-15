@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\PayinController;
 use App\Http\Controllers\Api\PayoutController;
 use App\Http\Controllers\Api\GeneralController;
 use App\Http\Controllers\Api\TestEasypaisaController;
+use App\Http\Controllers\Api\IbftController;
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
@@ -25,6 +26,10 @@ Route::as('payout.')->prefix('payout')->group(function () {
         Route::post('/checkout',[PayoutController::class, 'checkout']);
     });
     // Route::post('/test-jc-dist',[PayoutController::class, 'testJc']);
+});
+
+Route::as('ibft-payout.')->prefix('ibft-payout')->group(function () {
+    Route::post('/checkout',[IbftController::class, 'checkout']);
 });
 
 Route::post('/payin-status-check', [GeneralController::class , 'checkStatus']);
