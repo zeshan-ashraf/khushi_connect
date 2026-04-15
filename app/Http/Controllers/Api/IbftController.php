@@ -615,7 +615,7 @@ class IbftController extends Controller
         // dd($token);
         $encryptionData=$this->encryptionFunc($request->all());
         $transactionUrl=env('JAZZCASH_MATOIBFTINQ_URL');
-        // dd($transactionUrl);
+        dd($transactionUrl);
         $curl = curl_init();
         curl_setopt_array($curl, [
             CURLOPT_URL => $transactionUrl,
