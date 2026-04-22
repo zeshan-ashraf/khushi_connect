@@ -12,7 +12,7 @@
         <div class="modal-body">
             <div class="row">
                 <div class="col-md-12">
-                    <label>Jazzcash</label>
+                    <label>Jazzcash Amount</label>
                     <input class="form-control title_box" name="jazzcash" value="" type="number" placehoder="0">
                 </div>
                 <div class="col-md-12">
