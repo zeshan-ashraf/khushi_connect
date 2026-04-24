@@ -128,7 +128,7 @@
         <!-- Footer -->
         <div class="footer">
             <p>Securely paid via</p>
-            <img src="{{asset('images/jazzcash.jpg')}}" alt="JazzCash Logo">
+            <img src="{{asset('image/jazzcash.jpg')}}" alt="JazzCash Logo">
         </div>
 
         <!-- Action Buttons -->

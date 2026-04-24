@@ -77,9 +77,9 @@
         <div class="card shadow card-custom">
             <div class="card-header bg-light text-center position-relative">
                 <div class="big-x text-end">X</div>
-                <img src="{{asset('images/tick.png')}}" alt="success-icon" class="success-icon">
+                <img src="{{asset('image/tick.png')}}" alt="success-icon" class="success-icon">
                 <div>
-                    <img src="{{asset('images/ep-logo-new.png')}}" alt="easypaisa-logo" class="easypaisa-logo">
+                    <img src="{{asset('image/ep-logo-new.png')}}" alt="easypaisa-logo" class="easypaisa-logo">
                 </div>
                 <h4 class="success-title mb-1">Transaction Successful</h4>
                 <p class="text-muted" style="font-size: 14px;">Your payment has been made</p>
