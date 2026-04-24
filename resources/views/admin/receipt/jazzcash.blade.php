@@ -122,7 +122,7 @@
         <div class="details-list">
             <p><strong>Fee:</strong> Rs. 0.00</p>
             <p><strong>To:</strong> {{ $item->phone }}</p>
-            <p><strong>From:</strong> Mono Tech SMC Pvt. Limited</p>
+            <p><strong>From:</strong> Khushi Connect Pvt. Limited</p>
         </div>
 
         <!-- Footer -->

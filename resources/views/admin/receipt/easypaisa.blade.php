@@ -89,7 +89,7 @@
                 <p class="text-muted mb-2">TID# {{$item->transaction_reference}}</p>
 
                 <p><strong>Company/Merchant Name:</strong></p>
-                <p class="mb-2">Mono Tech SMC Pvt. Limited</p>
+                <p class="mb-2">Khushi Connect Pvt. Limited</p>
                 <p><strong>Paid To:</strong></p>
                 <p class="mb-2">{{ $item->phone }}</p>
                 <p><strong>Amount:</strong></p>
