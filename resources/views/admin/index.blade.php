@@ -274,7 +274,7 @@
                                                                         @if($item['setting']->auto == 1) checked @endif>
                                                                 </div>
                                                             </td>
-                                                            <td class="text-red">{{ number_format($item['rev_cln']) }}</td>
+                                                            <td class="font-weight-bold text-red">{{ number_format($item['rev_cln']) }}</td>
                                                             <td>
                                                                 <a data-target="#attributeModal"
                                                                     class="btn btn-primary waves-effect waves-float waves-light open_modal" 
