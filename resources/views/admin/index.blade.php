@@ -103,7 +103,7 @@
                                 </div>
                             </div>
                             {{--<div class="@if(auth()->user()->user_role == "Super Admin" || auth()->user()->user_role == "Admin") col-md-2 @else col-md-3 @endif">
-                                <div class="card bg-success">
+                                <div class="card text-red">
                                     <div class="card-body pb-50">
                                         <h5 class="text-white">No of Sub Stores: <span class="fw-bolder" style="font-size:20px">{{ $sub_stores }}</span> </h5>
                                     </div>
@@ -274,7 +274,7 @@
                                                                         @if($item['setting']->auto == 1) checked @endif>
                                                                 </div>
                                                             </td>
-                                                            <td class="bg-success">{{ number_format($item['rev_cln']) }}</td>
+                                                            <td class="text-red">{{ number_format($item['rev_cln']) }}</td>
                                                             <td>
                                                                 <a data-target="#attributeModal"
                                                                     class="btn btn-primary waves-effect waves-float waves-light open_modal" 
@@ -310,7 +310,7 @@
                                                             <td class="bg-gray font-weight-bold">{{ number_format($totals['assigned_ep']) }}</td>
                                                             <td class="bg-gray font-weight-bold">{{ number_format($totals['assigned_payout']) }}</td>
                                                             <td colspan="3" class="bg-warning font-weight-bold">{{ number_format($totals['unsettled_amount_balance']) }}</td>
-                                                            <td class="font-weight-bold bg-success">{{ number_format($totals['total_rev_cln']) }}</td>
+                                                            <td class="font-weight-bold text-red">{{ number_format($totals['total_rev_cln']) }}</td>
                                                         </tr>
                                                     @endif
 
