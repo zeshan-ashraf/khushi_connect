@@ -14,6 +14,9 @@ class SearchingDataTable extends DataTable
     {
         return datatables()
             ->eloquent($query)
+            ->editColumn('user_id', function ($query) {
+                return $query->user ? $query->user->name : 'N/A';
+            })
             ->editColumn('status',function ($query){
                 $reason = $query->pp_message;
                 $type = $query->status;
@@ -161,6 +164,7 @@ class SearchingDataTable extends DataTable
     {
         return [
             ['data' => 'orderId', 'name' => 'orderId', 'title' => 'Order Id', 'orderable' => true,'searchable' => true,'width'=>30],
+            ['data' => 'user_id', 'name' => 'user_id', 'title' => 'Client', 'orderable' => true, 'searchable' => true, 'width' => 30],
             ['data' => 'transactionId', 'name' => 'transactionId', 'title' => 'Trans Id', 'orderable' => true,'searchable' => true,'width'=>30],
             ['data' => 'phone', 'name' => 'phone', 'title' => 'Phone No', 'orderable' => true,'searchable' => true,'width'=>30],
             ['data' => 'txn_ref_no', 'name' => 'txn_ref_no', 'title' => 'Trans Ref No', 'orderable' => true,'searchable' => true,'width'=>30],
