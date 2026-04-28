@@ -137,7 +137,7 @@ class ReportGenerate extends Command
                     'jc_payout_fee' => $payoutSumJC * $PayoutFeeJC,
                     'op_cln' => $op_cln,
                     'rev_cln' => $rev_cln,
-                    // 'ep_payout_fee' => $payoutSumEP * $PayoutFeeEP,
+                    'ep_payout_fee' => $payoutSumEP * $PayoutFeeEP,
                     'usdt' => $sumamry->usdt,
                     'wallet_transfer' => $sumamry->wallet_transfer,
                     'settled' => $settleAmount,
