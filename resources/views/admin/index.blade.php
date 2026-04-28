@@ -145,7 +145,7 @@
                                                 <thead>
                                                     @if(auth()->user()->user_role == "Super Admin" || auth()->user()->user_role == "Manager")
                                                     <tr class="bg-warning">
-                                                        <th colspan="@if (auth()->user()->user_role == "Super Admin") 13 @else 5 @endif"  rowspan="2">Surplus Amount Interface</th>
+                                                        <th colspan="@if (auth()->user()->user_role == "Super Admin") 12 @else 5 @endif"  rowspan="2">Surplus Amount Interface</th>
                                                         <th>JC</th>
                                                         <th>EP</th>
                                                         <th colspan="5">Action</th>
@@ -197,15 +197,13 @@
                                                         <th rowspan="2">USDT</th>
                                                         <th rowspan="2">Wallet Transfer</th>
                                                         @endif
-                                                        @if(auth()->user()->user_role == "Super Admin")
-                                                        <th rowspan="2">REV</th>
-                                                        @endif
                                                         <th rowspan="2">Unsettled (Payable)</th>
                                                         <th colspan="3">Wallet</th>
                                                         @if(auth()->user()->user_role == "Super Admin" || auth()->user()->user_role == "Manager" || auth()->user()->user_role == "Client")
                                                         <th colspan="3" rowspan="3">Balance</th>
                                                         @endif
                                                         @if(auth()->user()->user_role == "Super Admin" || auth()->user()->user_role == "Manager")
+                                                        <th rowspan="2">REV</th>
                                                         <th colspan="3" rowspan="2">USDT & Wallet</th>
                                                         @endif
                                                     </tr>
@@ -246,9 +244,6 @@
                                                                 <td>{{ number_format($item['prev_usdt']) }}</td>
                                                                 <td>{{ number_format($item['wallet_transfer']) }}</td>
                                                             @endif
-                                                            @if(auth()->user()->user_role == "Super Admin")
-                                                                <td>{{ number_format($item['rev_cln']) }}</td>
-                                                            @endif
                                                             <td class="font-weight-bold text-red">{{ number_format($item['unsettled_amount']) }}</td>
                                                             <td class="bg-gray">{{ number_format($item['assigned_amount']->jazzcash ?? 0) }}</td>
                                                             <td class="bg-gray">{{ number_format($item['assigned_amount']->easypaisa ?? 0) }}</td>
@@ -279,6 +274,7 @@
                                                                         @if($item['setting']->auto == 1) checked @endif>
                                                                 </div>
                                                             </td>
+                                                            <td>{{ number_format($item['rev_cln']) }}</td>
                                                             <td>
                                                                 <a data-target="#attributeModal"
                                                                     class="btn btn-primary waves-effect waves-float waves-light open_modal" 
