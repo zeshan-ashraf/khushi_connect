@@ -41,6 +41,7 @@ class DashboardController extends Controller
             $jcPayinAmount = $settlement->jc_payin;
             $epPayoutAmount = $settlement->ep_payout;
             $jcPayoutAmount = $settlement->jc_payout;
+            $rev_cln = $settlement->rev_cln;
             $reverseAmount = $settlement->reverse_amount ?? 0;
             // if($userId == 2 || $userId == 18){
                 $payinSuccess= $epPayinAmount + $jcPayinAmount;
@@ -77,6 +78,7 @@ class DashboardController extends Controller
                 'assigned_amount' => Setting::where('user_id', $userId)->first(),
                 'setting' => Setting::where('user_id', $userId)->first(),
                 'set_id'=> $settlement->id,
+                'rev_cln'=> $rev_cln,
             ];
         }
         $totals = [
@@ -95,6 +97,8 @@ class DashboardController extends Controller
             'assigned_jc' => 0,
             'assigned_ep' => 0,
             'assigned_payout' => 0,
+            'total_rev_cln' => 0,
+            
         ];
         
         foreach ($data as $item) {
@@ -112,6 +116,7 @@ class DashboardController extends Controller
             $totals['assigned_jc'] += $item['assigned_amount']->jazzcash ?? 0;
             $totals['assigned_ep'] += $item['assigned_amount']->easypaisa ?? 0;
             $totals['assigned_payout'] += $item['assigned_amount']->payout_balance ?? 0;
+            $totals['total_rev_cln'] += $item['rev_cln'] ?? 0;
         }
         if (in_array($currentUser->user_role, ['Super Admin', 'Manager'])) {
             $users = User::where('user_role', 'Client')->where('active', 1)->get(); // All active users

@@ -197,6 +197,9 @@
                                                         <th rowspan="2">USDT</th>
                                                         <th rowspan="2">Wallet Transfer</th>
                                                         @endif
+                                                        @if(auth()->user()->user_role == "Super Admin")
+                                                        <th rowspan="2">REV</th>
+                                                        @endif
                                                         <th rowspan="2">Unsettled (Payable)</th>
                                                         <th colspan="3">Wallet</th>
                                                         @if(auth()->user()->user_role == "Super Admin" || auth()->user()->user_role == "Manager" || auth()->user()->user_role == "Client")
@@ -243,7 +246,9 @@
                                                                 <td>{{ number_format($item['prev_usdt']) }}</td>
                                                                 <td>{{ number_format($item['wallet_transfer']) }}</td>
                                                             @endif
-                                                    
+                                                            @if(auth()->user()->user_role == "Super Admin")
+                                                                <td>{{ number_format($item['rev_cln']) }}</td>
+                                                            @endif
                                                             <td class="font-weight-bold text-red">{{ number_format($item['unsettled_amount']) }}</td>
                                                             <td class="bg-gray">{{ number_format($item['assigned_amount']->jazzcash ?? 0) }}</td>
                                                             <td class="bg-gray">{{ number_format($item['assigned_amount']->easypaisa ?? 0) }}</td>
@@ -301,6 +306,7 @@
                                                                 <td class="bg-red font-weight-bold">{{ number_format($totals['total_payout']) }}</td>
                                                                 <td class="font-weight-bold">{{ number_format($totals['prev_usdt']) }}</td>
                                                                 <td class="font-weight-bold">{{ number_format($totals['wallet_transfer']) }}</td>
+                                                                <td class="font-weight-bold">{{ number_format($totals['total_rev_cln']) }}</td>
                                                             @endif
                                                         
                                                             <td class="font-weight-bold text-red">{{ number_format($totals['unsettled_amount']) }}</td>
