@@ -22,6 +22,11 @@ class Transaction extends Model
         'status',
         'src',
         'url',
-		 'reverse_requested_at',
+		'reverse_requested_at',
     ];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class,'user_id');
+    }
 }
