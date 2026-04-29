@@ -15,7 +15,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 
 Route::as('payin.')->prefix('payin')->group(function () {
-    Route::post('/checkout',[PayinController::class, 'checkout'])->middleware(['payment.validate', 'check.blocked.numbers', 'easypaisa.limit', 'easypaisa.pending.limit','phone.verified']);
+    Route::post('/checkout',[PayinController::class, 'checkout'])->middleware(['payment.validate', 'check.blocked.numbers', 'easypaisa.limit', 'easypaisa.pending.limit','phone.verified', 'restrict.user.transaction.range']);
 });
 
 
@@ -62,7 +62,7 @@ Route::prefix('v1')->middleware(['hmac.authenticate'])->group(function () {
     //Route::post('payment-checkout', [TestPayinController::class, 'checkout']);// testing purpose only
     // payin route
     Route::post('payment-checkout', [PayinController::class, 'checkout'])
-        ->middleware('phone.verified');
+        ->middleware(['phone.verified', 'restrict.user.transaction.range']);
 /*
  * 
   Route::post('payment-checkout', [PayinController::class, 'checkout'])

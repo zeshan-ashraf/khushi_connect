@@ -79,6 +79,7 @@ class Kernel extends HttpKernel
         'easypaisa.limit' => \App\Http\Middleware\EasyPaisaLimitMiddleware::class,
         'easypaisa.pending.limit' => \App\Http\Middleware\EasypaisaPendingRequestsMiddleware::class,
 		 'phone.verified' => \App\Http\Middleware\EnsurePhoneIsVerified::class,
+        'restrict.user.transaction.range' => \App\Http\Middleware\RestrictUserTransactionRange::class,
         
     ];
 }
