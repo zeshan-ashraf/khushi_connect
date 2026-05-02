@@ -160,6 +160,88 @@
                     <div class="col-12">
                         <div class="card">
                             <div class="card-header border-bottom d-flex justify-content-between">
+                                <h4 class="card-title text-capitalize">Per-client transaction amount range</h4>
+                            </div>
+                            <div class="card-body p-0">
+                                <p class="px-2 pt-2 mb-0 small text-muted">
+                                    When restriction is ON, checkout amounts must fall between min and max (max 50,000). For EasyPaisa with New User Verification enabled, limits apply only after the payer's phone is verified; until then, the new-user max amount applies.
+                                </p>
+                                <div class="material-datatables">
+                                    <table class="table table-hover m-b-0" cellspacing="0" width="100%" style="width:100%">
+                                        <thead class="table-dark">
+                                            <tr>
+                                                <th>#</th>
+                                                <th>Client Name</th>
+                                                <th>Restriction</th>
+                                                <th>Min amount</th>
+                                                <th>Max amount</th>
+                                                <th>Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach($list as $item)
+                                                <tr>
+                                                    <td>{{ $loop->iteration }}</td>
+                                                    <td>{{ $item->name ?: $item->email }}</td>
+                                                    <td>
+                                                        <div class="form-check form-switch">
+                                                            <input
+                                                                class="form-check-input transaction-limit-toggle"
+                                                                type="checkbox"
+                                                                data-user-id="{{ $item->id }}"
+                                                                @if($item->transaction_limit_enabled) checked @endif
+                                                            >
+                                                            <label class="form-check-label">
+                                                                <span class="status-label transaction-limit-status-label">
+                                                                    {{ $item->transaction_limit_enabled ? 'ON' : 'OFF' }}
+                                                                </span>
+                                                            </label>
+                                                        </div>
+                                                    </td>
+                                                    <td style="max-width: 140px;">
+                                                        <input
+                                                            type="text"
+                                                            inputmode="numeric"
+                                                            pattern="[0-9]*"
+                                                            class="form-control transaction-amount-min"
+                                                            data-user-id="{{ $item->id }}"
+                                                            value="{{ $item->transaction_amount_min !== null ? (int) $item->transaction_amount_min : '' }}"
+                                                            placeholder="Min"
+                                                        >
+                                                    </td>
+                                                    <td style="max-width: 140px;">
+                                                        <input
+                                                            type="text"
+                                                            inputmode="numeric"
+                                                            pattern="[0-9]*"
+                                                            class="form-control transaction-amount-max"
+                                                            data-user-id="{{ $item->id }}"
+                                                            value="{{ (int) ($item->transaction_amount_max ?? 50000) }}"
+                                                            placeholder="Max"
+                                                        >
+                                                    </td>
+                                                    <td>
+                                                        <button
+                                                            type="button"
+                                                            class="btn btn-primary btn-sm save-transaction-limit"
+                                                            data-user-id="{{ $item->id }}"
+                                                        >
+                                                            Update
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mt-1">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header border-bottom d-flex justify-content-between">
                                 <h4 class="card-title text-capitalize">New User Verification</h4>
                             </div>
                             <div class="card-body p-0">
@@ -340,6 +422,82 @@ $(document).ready(function () {
             },
         });
     }
+});
+</script>
+<script>
+$(document).ready(function () {
+    $('.transaction-limit-toggle').on('change', function () {
+        const toggle = $(this);
+        const statusLabel = toggle.closest('.form-check').find('.transaction-limit-status-label');
+        statusLabel.text(toggle.is(':checked') ? 'ON' : 'OFF');
+    });
+
+    $('.save-transaction-limit').on('click', function () {
+        const button = $(this);
+        const userId = button.data('user-id');
+        const toggle = $('.transaction-limit-toggle[data-user-id="' + userId + '"]');
+        const minInput = $('.transaction-amount-min[data-user-id="' + userId + '"]');
+        const maxInput = $('.transaction-amount-max[data-user-id="' + userId + '"]');
+        const statusLabel = toggle.closest('.form-check').find('.transaction-limit-status-label');
+        const enabled = toggle.is(':checked');
+
+        if (enabled) {
+            const minStr = String(minInput.val()).trim();
+            const maxStr = String(maxInput.val()).trim();
+            if (!/^\d+$/.test(minStr) || !/^\d+$/.test(maxStr)) {
+                toastr.error('Min and max must be whole numbers (digits only).');
+                return;
+            }
+            const minVal = parseInt(minStr, 10);
+            const maxVal = parseInt(maxStr, 10);
+            if (minVal < 1 || maxVal > 50000 || minVal >= maxVal) {
+                toastr.error('Min must be at least 1, max at most 50,000, and min must be less than max.');
+                return;
+            }
+        }
+
+        button.prop('disabled', true);
+        toggle.prop('disabled', true);
+        minInput.prop('disabled', true);
+        maxInput.prop('disabled', true);
+
+        const payload = {
+            user_id: userId,
+            transaction_limit_enabled: enabled ? 1 : 0,
+        };
+        if (enabled) {
+            payload.transaction_amount_min = parseInt(String(minInput.val()).trim(), 10);
+            payload.transaction_amount_max = parseInt(String(maxInput.val()).trim(), 10);
+        }
+
+        $.ajax({
+            url: '{{ route("admin.user.transaction_limit") }}',
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+            },
+            contentType: 'application/json',
+            data: JSON.stringify(payload),
+            success: function (response) {
+                toastr.success(response.message || 'Updated successfully.');
+            },
+            error: function (xhr) {
+                statusLabel.text(toggle.is(':checked') ? 'ON' : 'OFF');
+                const message = xhr.responseJSON?.message
+                    || xhr.responseJSON?.errors?.transaction_amount_min?.[0]
+                    || xhr.responseJSON?.errors?.transaction_amount_max?.[0]
+                    || 'Unable to update transaction limits.';
+                toastr.error(message);
+            },
+            complete: function () {
+                statusLabel.text(toggle.is(':checked') ? 'ON' : 'OFF');
+                button.prop('disabled', false);
+                toggle.prop('disabled', false);
+                minInput.prop('disabled', false);
+                maxInput.prop('disabled', false);
+            }
+        });
+    });
 });
 </script>
 <script>

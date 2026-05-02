@@ -33,6 +33,9 @@ class User extends Authenticatable
         'payout_ep_fee',
         'new_user_verification',
         'new_user_max_amount',
+        'transaction_limit_enabled',
+        'transaction_amount_min',
+        'transaction_amount_max',
     ];
 
     /**
@@ -55,6 +58,9 @@ class User extends Authenticatable
         'password' => 'hashed',
         'new_user_verification' => 'boolean',
         'new_user_max_amount' => 'integer',
+        'transaction_limit_enabled' => 'boolean',
+        'transaction_amount_min' => 'integer',
+        'transaction_amount_max' => 'integer',
     ];
 
 

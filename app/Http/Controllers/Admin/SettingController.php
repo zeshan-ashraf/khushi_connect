@@ -340,6 +340,44 @@ class SettingController extends Controller
         ]);
     }
 
+    public function saveUserTransactionLimitSetting(Request $request)
+    {
+        $enabled = (int) $request->input('transaction_limit_enabled', 0) === 1;
+
+        $rules = [
+            'user_id' => ['required', 'integer', 'exists:users,id'],
+            'transaction_limit_enabled' => ['required', 'in:0,1'],
+        ];
+
+        if ($enabled) {
+            $rules['transaction_amount_min'] = ['required', 'integer', 'min:1', 'max:49999'];
+            $rules['transaction_amount_max'] = ['required', 'integer', 'min:2', 'max:50000', 'gt:transaction_amount_min'];
+        }
+
+        $validated = $request->validate($rules);
+
+        $user = User::where('id', $validated['user_id'])
+            ->where('user_role', 'client')
+            ->firstOrFail();
+
+        if ($enabled) {
+            $user->update([
+                'transaction_limit_enabled' => true,
+                'transaction_amount_min' => (int) $validated['transaction_amount_min'],
+                'transaction_amount_max' => (int) $validated['transaction_amount_max'],
+            ]);
+        } else {
+            $user->update([
+                'transaction_limit_enabled' => false,
+            ]);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Transaction limit settings updated successfully.',
+        ]);
+    }
+
     public function toggleNewUserVerification(Request $request)
     {
         return $this->saveNewUserVerificationSetting($request);
