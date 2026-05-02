@@ -163,9 +163,9 @@
                                 <h4 class="card-title text-capitalize">Per-client transaction amount range</h4>
                             </div>
                             <div class="card-body p-0">
-                                <p class="px-2 pt-2 mb-0 small text-muted">
-                                    When restriction is ON, checkout amounts must fall between min and max (max 50,000). For EasyPaisa with New User Verification enabled, limits apply only after the payer's phone is verified; until then, the new-user max amount applies.
-                                </p>
+                                <div class="alert alert-warning mx-2 mt-2 mb-0 py-2 small border-warning" role="alert">
+                                    <strong>Note.</strong> When restriction is ON, checkout amounts must fall between min and max (max 50,000). For EasyPaisa with New User Verification enabled, limits apply only after the payer's phone is verified; until then, the new-user max amount applies.
+                                </div>
                                 <div class="material-datatables">
                                     <table class="table table-hover m-b-0" cellspacing="0" width="100%" style="width:100%">
                                         <thead class="table-dark">
