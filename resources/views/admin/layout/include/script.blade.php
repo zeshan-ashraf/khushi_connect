@@ -5,6 +5,30 @@
     <!-- BEGIN: Page Vendor JS-->
     <script src="{{asset('admin/vendors/js/charts/apexcharts.min.js')}}"></script>
     <script src="{{asset('admin/vendors/js/extensions/toastr.min.js')}}"></script>
+    <script>
+        (function () {
+            if (typeof toastr === 'undefined') {
+                return;
+            }
+            toastr.options = {
+                closeButton: true,
+                debug: false,
+                newestOnTop: true,
+                progressBar: true,
+                positionClass: 'toast-top-center',
+                preventDuplicates: true,
+                showDuration: 280,
+                hideDuration: 600,
+                timeOut: 7000,
+                extendedTimeOut: 2800,
+                showEasing: 'swing',
+                hideEasing: 'linear',
+                showMethod: 'fadeIn',
+                hideMethod: 'fadeOut',
+                tapToDismiss: true,
+            };
+        })();
+    </script>
     <!-- END: Page Vendor JS-->
 
     <!-- BEGIN: Theme JS-->

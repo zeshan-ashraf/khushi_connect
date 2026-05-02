@@ -479,7 +479,7 @@ $(document).ready(function () {
             contentType: 'application/json',
             data: JSON.stringify(payload),
             success: function (response) {
-                toastr.success(response.message || 'Updated successfully.');
+                toastr.success(response.message || 'Updated successfully.', 'Saved');
             },
             error: function (xhr) {
                 statusLabel.text(toggle.is(':checked') ? 'ON' : 'OFF');
@@ -540,7 +540,7 @@ $(document).ready(function () {
                 new_user_max_amount: parseInt(maxAmountValue, 10)
             }),
             success: function (response) {
-                toastr.success(response.message || 'Updated successfully.');
+                toastr.success(response.message || 'Updated successfully.', 'Saved');
             },
             error: function (xhr) {
                 statusLabel.text(toggle.is(':checked') ? 'ON' : 'OFF');

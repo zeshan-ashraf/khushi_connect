@@ -55,7 +55,7 @@
 <!--end wrapper-->
 <script>
   @if(session('message'))
-    toastr.success("{{ session('message') }}");
+    toastr.success("{{ session('message') }}", "Success");
     @elseif(session('error'))
     toastr.error("{{ session('error') }}");
     @endif

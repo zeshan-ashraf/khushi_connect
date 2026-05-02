@@ -1,0 +1,119 @@
+/**
+ * Khushipay admin — more visible toasts (loads after ext-component-toastr.css).
+ * Success: centered “card”, stronger shadow, readable type; errors slightly clearer.
+ */
+
+#toast-container {
+  z-index: 100000 !important;
+}
+
+#toast-container.toast-top-center {
+  left: 50% !important;
+  right: auto !important;
+  transform: translateX(-50%);
+  width: auto !important;
+  max-width: calc(100vw - 1.5rem);
+  padding-top: 1.35rem;
+  pointer-events: none;
+}
+
+#toast-container.toast-top-center > div {
+  pointer-events: auto;
+}
+
+/* Success — high contrast, brand-adjacent accent */
+#toast-container > .toast.toast-success {
+  width: min(28rem, calc(100vw - 1.5rem)) !important;
+  min-height: 4.5rem;
+  padding: 1.1rem 1.35rem 1.1rem 3.65rem !important;
+  border-radius: 0.75rem !important;
+  border: 1px solid rgba(40, 199, 111, 0.35) !important;
+  border-left: 6px solid #28c76f !important;
+  background: linear-gradient(105deg, #ffffff 0%, #eefcf4 55%, #e8faf0 100%) !important;
+  box-shadow:
+    0 4px 6px rgba(40, 199, 111, 0.08),
+    0 18px 48px rgba(34, 41, 47, 0.18) !important;
+  color: #1a3328 !important;
+}
+
+#toast-container > .toast.toast-success:hover {
+  box-shadow:
+    0 6px 10px rgba(40, 199, 111, 0.12),
+    0 22px 56px rgba(34, 41, 47, 0.22) !important;
+}
+
+#toast-container > .toast.toast-success:before {
+  left: 1.1rem !important;
+  width: 2.35rem !important;
+  height: 2.35rem !important;
+  background-size: 1.2rem !important;
+  box-shadow: 0 2px 8px rgba(40, 199, 111, 0.35);
+}
+
+#toast-container > .toast.toast-success .toast-message {
+  font-size: 1.0625rem !important;
+  font-weight: 600 !important;
+  line-height: 1.5 !important;
+  color: #1a3328 !important;
+}
+
+#toast-container > .toast.toast-success .toast-title {
+  font-size: 1.125rem !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.01em;
+  color: #14854a !important;
+  margin-bottom: 0.2rem !important;
+}
+
+#toast-container > .toast.toast-success .toast-close-button {
+  color: #1a3328 !important;
+  opacity: 0.55;
+}
+
+#toast-container > .toast.toast-success .toast-close-button:hover {
+  opacity: 1;
+}
+
+#toast-container > .toast.toast-success .toast-progress {
+  height: 4px !important;
+  opacity: 1 !important;
+}
+
+/* Errors — same placement benefits, clearer frame */
+#toast-container > .toast.toast-error {
+  width: min(26rem, calc(100vw - 1.5rem)) !important;
+  border-radius: 0.75rem !important;
+  border-left: 5px solid #ea5455 !important;
+  box-shadow: 0 14px 40px rgba(234, 84, 85, 0.2), 0 4px 16px rgba(34, 41, 47, 0.12) !important;
+}
+
+#toast-container > .toast.toast-error .toast-message {
+  font-size: 1rem !important;
+  font-weight: 500 !important;
+}
+
+.dark-layout #toast-container > .toast.toast-success {
+  background: linear-gradient(105deg, #283046 0%, #243044 100%) !important;
+  border-color: rgba(40, 199, 111, 0.45) !important;
+  color: #e9fff3 !important;
+}
+
+.dark-layout #toast-container > .toast.toast-success .toast-message,
+.dark-layout #toast-container > .toast.toast-success .toast-title {
+  color: #d4ffe6 !important;
+}
+
+.dark-layout #toast-container > .toast.toast-success .toast-title {
+  color: #5ce18a !important;
+}
+
+.dark-layout #toast-container > .toast.toast-success .toast-close-button {
+  color: #e9fff3 !important;
+}
+
+@media (max-width: 480px) {
+  #toast-container.toast-top-center > div,
+  #toast-container.toast-top-center > .toast.toast-success {
+    width: calc(100vw - 1.25rem) !important;
+  }
+}

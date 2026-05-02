@@ -28,6 +28,7 @@
     <link rel="stylesheet" type="text/css" href="{{asset('admin/css/pages/dashboard-ecommerce.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('admin/css/plugins/charts/chart-apex.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('admin/css/plugins/extensions/ext-component-toastr.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('admin/assets/css/toastr-khushi-prominent.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('admin/fonts/font-awesome/css/font-awesome.css')}}">
     <!-- END: Page CSS-->
     <link rel="stylesheet" type="text/css" href="{{asset('admin/vendors/css/forms/select/select2.min.css')}}">
