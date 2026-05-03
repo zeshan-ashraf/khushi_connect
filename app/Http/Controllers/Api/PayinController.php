@@ -13,6 +13,7 @@ use Illuminate\Http\Response;
 use Illuminate\Http\JsonResponse;
 use Carbon\Carbon;
 use App\Models\{Transaction, Payout, User, BlockedNumber};
+use App\Support\RequestPayloadForLog;
 use DateTime;
 use DateTimeZone;
 
@@ -39,7 +40,7 @@ class PayinController extends Controller
         // Log all incoming request parameters
         Log::channel('payin')->info('************** Payment checkout initiated', [
             'request_id' => $requestId,
-            'request_params' => $request->all(),
+            'request_params' => RequestPayloadForLog::from($request),
             'client_ip' => $request->ip(),
             'user_agent' => $request->header('User-Agent')
         ]);
@@ -58,7 +59,7 @@ class PayinController extends Controller
                 'request_id' => $requestId,
                 'client_email' => $request->client_email,
                 'middleware_applied' => $request->attributes->get('middleware_ran', 'unknown'),
-                'request_params' => $request->all(),
+                'request_params' => RequestPayloadForLog::from($request),
             ]);
 
             return response()->json([
@@ -107,7 +108,7 @@ class PayinController extends Controller
                 'request_id' => $requestId,
                 'client_email' => $request->client_email,
                 'payment_method' => $request->payment_method,
-                'request_params' => $request->all()
+                'request_params' => RequestPayloadForLog::from($request)
             ]);*/
             
             return false;
@@ -152,7 +153,7 @@ class PayinController extends Controller
             'request_id' => $requestId,
             'client_email' => $request->client_email,
             'payment_method' => $request->payment_method,
-            'request_params' => $request->all()
+            'request_params' => RequestPayloadForLog::from($request)
         ]);*/
         
         // Get payment method details
@@ -183,7 +184,7 @@ class PayinController extends Controller
             Log::channel('payin')->info('Initiating Easypaisa payment', [
                 'request_id' => $requestId,
                 'client_email' => $request->client_email,
-                'request_params' => $request->all(),
+                'request_params' => RequestPayloadForLog::from($request),
                 'post_data' => json_encode($post_data),
                 'api_url' => $url
             ]);
@@ -214,7 +215,7 @@ class PayinController extends Controller
                 //    'order_id' => $response['orderId'],
                 //    'response_code' => $response['responseCode'],
                 //    'response_desc' => $response['responseDesc'],
-                //    'request_params' => $request->all(),
+                //    'request_params' => RequestPayloadForLog::from($request),
                 //    'api_request' => json_encode($post_data)
                 //]);
 
@@ -247,7 +248,7 @@ class PayinController extends Controller
                     'response_code' => $responseCode,
                     'response_desc' => $responseDesc,
                     'carrier_latency_seconds' => $carrierDuration !== null ? $this->formatDuration($carrierDuration) : null,
-                    'request_params' => $request->all(),
+                    'request_params' => RequestPayloadForLog::from($request),
                     'api_request' => json_encode($post_data),
                     'complete_response' => json_encode($response),
                     'timestamp' => now(),
@@ -263,7 +264,7 @@ class PayinController extends Controller
                 'request_id' => $requestId,
                 'carrier_latency_seconds' => $carrierDuration !== null ? $this->formatDuration($carrierDuration) : null,
                 'response' => json_encode($response),
-                'request_params' => $request->all(),
+                'request_params' => RequestPayloadForLog::from($request),
                 'api_request' => json_encode($post_data)
             ]);
             
@@ -279,7 +280,7 @@ class PayinController extends Controller
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
                 'carrier_latency_seconds' => $carrierDuration !== null ? $this->formatDuration($carrierDuration) : null,
-                'request_params' => $request->all(),
+                'request_params' => RequestPayloadForLog::from($request),
                 'api_request' => json_encode($post_data ?? []),
                 'api_url' => $url,
                 'timestamp' => now()
@@ -307,7 +308,7 @@ class PayinController extends Controller
         Log::channel('payin')->info('Initiating JazzCash payment', [
             'request_id' => $requestId,
             'client_email' => $request->client_email,
-            'request_params' => $request->all(),
+            'request_params' => RequestPayloadForLog::from($request),
             'post_data' => json_encode($post_data),
             'api_url' => $url
         ]);
@@ -344,7 +345,7 @@ class PayinController extends Controller
                 'error' => $error,
                 'url' => $url,
                 'carrier_latency_seconds' => $this->formatDuration($carrierDuration),
-                'request_params' => $request->all(),
+                'request_params' => RequestPayloadForLog::from($request),
                 'api_request' => json_encode($post_data),
                 'curl_error_no' => curl_errno($curl),
                 'upstream_status' => $upstreamStatus,
@@ -372,7 +373,7 @@ class PayinController extends Controller
                 'request_id' => $requestId,
                 'upstream_status' => $upstreamStatus,
                 'upstream_body' => $response,
-                'request_params' => $request->all(),
+                'request_params' => RequestPayloadForLog::from($request),
             ]);
 
             return response()->json([
@@ -391,7 +392,7 @@ class PayinController extends Controller
                 'request_id' => $requestId,
                 'raw_response' => $response,
                 'carrier_latency_seconds' => $this->formatDuration($carrierDuration),
-                'request_params' => $request->all(),
+                'request_params' => RequestPayloadForLog::from($request),
                 'api_request' => json_encode($post_data),
                 'upstream_status' => $upstreamStatus,
                 'timestamp' => now()
@@ -409,7 +410,7 @@ class PayinController extends Controller
         //    'request_id' => $requestId,
         //    'response_code' => $result->pp_ResponseCode ?? 'unknown',
         //    'transaction_ref' => $result->pp_TxnRefNo ?? 'unknown',
-        //    'request_params' => $request->all(),
+        //    'request_params' => RequestPayloadForLog::from($request),
         //    'api_request' => json_encode($post_data)
         //]);
 
@@ -461,7 +462,7 @@ class PayinController extends Controller
             'response_code' => $result->pp_ResponseCode ?? 'unknown',
             'transaction_ref' => $result->pp_TxnRefNo ?? 'unknown',
             'carrier_latency_seconds' => $this->formatDuration($carrierDuration),
-            'request_params' => $request->all(),
+            'request_params' => RequestPayloadForLog::from($request),
             'api_request' => json_encode($post_data),
             'complete_response' => json_encode($result),
             'raw_response' => $response,
@@ -513,7 +514,7 @@ class PayinController extends Controller
                 'transaction_id' => $updatedTransaction->txn_ref_no,
                 'phone_cooldown_set' => true,
                 'cooldown_duration' => '5 minutes',
-                'original_request' => $request->all()
+                'original_request' => RequestPayloadForLog::from($request)
             ]);
             if($paymentMethod == "easypaisa"){
                 try {
@@ -603,7 +604,7 @@ class PayinController extends Controller
             'trace' => $e->getTraceAsString(),
             'client_email' => $request->client_email,
             'payment_method' => $request->payment_method,
-            'request_params' => $request->all()
+            'request_params' => RequestPayloadForLog::from($request)
         ]);
         
         return response()->json([
