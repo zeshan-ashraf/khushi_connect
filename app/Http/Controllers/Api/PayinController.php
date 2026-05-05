@@ -418,6 +418,41 @@ class PayinController extends Controller
             return $this->handleSuccessfulPayment($result, $result->pp_TxnRefNo, 'jazzcash', 
                                                 $user, $transaction, $startTime, $requestId, $request, $carrierDuration);
         }
+
+        // JazzCash "157" means the transaction is still in-progress at provider side.
+        if (isset($result->pp_ResponseCode) && (string) $result->pp_ResponseCode === '157') {
+            if ($transaction instanceof Transaction) {
+                $transaction->update([
+                    'status' => 'pending',
+                    'pp_code' => (string) $result->pp_ResponseCode,
+                    'pp_message' => (string) ($result->pp_ResponseMessage ?? 'Transaction is Pending'),
+                ]);
+            }
+
+            Log::channel('payin')->info('JazzCash payment is pending', [
+                'request_id' => $requestId,
+                'execution_time' => microtime(true) - $startTime,
+                'response_code' => $result->pp_ResponseCode ?? '157',
+                'response_desc' => $result->pp_ResponseMessage ?? 'Transaction is Pending',
+                'carrier_latency_seconds' => $this->formatDuration($carrierDuration),
+                'request_params' => RequestPayloadForLog::from($request),
+                'api_request' => json_encode($post_data),
+                'complete_response' => json_encode($result),
+                'raw_response' => $response,
+                'timestamp' => now(),
+            ]);
+
+            return response()->json([
+                'status' => 'pending',
+                'transaction_id' => $transaction?->txn_ref_no ?? ($result->pp_TxnRefNo ?? null),
+                'message' => 'Payment checkout is pending.',
+                'message_description' => $result->pp_ResponseMessage ?? 'Transaction is Pending',
+                'carrier_message' => $result->pp_ResponseMessage ?? 'Transaction is Pending',
+                'carrier_code' => (string) ($result->pp_ResponseCode ?? '157'),
+                'upstream_status' => $upstreamStatus,
+                'upstream_body' => $response,
+            ], 200);
+        }
         
         // Log failed number if account doesn't exist
         /*
