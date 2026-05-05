@@ -532,6 +532,8 @@ class PayinController extends Controller
                 'status' => $updatedTransaction->status,
                 'transaction_id' => $updatedTransaction->txn_ref_no,
                 'message' => 'Payment checkout initiated successfully.',
+                'carrier_message' => $updatedTransaction->pp_message,
+                'carrier_code' => $updatedTransaction->pp_code,
             ], 200);
         }
         
@@ -631,12 +633,40 @@ class PayinController extends Controller
                 if (is_array($decoded) && array_key_exists('status', $decoded)) {
                     $logPayload['response_status'] = $decoded['status'];
                 }
+                if (is_array($decoded)) {
+                    $summary = $this->responseMessageForCompletionLog($decoded);
+                    if ($summary !== null && $summary !== '') {
+                        $logPayload['response_message'] = $summary;
+                    }
+                    $code = $decoded['carrier_code'] ?? $decoded['pp_code'] ?? null;
+                    if ($code !== null && $code !== '') {
+                        $logPayload['response_carrier_code'] = $code;
+                    }
+                }
             } catch (\Throwable $throwable) {
                 $logPayload['response_status'] = 'unavailable';
             }
         }
 
         Log::channel('payin')->info('Checkout request completed', $logPayload);
+    }
+
+    /**
+     * Prefer carrier-facing text for the completion log (Easypaisa/Jazz errors use message_description).
+     */
+    private function responseMessageForCompletionLog(array $decoded): ?string
+    {
+        if (!empty($decoded['message_description'])) {
+            return (string) $decoded['message_description'];
+        }
+        if (!empty($decoded['carrier_message'])) {
+            return (string) $decoded['carrier_message'];
+        }
+        if (!empty($decoded['message'])) {
+            return (string) $decoded['message'];
+        }
+
+        return null;
     }
 
     private function formatDuration(float $duration): float

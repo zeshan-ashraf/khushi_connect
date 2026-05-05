@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Middleware;
 
+use App\Models\User;
 use App\Services\PhoneVerificationService;
 use Closure;
 use Illuminate\Http\JsonResponse;
@@ -45,8 +46,19 @@ final class EnsurePhoneIsVerified
             return $next($request);
         }
 
-        // Optional bypass: allow specific users to skip phone verification.
+        // Resolve user model if upstream middleware did not attach it.
         $userModel = $request->user_model;
+        if (!$userModel instanceof User && $request->filled('client_email')) {
+            $email = strtolower(trim((string) $request->input('client_email')));
+            if ($email !== '') {
+                $userModel = User::query()->whereRaw('LOWER(email) = ?', [$email])->first();
+                if ($userModel instanceof User) {
+                    $request->merge(['user_model' => $userModel]);
+                }
+            }
+        }
+
+        // Optional bypass: allow specific users to skip phone verification.
         $email = $userModel ? (string) $userModel->email : (string) $request->input('client_email', '');
         $normalizedEmail = strtolower(trim($email));
 
