@@ -42,12 +42,22 @@
                                             <div class="row g-1 align-items-end">
                                                 <div class="col-xl-2 col-lg-3 col-md-4">
                                                     <div class="form-group">
+                                                        <label>Order Id</label>
+                                                        <input type="text" name="order_id"
+                                                            class="form-control"
+                                                            value="{{request()->order_id}}">
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="col-xl-2 col-lg-3 col-md-4">
+                                                    <div class="form-group">
                                                         <label>Phone</label>
                                                         <input type="text" name="phone"
                                                             class="form-control"
                                                             value="{{request()->phone}}">
                                                     </div>
                                                 </div>
+
                                                 <div class="col-xl-2 col-lg-3 col-md-4">
                                                     <div class="form-group">
                                                         <label>Transaction Id</label>
@@ -56,29 +66,7 @@
                                                             value="{{request()->transaction_Id}}">
                                                     </div>
                                                 </div>
-                                                {{--<div class="col-md-2">
-                                                    <div class="form-group">
-                                                        <label>Transaction Ref No</label>
-                                                        <input type="text" name="transaction_ref_no" id="fp-range"
-                                                            class="form-control flatpickr-range  flatpickr-input"
-                                                            value="{{request()->transaction_ref_no}}">
-                                                    </div>
-                                                </div>--}}
-                                                <div class="col-xl-2 col-lg-3 col-md-4">
-                                                    <div class="form-group">
-                                                        <label>Order Id</label>
-                                                        <input type="text" name="order_id"
-                                                            class="form-control"
-                                                            value="{{request()->order_id}}">
-                                                    </div>
-                                                </div>
-                                                <div class="col-xl-2 col-lg-3 col-md-4">
-                                                    <div class="form-group">
-                                                        <label>Date</label>
-                                                        <input type="date" name="start_date" class="form-control"
-                                                            value="{{ request()->start_date }}">
-                                                    </div>
-                                                </div>
+
                                                 <div class="col-xl-2 col-lg-3 col-md-4">
                                                     <div class="form-group">
                                                         <label>Amount</label>
@@ -86,6 +74,15 @@
                                                             value="{{ request()->amount_min }}">
                                                     </div>
                                                 </div>
+
+                                                <div class="col-xl-2 col-lg-3 col-md-4">
+                                                    <div class="form-group">
+                                                        <label>Date</label>
+                                                        <input type="date" name="start_date" class="form-control"
+                                                            value="{{ request()->start_date }}">
+                                                    </div>
+                                                </div>
+                                                
                                                 <div class="col-xl-2 col-lg-3 col-md-4 d-grid">
                                                     <button type="submit" class="btn btn-outline-primary waves-effect">
                                                         <i data-feather='search'></i>
