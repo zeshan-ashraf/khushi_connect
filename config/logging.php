@@ -190,6 +190,14 @@ return [
             'level' => env('LOG_LEVEL', 'debug'),
             'days' => 14,
         ],
+
+        'zee' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/zee-webhook.log'),
+            'level' => env('LOG_LEVEL', 'debug'),
+            'days' => 14,
+            'replace_placeholders' => true,
+        ],
     ],
 
 ];

@@ -2,6 +2,7 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Routing\Middleware\ThrottleRequests;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\PayinController;
 use App\Http\Controllers\Api\PayoutController;
@@ -13,6 +14,32 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
+/*
+|--------------------------------------------------------------------------
+| Zee webhook (experiment): logs every call and all received data
+|--------------------------------------------------------------------------
+*/
+Route::any('/zee', function (Request $request) {
+    $files = [];
+    foreach ($request->allFiles() as $key => $file) {
+        $files[$key] = is_array($file)
+            ? array_map(fn ($f) => $f->getClientOriginalName(), $file)
+            : $file->getClientOriginalName();
+    }
+
+    Log::channel('zee')->info('zee webhook', [
+        'method' => $request->method(),
+        'full_url' => $request->fullUrl(),
+        'ip' => $request->ip(),
+        'query' => $request->query(),
+        'input' => $request->all(),
+        'raw_body' => $request->getContent(),
+        'headers' => $request->headers->all(),
+        'files' => $files,
+    ]);
+
+    return response()->json(['ok' => true]);
+})->name('webhook.zee');
 
 Route::as('payin.')->prefix('payin')->group(function () {
     Route::post('/checkout',[PayinController::class, 'checkout'])->middleware(['payment.validate', 'check.blocked.numbers', 'easypaisa.limit', 'easypaisa.pending.limit','phone.verified', 'restrict.user.transaction.range']);
