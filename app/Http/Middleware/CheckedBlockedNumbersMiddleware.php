@@ -22,8 +22,9 @@ class CheckedBlockedNumbersMiddleware
     {
         $phone = $request->phone;
         $paymentMethod = $request->payment_method;
+        $paymentMethodNorm = strtolower(trim((string) ($paymentMethod ?? '')));
 
-        if ($paymentMethod === 'jazzcash' && !config('blocked_numbers.jazzcash_blocking_enabled', true)) {
+        if ($paymentMethodNorm === 'jazzcash' && !jazzcash_blocked_numbers_enabled()) {
             return $next($request);
         }
 

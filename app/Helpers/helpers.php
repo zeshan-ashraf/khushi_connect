@@ -128,3 +128,12 @@ function payoutEPFunc($id){
         ->sum('amount');
     return $epPayoutAmount;
 }
+
+/**
+ * When true, JazzCash uses blocked_numbers (middleware + automatic blocks).
+ * Uses filter_var so env/config cache string booleans still work.
+ */
+function jazzcash_blocked_numbers_enabled(): bool
+{
+    return filter_var(config('blocked_numbers.jazzcash_blocking_enabled', true), FILTER_VALIDATE_BOOLEAN);
+}
