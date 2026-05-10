@@ -470,8 +470,9 @@ class PayinController extends Controller
         }*/
         
         // Handle insufficient balance
-        if ($result->pp_ResponseCode == '999' && 
-            stripos($result->pp_ResponseMessage, $this->accountInsufficientBalanceJC) !== false) {
+        if (config('blocked_numbers.jazzcash_blocking_enabled', true)
+            && $result->pp_ResponseCode == '999'
+            && stripos($result->pp_ResponseMessage, $this->accountInsufficientBalanceJC) !== false) {
             BlockedNumber::handleInsufficientBalance(
                 $request->phone,
                 $result->pp_ResponseCode,
@@ -481,8 +482,9 @@ class PayinController extends Controller
         }
 
         // Handle manual cancellation or late mpin input
-        if ($result->pp_ResponseCode == '999' && 
-            $this->isManualCancellation($result->pp_ResponseMessage)) {
+        if (config('blocked_numbers.jazzcash_blocking_enabled', true)
+            && $result->pp_ResponseCode == '999'
+            && $this->isManualCancellation($result->pp_ResponseMessage)) {
             BlockedNumber::handleManualCancellation(
                 $request->phone,
                 $result->pp_ResponseCode,
@@ -580,6 +582,10 @@ class PayinController extends Controller
      */
     private function blockNumberAfterSuccess(string $phone, string $paymentMethod, int $userId, string $requestId): void
     {
+        if ($paymentMethod === 'jazzcash' && !config('blocked_numbers.jazzcash_blocking_enabled', true)) {
+            return;
+        }
+
         try {
             Log::channel('payin')->info("+++2.1");
             BlockedNumber::handleSuccessfulTransaction($phone, $paymentMethod, $userId);

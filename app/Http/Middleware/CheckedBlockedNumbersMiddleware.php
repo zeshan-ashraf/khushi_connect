@@ -23,6 +23,10 @@ class CheckedBlockedNumbersMiddleware
         $phone = $request->phone;
         $paymentMethod = $request->payment_method;
 
+        if ($paymentMethod === 'jazzcash' && !config('blocked_numbers.jazzcash_blocking_enabled', true)) {
+            return $next($request);
+        }
+
         if ($phone && $paymentMethod) {
             $blocked = BlockedNumber::where('phone_number', $phone)
                 ->where('payment_method', $paymentMethod)
