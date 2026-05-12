@@ -149,12 +149,11 @@
                                                     </div>
                                                 </td>
                                                 <td>
-                                                    <select name="api_version" class="form-control">
-                                                        <option value="base_version" {{ $item->api_version == 'base_version' ? 'selected' : '' }} data-user-id="{{ $item->id }}">
+                                                    <select name="api_version" class="form-control change_api_version"  data-id="{{ $item->id }}">
+                                                        <option value="base_version" {{ $item->api_version == 'base_version' ? 'selected' : '' }} >
                                                             Base Version
                                                         </option>
-
-                                                        <option value="api_v2" {{ $item->api_version == 'api_v2' ? 'selected' : '' }} data-user-id="{{ $item->id }}">
+                                                        <option value="api_v2" {{ $item->api_version == 'api_v2' ? 'selected' : '' }}>
                                                             Api v2
                                                         </option>
                                                     </select>
@@ -436,6 +435,25 @@ $(document).ready(function () {
             },
         });
     }
+    $('.change_api_version').on('change', function () {
+        const api_version = $(this).val();
+        const id = $(this).data('id');
+        $.ajax({
+            url: '{{ route("admin.setting.api.change_version") }}',
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+            },
+            contentType: 'application/json',
+            data: JSON.stringify({ id: id, api_version: api_version }),
+            success: function (response) {
+                console.log('Toggle updated:', response);
+            },
+            error: function (xhr, status, error) {
+                console.error('Error:', error);
+            },
+        });
+    });
 });
 </script>
 <script>

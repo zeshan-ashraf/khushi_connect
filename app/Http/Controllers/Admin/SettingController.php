@@ -410,4 +410,10 @@ class SettingController extends Controller
         Setting::where('user_id',$request->id)->update(['jc_assigned_value' => $request->jc_assigned_value,'ep_assigned_value'=>$request->ep_assigned_value]);
         return redirect()->back();
     }
+    public function apiVersionChange(Request $request)
+    {
+        User::where('id',$request->id)->update(['api_version' => $request->api_version]);
+        
+        return redirect()->back();
+    }
 }
