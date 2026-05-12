@@ -447,7 +447,7 @@ $(document).ready(function () {
             contentType: 'application/json',
             data: JSON.stringify({ id: id, api_version: api_version }),
             success: function (response) {
-                console.log('Toggle updated:', response);
+                toastr.success(response.message || 'Updated successfully.', 'Saved');
             },
             error: function (xhr, status, error) {
                 console.error('Error:', error);

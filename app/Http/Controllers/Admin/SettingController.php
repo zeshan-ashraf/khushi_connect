@@ -414,6 +414,9 @@ class SettingController extends Controller
     {
         User::where('id',$request->id)->update(['api_version' => $request->api_version]);
         
-        return redirect()->back();
+        return response()->json([
+            'success' => true,
+            'message' => 'Api Version settings updated successfully.',
+        ]);
     }
 }
