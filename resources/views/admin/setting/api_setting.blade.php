@@ -153,6 +153,9 @@
                                                         <option value="base_version" {{ $item->api_version == 'base_version' ? 'selected' : '' }} >
                                                             Base Version
                                                         </option>
+                                                        <option value="api_v1" {{ $item->api_version == 'api_v1' ? 'selected' : '' }}>
+                                                            Api v1
+                                                        </option>
                                                         <option value="api_v2" {{ $item->api_version == 'api_v2' ? 'selected' : '' }}>
                                                             Api v2
                                                         </option>
