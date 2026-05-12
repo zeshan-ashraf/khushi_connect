@@ -76,6 +76,7 @@
                                                 <th>Payin Easypaisa</th>
                                                 <th>Payout Jazzcash</th>
                                                 <th>Payout Easypaisa</th>
+                                                <th>Api Version</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -147,6 +148,17 @@
                                                         </label>
                                                     </div>
                                                 </td>
+                                                <td>
+                                                    <select name="api_version" class="form-control">
+                                                        <option value="base_version" {{ $item->api_version == 'base_version' ? 'selected' : '' }} data-user-id="{{ $item->id }}">
+                                                            Base Version
+                                                        </option>
+
+                                                        <option value="api_v2" {{ $item->api_version == 'api_v2' ? 'selected' : '' }} data-user-id="{{ $item->id }}">
+                                                            Api v2
+                                                        </option>
+                                                    </select>
+                                                </td>
                                             </tr>
                                             @endforeach
                                         </tbody>
@@ -175,7 +187,7 @@
                                                 <th>Restriction</th>
                                                 <th>Min amount</th>
                                                 <th>Max amount</th>
-                                                <th>Api Version</th>
+                                                
                                                 <th>Action</th>
                                             </tr>
                                         </thead>
@@ -221,17 +233,7 @@
                                                             placeholder="Max"
                                                         >
                                                     </td>
-                                                    <td>
-                                                        <select name="api_version" class="form-control">
-                                                            <option value="base_version" {{ $item->api_version == 'base_version' ? 'selected' : '' }} data-user-id="{{ $item->id }}">
-                                                                Base Version
-                                                            </option>
-
-                                                            <option value="api_v2" {{ $item->api_version == 'api_v2' ? 'selected' : '' }} data-user-id="{{ $item->id }}">
-                                                                Api v2
-                                                            </option>
-                                                        </select>
-                                                    </td>
+                                                    
                                                     <td>
                                                         <button
                                                             type="button"
