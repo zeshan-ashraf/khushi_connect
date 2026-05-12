@@ -175,6 +175,7 @@
                                                 <th>Restriction</th>
                                                 <th>Min amount</th>
                                                 <th>Max amount</th>
+                                                <th>Api Version</th>
                                                 <th>Action</th>
                                             </tr>
                                         </thead>
@@ -219,6 +220,12 @@
                                                             value="{{ (int) ($item->transaction_amount_max ?? 50000) }}"
                                                             placeholder="Max"
                                                         >
+                                                    </td>
+                                                    <td>
+                                                        <select name="api_version" class="form-control">
+                                                            <option value="base_version" {{$item->api_version == "base_version" 'selected' ? : ""}}>Base Version</option>
+                                                            <option value="api_v2" {{$item->api_version == "api_v2" 'selected' ? : ""}}>Api v2</option>
+                                                        </select>
                                                     </td>
                                                     <td>
                                                         <button

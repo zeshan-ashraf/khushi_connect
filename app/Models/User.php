@@ -36,6 +36,7 @@ class User extends Authenticatable
         'transaction_limit_enabled',
         'transaction_amount_min',
         'transaction_amount_max',
+        'api_version',
     ];
 
     /**

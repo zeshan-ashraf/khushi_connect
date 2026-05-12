@@ -345,6 +345,7 @@ class SettingController extends Controller
             'user_id' => ['required', 'integer', 'exists:users,id'],
             'status' => ['required', 'in:0,1'],
             'new_user_max_amount' => ['required', 'integer', 'gt:0'],
+            
         ]);
 
         $user = User::where('id', $validated['user_id'])
@@ -354,6 +355,7 @@ class SettingController extends Controller
         $user->update([
             'new_user_verification' => (int) $validated['status'],
             'new_user_max_amount' => (int) $validated['new_user_max_amount'],
+            
         ]);
 
         return response()->json([
@@ -369,11 +371,12 @@ class SettingController extends Controller
         $rules = [
             'user_id' => ['required', 'integer', 'exists:users,id'],
             'transaction_limit_enabled' => ['required', 'in:0,1'],
+            'api_version' => 'required',
         ];
 
         if ($enabled) {
             $rules['transaction_amount_min'] = ['required', 'integer', 'min:1', 'max:49999'];
-            $rules['transaction_amount_max'] = ['required', 'integer', 'min:2', 'max:50000', 'gt:transaction_amount_min'];
+            $rules['transaction_amount_max'] = ['required', 'integer', 'min:2', 'max:50000', 'gt:transaction_amount_min'];   
         }
 
         $validated = $request->validate($rules);
@@ -387,6 +390,7 @@ class SettingController extends Controller
                 'transaction_limit_enabled' => true,
                 'transaction_amount_min' => (int) $validated['transaction_amount_min'],
                 'transaction_amount_max' => (int) $validated['transaction_amount_max'],
+                'api_version' => $validated['api_version'],
             ]);
         } else {
             $user->update([
