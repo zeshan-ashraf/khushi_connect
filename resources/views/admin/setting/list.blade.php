@@ -33,6 +33,18 @@
                                                     </div>
                                                 </fieldset>
                                             </div>
+                                            @if(auth()->user()->user_role == "Super Admin" || auth()->user()->user_role == "Admin")
+                                            <div class="col-md-2">
+                                                <select name="client" class="form-select border-primary">
+                                                    <option value="" {{ request()->client == '' ? 'selected' : '' }}>All Clients</option>
+                                                    @foreach($users as $user)
+                                                    <option value="{{$user->id}}"
+                                                        {{ request()->client == $user->id ? 'selected' : '' }}>{{$user->name}}
+                                                    </option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                            @endif
                                             <div class="col-md-4">
                                                 <select name="txn_type" class="form-select border-primary">
                                                     <option selected disabled>Filter Type</option>
@@ -90,6 +102,7 @@
                                             <tr>
                                                 <th>#</th>
                                                 <th>Order Id</th>
+                                                <th>Client Name</th>
                                                 <th>Phone</th>
                                                 <th>Transaction Id</th>
                                                 <th>Transaction Ref No</th>
@@ -105,6 +118,7 @@
                                             <tr>
                                                 <td>{{$loop->iteration}}</td>
                                                 <td>{{$item->orderId}}</td>
+                                                <td>{{$item->user_name}}</td>
                                                 <td>{{$item->phone}}</td>
                                                 <td>{{$item->transactionId}}</td>
                                                 <td>{{$item->txn_ref_no}}</td>
