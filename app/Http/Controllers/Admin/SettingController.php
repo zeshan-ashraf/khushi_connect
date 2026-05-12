@@ -377,6 +377,7 @@ class SettingController extends Controller
         if ($enabled) {
             $rules['transaction_amount_min'] = ['required', 'integer', 'min:1', 'max:49999'];
             $rules['transaction_amount_max'] = ['required', 'integer', 'min:2', 'max:50000', 'gt:transaction_amount_min'];   
+            $rules['api_version'] = ['required'];   
         }
 
         $validated = $request->validate($rules);
