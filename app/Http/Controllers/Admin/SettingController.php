@@ -48,6 +48,15 @@ class SettingController extends Controller
 
         $unioned = $query1->unionAll($query2)->unionAll($query3);
 
+        // Get all active users for the dropdown (only for Super Admin and Admin)
+        $users = collect();
+        if (auth()->user()->user_role == "Super Admin" || auth()->user()->user_role == "Admin") {
+            $users = User::where('user_role', 'Client')
+                ->where('active', '1')
+                ->orderBy('name')
+                ->get();
+        }
+
         // Use fromSub to treat the union as a subquery
         $finalQuery = DB::query()
             ->fromSub($unioned, 'combined_transactions');
@@ -67,6 +76,7 @@ class SettingController extends Controller
             'list' => $list,
             'reverse_count' => $summary->reverse_count,
             'total_reverse_amount' => $summary->total_reverse_amount,
+            'users' => $users,
         ]);
     }
 
