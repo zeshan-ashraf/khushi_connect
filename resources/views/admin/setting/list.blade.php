@@ -18,7 +18,7 @@
                             <div class="card-body">
                                 <div>
                                     <div class="toolbar w-100">
-                                        <form action="{{ route('admin.setting.client_list') }}" method="GET"
+                                        <form action="{{ route('admin.setting.list') }}" method="GET"
                                             class="d-flex justify-content-between">
                                             <div class="col-md-4">
                                                 <fieldset>
@@ -59,7 +59,7 @@
                                             <div>
                                                 <button class="btn btn-outline-primary waves-effect me-3"
                                                     type="submit">Apply</button>
-                                                <a href="{{ route('admin.setting.client_list') }}"
+                                                <a href="{{ route('admin.setting.list') }}"
                                                     class="btn btn-outline-danger waves-effect" type="submit">Reset</a>
                                             </div>
                                         </form>
