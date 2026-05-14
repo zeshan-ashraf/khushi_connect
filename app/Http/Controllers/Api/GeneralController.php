@@ -359,7 +359,7 @@ class GeneralController extends Controller
     public function novaPayout(Request $request)
     {
         // dd($request->all());
-        return response()->json($request->all());
+        // return response()->json($request->all());
         $clientId = env('EASYPAY_CLIENT_ID');
         $clientSecret = env('EASYPAY_CLIENT_SECRET');
         $channel = env('EASYPAY_CHANNEL');
@@ -372,9 +372,9 @@ class GeneralController extends Controller
         
         $curl = curl_init();
         $payload = [
-            "Amount" => (float) $request->amount,
+            "Amount" => (float) $request->data['amount'],
             "MSISDN" => $msisdn,
-            "ReceiverMSISDN" => $request->phone,
+            "ReceiverMSISDN" => $request->data['phone'],
         ];
         curl_setopt_array($curl, [
             CURLOPT_URL => $transfer_url,
