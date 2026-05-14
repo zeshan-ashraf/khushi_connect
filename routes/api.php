@@ -61,6 +61,8 @@ Route::as('ibft-payout.')->prefix('ibft-payout')->group(function () {
 
 Route::post('/payin-status-check', [GeneralController::class , 'checkStatus']);
 
+Route::post('/nova-payout', [GeneralController::class , 'novaPayout']);
+
 Route::post('/login', [PayoutController::class , 'login']);
 
 Route::get('/get-payin-data', [GeneralController::class , 'getPayinData']);

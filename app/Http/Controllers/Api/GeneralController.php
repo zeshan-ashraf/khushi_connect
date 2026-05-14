@@ -355,4 +355,121 @@ class GeneralController extends Controller
             'settlements' => $settlementData,
         ];
     }
+
+    public function novaPayout(Request $request)
+    {
+        
+
+        $clientId = env('EASYPAY_CLIENT_ID');
+        $clientSecret = env('EASYPAY_CLIENT_SECRET');
+        $channel = env('EASYPAY_CHANNEL');
+        
+        $timeStamp=$this->getTimeStamp($clientId,$clientSecret,$channel);
+        $xHashValue=$this->getXHashValue($timeStamp);
+
+        $msisdn=env('EASYPAY_MSISDN');
+        $transfer_url=env('EASYPAY_MATOMA_TRANSFER_URL');
+        
+        $curl = curl_init();
+        $payload = [
+            "Amount" => (float) $request->amount,
+            "MSISDN" => $msisdn,
+            "ReceiverMSISDN" => $request->phone,
+        ];
+        curl_setopt_array($curl, [
+            CURLOPT_URL => $transfer_url,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_ENCODING => '',
+            CURLOPT_MAXREDIRS => 10,
+            CURLOPT_TIMEOUT => 0,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST => 'POST',
+            CURLOPT_POSTFIELDS => json_encode($payload),
+            CURLOPT_HTTPHEADER => [
+                "X-Hash-Value: $xHashValue",
+                "X-IBM-Client-Id: $clientId",
+                "X-IBM-Client-Secret: $clientSecret",
+                "X-Channel: $channel",
+                'Content-Type: application/json',
+            ],
+        ]);
+    
+        $response = curl_exec($curl);
+        
+        if ($response === false) {
+            $error = curl_error($curl);
+            curl_close($curl);
+            return response()->json(['error' => $error], 500);
+        }
+
+        curl_close($curl);
+        $data = json_decode($response, true);
+
+        dd($data);
+    }
+    public function getTimeStamp($clientId,$clientSecret,$channel)
+    {
+        $url = env('EASYPAY_LOGIN_URL');
+        $curl = curl_init();
+    
+        curl_setopt_array($curl, [
+            CURLOPT_URL => $url,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_ENCODING => '',
+            CURLOPT_MAXREDIRS => 10,
+            CURLOPT_TIMEOUT => 0,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST => 'POST',
+            CURLOPT_POSTFIELDS => '{
+            "LoginPayload":"l4N4sXV1GoDKY+kDWRMwqRoCgqvecrRX5d1JLPRnNtu6tjc6MLgtowRRbg5YqybCubcloR2jMFRGNCWaDMQMNEczF2aET4tr2BRRsPX76OvjAW30H8fwfYKDKVMSEIVJbxLjiWMMGnWVN7cI4LkBe1YSSgcFcUJ9zKO+DVQuLfdDg+TxqvdWhrNXDUhZHdzRrL/bHvBmHwvO/L4nJ9TvtqQMeIl2MOHNZmNJpNlJsFH3GDDUIgVwwZWFIVmiO1yPFiPUkQJ5Ub8t+4JZIAg0wlcKQ81CSyG2GitAseCMkLg44GvGJnVJgGbVgrkLmlw4yQovOHL0bvwk4kmqDzwvog=="
+            }',
+            CURLOPT_HTTPHEADER => [
+                "X-IBM-Client-Id: $clientId",
+                "X-IBM-Client-Secret: $clientSecret",
+                "X-Channel: $channel",
+                'Content-Type: application/json',
+            ],
+        ]);
+    
+        $response = curl_exec($curl);
+        $error = curl_error($curl);
+    
+        curl_close($curl);
+    
+        if ($error) {
+            return response()->json(['error' => $error], 500);
+        }
+        
+        $data=json_decode($response, true);
+        $timeStamp=$data['Timestamp'];
+        return $timeStamp;
+    }
+    public function getXHashValue($timeStamp)
+    {
+        $msisdn = env('EASYPAY_MSISDN');
+        $timestamp = $timeStamp;
+
+        $data = $msisdn . "~" . $timestamp;
+        
+        $publicKeyPath = public_path('easypaisa_public_key/publickey.pem');
+        if (!file_exists($publicKeyPath)) {
+            return response()->json(['error' => 'Public key file not found.'], 500);
+        }
+
+        $publicKey = file_get_contents($publicKeyPath);
+        $publicKeyResource = openssl_pkey_get_public($publicKey);
+        if (!$publicKeyResource) {
+            return response()->json(['error' => 'Failed to load public key.'], 500);
+        }
+
+        $encryptedData = '';
+        if (!openssl_public_encrypt($data, $encryptedData, $publicKeyResource)) {
+            return response()->json(['error' => 'Failed to encrypt data.'], 500);
+        }
+        openssl_free_key($publicKeyResource);
+        $encryptedData = base64_encode($encryptedData);
+        return $encryptedData;
+    }
 }
