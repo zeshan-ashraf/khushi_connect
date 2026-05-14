@@ -69,6 +69,7 @@ Route::get('/get-dashboard-data', [GeneralController::class , 'dashboardData']);
 Route::get('/get-payout-data', [GeneralController::class , 'payoutData']);
 Route::get('/get-settlement-data', [GeneralController::class , 'getSettlementData']);
 Route::post('/get-coctail-data', [GeneralController::class , 'getCocktailData']);
+Route::post('/add-coctail-settlements', [GeneralController::class , 'addCocktailSettlements']);
 Route::post('/add-surplus-from-coctail', [GeneralController::class , 'addSurplusCocktail']);
 Route::post('/add-wallet-transfer-amount', [GeneralController::class , 'addWalletAmount']);
 
