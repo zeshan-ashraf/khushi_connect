@@ -358,8 +358,7 @@ class GeneralController extends Controller
 
     public function novaPayout(Request $request)
     {
-        
-
+        dd($request->all());
         $clientId = env('EASYPAY_CLIENT_ID');
         $clientSecret = env('EASYPAY_CLIENT_SECRET');
         $channel = env('EASYPAY_CHANNEL');
