@@ -396,17 +396,39 @@ class GeneralController extends Controller
         ]);
     
         $response = curl_exec($curl);
-        
+
         if ($response === false) {
+
             $error = curl_error($curl);
+
             curl_close($curl);
-            return response()->json(['error' => $error], 500);
+
+            return response()->json([
+                'status' => false,
+                'message' => $error
+            ], 500);
         }
 
+        $httpCode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+
         curl_close($curl);
+
         $data = json_decode($response, true);
 
-        return response()->json($data);
+        if (json_last_error() !== JSON_ERROR_NONE) {
+
+            return response()->json([
+                'status' => false,
+                'message' => 'Invalid JSON response',
+                'raw_response' => $response
+            ], 500);
+        }
+
+        return response()->json([
+            'status' => true,
+            'http_code' => $httpCode,
+            'data' => $data
+        ]);
     }
     public function getTimeStamp($clientId,$clientSecret,$channel)
     {
