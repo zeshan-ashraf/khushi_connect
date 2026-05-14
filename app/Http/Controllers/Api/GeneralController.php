@@ -348,7 +348,7 @@ class GeneralController extends Controller
             ->pluck('id');
 
         $settlementData = Settlement::whereIn('user_id', $activeUserIds)
-            ->whereBetween('date', ['2026-03-01', '2026-04-29'])
+            ->whereBetween('date', ['2026-03-01', '2026-05-14'])
             ->get();
 
         return [
