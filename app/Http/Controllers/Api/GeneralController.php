@@ -406,7 +406,7 @@ class GeneralController extends Controller
         curl_close($curl);
         $data = json_decode($response, true);
 
-        dd($data);
+        return response()->json($data);
     }
     public function getTimeStamp($clientId,$clientSecret,$channel)
     {
