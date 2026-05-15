@@ -37,7 +37,7 @@ class ReportGenerate extends Command
             $sumamry= Settlement::where('user_id',$user->id)->whereDate('date', Carbon::today()->format('y-m-d'))->first();
             if($sumamry){
                 // Get yesterday's closing balance
-                $closingBal = DB::table('settlements')
+                $preClosingBal = DB::table('settlements')
                     ->where('user_id', $user->id)
                     ->whereDate('date', Carbon::today()->subDay(1)->format('y-m-d'))
                     ->value('closing_bal');
@@ -123,17 +123,26 @@ class ReportGenerate extends Command
                 $op_cln=($transactionSumJC + $transactionSumEP) * 0.015 + ($payoutSumJC + $payoutSumEP) * 0.0075 +  $transactionReverseHalf;
 
                 $rev_cln=($transactionSumJC * $payinFeeJC + $transactionSumEP * $payinFeeEP)  + ($payoutSumJC * $PayoutFeeJC + $payoutSumEP * $PayoutFeeEP) -  $op_cln;  
-
-                // Calculate balances
-                $payinBal = $closingBal + $transactionSumJC + $transactionSumEP - ($transactionSumJC * $payinFeeJC) - ($transactionSumEP * $payinFeeEP) - $transactionReverseHalf;
-                // $payinBal = $closingBal + $transactionSumEP - ($transactionSumEP * $payinFeeEP) - $transactionReverseHalf;
                 $settleAmount = $payoutSumJC + $payoutSumEP + ($payoutSumJC * $PayoutFeeJC) + ($payoutSumEP * $PayoutFeeEP) + $todayUsdt +$todayWalletTrans;
+                if($user->id == "14"){
+                    $payinBal = $payoutSumEP + ($payoutSumEP * 0.0075);
+
+                    $closingBal=$preClosingBal + $payinBal - $todayUsdt;
+                } else {
+
+                    // Calculate balances
+                    $payinBal = $preClosingBal + $transactionSumJC + $transactionSumEP - ($transactionSumJC * $payinFeeJC) - ($transactionSumEP * $payinFeeEP) - $transactionReverseHalf;
+                    $closingBal=$payinBal - $settleAmount;
+                }
+                // $payinBal = $closingBal + $transactionSumEP - ($transactionSumEP * $payinFeeEP) - $transactionReverseHalf;
             
+
+                
                 // Create a summary for the user
                 $sumamry->update([
                     'date' => Carbon::today()->format('y-m-d'),
                     'user_id' => $user->id,
-                    'opening_bal'  => $closingBal,
+                    'opening_bal'  => $preClosingBal,
                     'jc_payin' => $transactionSumJC,
                     'ep_payin' => $transactionSumEP,
                     'jc_payin_fee' => $transactionSumJC * $payinFeeJC,
@@ -149,7 +158,7 @@ class ReportGenerate extends Command
                     'usdt' => $sumamry->usdt,
                     'wallet_transfer' => $sumamry->wallet_transfer,
                     'settled' => $settleAmount,
-                    'closing_bal' => $payinBal - $settleAmount,
+                    'closing_bal' => $closingBal,
                 ]);
                 
             }
