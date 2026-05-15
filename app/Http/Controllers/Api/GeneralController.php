@@ -235,7 +235,6 @@ class GeneralController extends Controller
         
         return [
             'settlements' => $settlementData,
-            'web_name'    => "khushi",
         ];
     }
     public function addWalletAmount(Request $request)
