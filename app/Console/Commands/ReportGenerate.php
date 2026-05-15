@@ -6,6 +6,7 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 use App\Models\{Settlement,SurplusAmount,Setting,User};
+use Illuminate\Support\Facades\Http;
 
 class ReportGenerate extends Command
 {
@@ -97,13 +98,20 @@ class ReportGenerate extends Command
                     ->where('transaction_type', 'jazzcash')
                     ->whereDate('created_at', Carbon::today())
                     ->sum('amount');
-                
-                $payoutSumEP = DB::table('payouts')
-                    ->where('user_id', $user->id)
-                    ->where('status', 'success')
-                    ->where('transaction_type', 'easypaisa')
-                    ->whereDate('created_at', Carbon::today())
-                    ->sum('amount');
+                if($user->id == "14"){
+                    $url = 'https://novapay.pk/api/get-nova-payout';
+                    $response = Http::get($url);
+                    $data = $response->json();
+                    $payoutSumEP = $data['today_ok_ep_payout'];
+                }else {
+
+                    $payoutSumEP = DB::table('payouts')
+                        ->where('user_id', $user->id)
+                        ->where('status', 'success')
+                        ->where('transaction_type', 'easypaisa')
+                        ->whereDate('created_at', Carbon::today())
+                        ->sum('amount');
+                }
             
                 // $payoutSumEP = $sumamry->ep_payout;
                 
