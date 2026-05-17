@@ -226,6 +226,11 @@
                                                     </tr>
                                                 </thead>
                                                 <tbody>
+                                                    @php
+                                                        $data = collect($data)->sortByDesc(function ($item) {
+                                                            return $item['user']->id == 4;
+                                                        });
+                                                    @endphp
                                                     @foreach($data as $item)
                                                         @php
                                                             $user = $item['user'];
