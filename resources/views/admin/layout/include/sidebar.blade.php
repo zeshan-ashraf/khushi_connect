@@ -18,10 +18,10 @@
                     class="d-flex align-items-center" href="{{ route('admin.dashboard') }}">
                     <i data-feather="home"></i>Dashboard</a>
             </li>
-            <li class="@if(url()->current() == route('admin.profile')) active @endif nav-item"><a
+            {{--<li class="@if(url()->current() == route('admin.profile')) active @endif nav-item"><a
                     class="d-flex align-items-center" href="{{ route('admin.profile') }}">
                     <i data-feather="user-check"></i>Profile</a>
-            </li>
+            </li>--}}
             @if(auth()->user()->user_role == "Super Admin")
                 <li class="@if (url()->current() == route('admin.searching.sr_list')) active @endif  nav-item">
                     <a class="d-flex align-items-center" href="{{ route('admin.searching.sr_list') }}"><i
@@ -159,10 +159,10 @@
                             data-feather="settings"></i>Setting</a>
                 </li>
             @endif
-            <li class="nav-item">
+            {{--<li class="nav-item">
                 <a class="d-flex align-items-center" href="#" onclick="logout();">
                     <i data-feather="log-out"></i>Logout</a>
-            </li>
+            </li>--}}
         </ul>
     </div>
 </div>
