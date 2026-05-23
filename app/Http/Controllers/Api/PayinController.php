@@ -197,9 +197,9 @@ class PayinController extends Controller
             // dd($post_data);
             $carrierStart = microtime(true);
             $response = $easypaisa->sendRequest($post_data);
+            //dd($post_data,$response);
             $carrierDuration = microtime(true) - $carrierStart;
             $upstreamBody = is_string($response) ? $response : json_encode($response);
-            // dd($response);
             // Decode the response into an array if needed
             if ($response instanceof \Illuminate\Http\JsonResponse) {
                 $upstreamStatus = $response->getStatusCode();
