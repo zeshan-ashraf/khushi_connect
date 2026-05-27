@@ -4,8 +4,8 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use App\Support\MerchantCallback;
 use Zfhassaan\Easypaisa\Easypaisa;
 use App\Service\PaymentService;
 use Illuminate\Http\Response;
@@ -80,7 +80,7 @@ class PayoutController extends Controller
                 'callback_url' => $url,
                 'callback_data' => $call_data
             ]);
-            $response = Http::timeout(60)->post($url, $call_data);
+            $response = MerchantCallback::post($url, $call_data, $user, 60);
             $this->logger->info('Callback response for duplicate order', [
                 'request_id' => $requestId,
                 'response_status' => $response->status(),
@@ -122,7 +122,7 @@ class PayoutController extends Controller
                         'message' => 'Your payout cannot be processed due to not enough balance , please try again.',
                         'status' => 'failed',
                     ];
-                    $response = Http::timeout(60)->post($url, $call_data);
+                    $response = MerchantCallback::post($url, $call_data, $user, 60);
                     return response()->json([
                         'status' => 'error',
                         'message' => 'Merchant assigned limit breached',
@@ -260,7 +260,7 @@ class PayoutController extends Controller
                         $setting->payout_balance -= $amount;
                         $setting->save();
                     }
-                    $response = Http::timeout(60)->post($url, $call_data); // increased timeout
+                    $response = MerchantCallback::post($url, $call_data, $user, 60); // increased timeout
     
                     $this->logger->info('Callback response received', [
                         'request_id' => $requestId,
@@ -292,7 +292,7 @@ class PayoutController extends Controller
                         'callback_url' => $url,
                         'callback_data' => $call_data
                     ]);
-                    $response = Http::timeout(60)->post($url, $call_data);
+                    $response = MerchantCallback::post($url, $call_data, $user, 60);
                     $this->logger->info('Callback response received', [
                         'request_id' => $requestId,
                         'response_status' => $response->status(),
@@ -390,7 +390,7 @@ class PayoutController extends Controller
                         Log::debug('*******unable to update wallet');
                         
                     }
-                    $response = Http::timeout(60)->post($call_url, $call_data); // increased timeout
+                    $response = MerchantCallback::post($call_url, $call_data, $user, 60);
                     
                     $this->logger->info('Callback response received', [
                         'request_id' => $requestId,
@@ -421,7 +421,7 @@ class PayoutController extends Controller
                         'callback_url' => $url,
                         'callback_data' => $call_data
                     ]);
-                    $response = Http::timeout(60)->post($url, $call_data);
+                    $response = MerchantCallback::post($url, $call_data, $user, 60);
                     $this->logger->info('Callback response received', [
                         'request_id' => $requestId,
                         'response_status' => $response->status(),

@@ -2,7 +2,7 @@
 namespace App\Service;
 
 use App\Models\OrderBilling;
-use Illuminate\Support\Facades\Http;
+use App\Support\MerchantCallback;
 use GuzzleHttp\Client;
 use Carbon\Carbon;
 use App\Models\{User, Transaction, Setting, SurplusAmount};
@@ -597,7 +597,8 @@ class PaymentServiceV1
                 'amount' => $transaction->amount,
                 'status' => $transaction->status,
             ], 
-            $requestId
+            $requestId,
+            $user
         );
     }
 
@@ -770,7 +771,7 @@ class PaymentServiceV1
      * @param int|null $retries
      * @return bool
      */
-    private function sendCallback(string $url, array $data, string $requestId, ?int $retries = null): bool
+    private function sendCallback(string $url, array $data, string $requestId, ?User $user = null, ?int $retries = null): bool
     {
         $maxRetries = $retries ?? config('payment.callback.max_retries', 3);
         $timeout = config('payment.callback.timeout', 120);
@@ -785,7 +786,7 @@ class PaymentServiceV1
                     'data' => $data
                 ]);
                 
-                $response = Http::timeout($timeout)->post($url, $data);
+                $response = MerchantCallback::post($url, $data, $user, $timeout);
                 
                 if ($response->successful()) {
                     Log::channel('payout')->info('[TestPaymentService] Callback successful', [
