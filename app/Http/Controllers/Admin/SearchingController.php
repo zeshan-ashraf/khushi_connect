@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\DataTables\Admin\SearchingDataTable;
 use App\DataTables\Admin\PayoutSearchingDataTable;
 use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Http;
+use App\Support\MerchantCallback;
 use App\Models\{Transaction,ArcheiveTransaction,BackupTransaction,User,SurplusAmount,Payout,ArcheivePayout};
 use Illuminate\Http\Request;
 use App\Service\StatusService;
@@ -117,7 +117,8 @@ class SearchingController extends Controller
             $item = BackupTransaction::find($id);
         }
         // dd($item);
-        $url=$item->url;
+        $url = $item->url;
+        $user = $item->user;
         if($item->txn_type === 'jazzcash'){
             $integritySalt = $this->integritySalt;
             $merchantId = $this->merchantId;
@@ -166,7 +167,7 @@ class SearchingController extends Controller
                     'amount' => $item->amount,
                     'status' => 'success',
                 ];
-                $response = Http::timeout(120)->post($url, $data);
+                $response = MerchantCallback::post($url, $data, $user, 120);
             } elseif ($result['pp_PaymentResponseCode'] == '157'){
                 $item->update([
                     'status' => 'pending',
@@ -188,7 +189,7 @@ class SearchingController extends Controller
                     'amount' => $item->amount,
                     'status' => 'failed',
                 ];
-                $response = Http::timeout(120)->post($url, $data);
+                $response = MerchantCallback::post($url, $data, $user, 120);
             }
         }
         else{
@@ -206,8 +207,6 @@ class SearchingController extends Controller
                         'amount' => $item->amount,
                         'status' => 'success',
                     ];
-                    $user = User::find($item->user_id);
-
                     // if ($user && $user->per_payin_fee) {
                     //     $percentage = $user->per_payin_fee;
                     //     $amount = $item->amount * $percentage;
@@ -224,7 +223,7 @@ class SearchingController extends Controller
                     //         $surplus->save();
                     //     }
                     // }
-                    $response = Http::timeout(60)->post($url, $data);
+                    $response = MerchantCallback::post($url, $data, $user, 60);
                 } elseif ($result['transactionStatus'] == 'FAILED') {
                     $item->update([
                         'status' => 'failed',
@@ -237,7 +236,7 @@ class SearchingController extends Controller
                         'amount' => $item->amount,
                         'status' => 'failed',
                     ];
-                    $response = Http::timeout(60)->post($url, $data);
+                    $response = MerchantCallback::post($url, $data, $user, 60);
                 }
             } elseif ($result['responseCode'] == '0003') {
                 // Transaction failed, update and notify
@@ -251,7 +250,7 @@ class SearchingController extends Controller
                     'amount' => $item->amount,
                     'status' => 'failed',
                 ];
-                $response = Http::timeout(60)->post($url, $data);
+                $response = MerchantCallback::post($url, $data, $user, 60);
             }
         }
         return redirect()->back()->with('message','Callback send manually successfully!');
@@ -268,9 +267,10 @@ class SearchingController extends Controller
             'amount' => $item->amount,
             'status' => $item->status,
         ];
-        $response = Http::timeout(120)->post($item->url, $data);
+        $response = MerchantCallback::post($item->url, $data, $item->user, 120);
         return redirect()->back()->with('message','Callback send manually successfully!');
     }
+
     protected function getCredentials() {
         return base64_encode(env('EASYPAISA_PRODUCTION_USERNAME').':'.env('EASYPAISA_PRODUCTION_PASSWORD'));
     }

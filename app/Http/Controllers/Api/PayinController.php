@@ -541,13 +541,13 @@ class PayinController extends Controller
 
 
         $updatedTransaction = $this->service->orderFinalProcess($response, $txnRefNo, $paymentMethod, $user, $transaction);
-        Log::channel('payin')->info("+++1 ");
+        
         if (1==1) { // as per this function will only call when status is success
             $executionTime = microtime(true) - $startTime;
-            Log::channel('payin')->info("+++2");
+            
             // Block the phone number for 5 minutes after successful transaction using cache
             $this->blockNumberAfterSuccess($request->phone, $paymentMethod, $user->id, $requestId);
-            Log::channel('payin')->info("+++3");
+          
             Log::channel('payin')->info("$paymentMethod payment completed successfully", [
                 'request_id' => $requestId,
                 'execution_time' => $executionTime,
