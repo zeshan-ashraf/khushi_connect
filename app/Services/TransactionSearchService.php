@@ -20,13 +20,41 @@ class TransactionSearchService
     ];
 
     /**
-     * UNION of filtered queries across live, archive, and backup tables.
-     * Pagination and ordering remain handled by Yajra DataTables after UNION.
+     * Entry point: unique lookup (sequential, no UNION) or multi-row UNION search.
+     * Pagination and ordering remain handled by Yajra DataTables.
      */
     public function buildCombinedQuery(TransactionSearchFilters $filters): Builder
     {
+        if ($filters->hasUniqueIdentifier()) {
+            return $this->findByUniqueIdentifiers($filters);
+        }
+
+        return $this->searchByFiltersUnion($filters);
+    }
+
+    /**
+     * Sequential table scan; stops at first match. No UNION.
+     */
+    public function findByUniqueIdentifiers(TransactionSearchFilters $filters): Builder
+    {
+        foreach (self::SOURCES as $modelClass) {
+            $record = $this->findFirstOnSource($modelClass, $filters);
+
+            if ($record !== null) {
+                return $modelClass::query()->whereKey($record->getKey());
+            }
+        }
+
+        return $this->emptyQuery();
+    }
+
+    /**
+     * UNION across all sources when no unique identifier is provided.
+     */
+    public function searchByFiltersUnion(TransactionSearchFilters $filters): Builder
+    {
         $queries = array_map(
-            fn (string $modelClass) => $this->buildFilteredQuery($modelClass::query(), $filters),
+            fn (string $modelClass) => $this->buildUnionBranchQuery($modelClass::query(), $filters),
             self::SOURCES
         );
 
@@ -36,23 +64,83 @@ class TransactionSearchService
     }
 
     /**
-     * Apply shared search filters to a single transaction source query.
+     * @param  class-string<Model>  $modelClass
      */
-    public function buildFilteredQuery(Builder $query, TransactionSearchFilters $filters): Builder
+    private function findFirstOnSource(string $modelClass, TransactionSearchFilters $filters): ?Model
     {
-        if ($filters->hasTransactionId()) {
-            $query->where('transactionId', 'like', '%' . $filters->transactionId . '%');
+        $record = $this->firstWithExactUniqueColumns($modelClass, $filters);
+
+        if ($record !== null) {
+            return $record;
         }
 
+        return $this->firstWithPrefixUniqueColumns($modelClass, $filters);
+    }
+
+    /**
+     * @param  class-string<Model>  $modelClass
+     */
+    private function firstWithExactUniqueColumns(string $modelClass, TransactionSearchFilters $filters): ?Model
+    {
+        $query = $modelClass::query();
+        $this->applyUniqueIdentifierExactMatch($query, $filters);
+        $this->applyMultiRowFilters($query, $filters);
+
+        return $query->limit(1)->first();
+    }
+
+    /**
+     * @param  class-string<Model>  $modelClass
+     */
+    private function firstWithPrefixUniqueColumns(string $modelClass, TransactionSearchFilters $filters): ?Model
+    {
+        $query = $modelClass::query();
+        $this->applyUniqueIdentifierPrefixMatch($query, $filters);
+        $this->applyMultiRowFilters($query, $filters);
+
+        return $query->limit(1)->first();
+    }
+
+    private function applyUniqueIdentifierExactMatch(Builder $query, TransactionSearchFilters $filters): void
+    {
+        if ($filters->hasOrderId()) {
+            $query->where('orderId', $filters->orderId);
+        }
+
+        if ($filters->hasTransactionId()) {
+            $query->where('transactionId', $filters->transactionId);
+        }
+    }
+
+    private function applyUniqueIdentifierPrefixMatch(Builder $query, TransactionSearchFilters $filters): void
+    {
+        if ($filters->hasOrderId()) {
+            $query->where('orderId', 'like', $filters->orderId . '%');
+        }
+
+        if ($filters->hasTransactionId()) {
+            $query->where('transactionId', 'like', $filters->transactionId . '%');
+        }
+    }
+
+    /**
+     * Filters that may return multiple rows (phone, amount, date).
+     */
+    private function applyMultiRowFilters(Builder $query, TransactionSearchFilters $filters): void
+    {
         if ($filters->hasPhone()) {
             $query->where('phone', 'like', '%' . $filters->phone . '%');
         }
 
-        if ($filters->hasOrderId()) {
-            $query->where('orderId', 'like', '%' . $filters->orderId . '%');
-        }
-
         $this->applyExactFilters($query, $filters);
+    }
+
+    /**
+     * UNION branch: multi-row filters only (unique columns handled elsewhere).
+     */
+    private function buildUnionBranchQuery(Builder $query, TransactionSearchFilters $filters): Builder
+    {
+        $this->applyMultiRowFilters($query, $filters);
 
         return $query;
     }
@@ -61,8 +149,9 @@ class TransactionSearchService
     {
         if ($filters->hasStartDate()) {
             try {
-                $normalizedDate = Carbon::parse($filters->startDate)->toDateString();
-                $query->whereDate('created_at', '=', $normalizedDate);
+                $date = Carbon::parse($filters->startDate);
+                $query->where('created_at', '>=', $date->copy()->startOfDay())
+                    ->where('created_at', '<=', $date->copy()->endOfDay());
             } catch (\Throwable $e) {
                 // Ignore invalid date input to preserve existing search flow.
             }
@@ -71,5 +160,10 @@ class TransactionSearchService
         if ($filters->hasAmount()) {
             $query->where('amount', '=', $filters->amountMin);
         }
+    }
+
+    private function emptyQuery(): Builder
+    {
+        return Transaction::query()->whereRaw('1 = 0');
     }
 }

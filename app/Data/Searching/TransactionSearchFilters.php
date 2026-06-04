@@ -102,14 +102,25 @@ final class TransactionSearchFilters
         return $this->globalSearch !== null;
     }
 
-    public function hasManualOrColumnFilters(): bool
+    /** orderId or transactionId — eligible for sequential early-exit lookup. */
+    public function hasUniqueIdentifier(): bool
     {
-        return $this->hasOrderId()
-            || $this->hasPhone()
-            || $this->hasTransactionId()
+        return $this->hasOrderId() || $this->hasTransactionId();
+    }
+
+    /** phone, amount, date, global search — require scanning all sources. */
+    public function hasMultiRowFilters(): bool
+    {
+        return $this->hasPhone()
             || $this->hasStartDate()
             || $this->hasAmount()
+            || $this->hasGlobalSearch()
             || $this->columnSearches !== [];
+    }
+
+    public function hasManualOrColumnFilters(): bool
+    {
+        return $this->hasUniqueIdentifier() || $this->hasMultiRowFilters();
     }
 
     private static function normalizeString(mixed $value): ?string

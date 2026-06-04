@@ -3,7 +3,6 @@
 namespace App\DataTables\Admin;
 
 use App\Data\Searching\TransactionSearchFilters;
-use App\Models\User;
 use App\Services\TransactionSearchService;
 use Yajra\DataTables\Services\DataTable;
 
