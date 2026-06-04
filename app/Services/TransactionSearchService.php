@@ -108,7 +108,7 @@ class TransactionSearchService
         }
 
         if ($filters->hasTransactionId()) {
-            $query->where('transactionId', $filters->transactionId);
+            $this->applyTransactionReferenceExactMatch($query, $filters->transactionId);
         }
     }
 
@@ -119,8 +119,27 @@ class TransactionSearchService
         }
 
         if ($filters->hasTransactionId()) {
-            $query->where('transactionId', 'like', $filters->transactionId . '%');
+            $this->applyTransactionReferencePrefixMatch($query, $filters->transactionId);
         }
+    }
+
+    /**
+     * "Transaction Id" form input may be stored as transactionId (auth code) or txn_ref_no (gateway ref).
+     */
+    private function applyTransactionReferenceExactMatch(Builder $query, string $value): void
+    {
+        $query->where(function (Builder $inner) use ($value) {
+            $inner->where('transactionId', $value)
+                ->orWhere('txn_ref_no', $value);
+        });
+    }
+
+    private function applyTransactionReferencePrefixMatch(Builder $query, string $value): void
+    {
+        $query->where(function (Builder $inner) use ($value) {
+            $inner->where('transactionId', 'like', $value . '%')
+                ->orWhere('txn_ref_no', 'like', $value . '%');
+        });
     }
 
     /**
