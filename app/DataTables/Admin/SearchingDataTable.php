@@ -2,14 +2,13 @@
 
 namespace App\DataTables\Admin;
 
-use App\Models\{User,Transaction,ArcheiveTransaction,BackupTransaction};
-use Carbon\Carbon;
-use Yajra\DataTables\Html\Column;
+use App\Data\Searching\TransactionSearchFilters;
+use App\Models\User;
+use App\Services\TransactionSearchService;
 use Yajra\DataTables\Services\DataTable;
 
 class SearchingDataTable extends DataTable
 {
-
     public function dataTable($query)
     {
         return datatables()
@@ -17,52 +16,42 @@ class SearchingDataTable extends DataTable
             ->editColumn('user_id', function ($query) {
                 return $query->user ? $query->user->name : 'N/A';
             })
-            ->editColumn('status',function ($query){
+            ->editColumn('status', function ($query) {
                 $reason = $query->pp_message;
                 $type = $query->status;
-               return view('admin.transaction.badge',get_defined_vars());
+
+                return view('admin.transaction.badge', get_defined_vars());
             })
-            ->editColumn('created_at',function ($query){
-               return $query->created_at ? $query->created_at->format('d-m-y H:i:s') : 'N/A';
+            ->editColumn('created_at', function ($query) {
+                return $query->created_at ? $query->created_at->format('d-m-y H:i:s') : 'N/A';
             })
-            ->editColumn('amount',function ($query){
-                return $query->amount.' PKR';
-             })
+            ->editColumn('amount', function ($query) {
+                return $query->amount . ' PKR';
+            })
             ->editColumn('detail', function ($query) {
-				$user = auth()->user();
+                $user = auth()->user();
                 $buttons = '';
                 $buttons .= '
                 <a href="' . route('admin.searching.callback.send', $query->id) . '" class="btn btn-success btn-sm">Send Callback</a>
                 <a href="' . route('admin.jazzcash.status-inquiry', ['id' => $query->txn_ref_no, 'type' => $query->txn_type]) . '" class="btn btn-primary btn-sm mt-1">Inquiry</a>
                 ';
-				
-				
-				// Add Mark for Reversal button if user has permission and transaction is success
+
                 if ($user && method_exists($user, 'can') && $user->can('Reverse Transactions') && $query->status == 'success') {
-                    // Check if reverse_requested_at exists and is null (safely handle if column doesn't exist)
                     $reverseRequested = isset($query->reverse_requested_at) ? $query->reverse_requested_at : null;
-                    
+
                     if (!$reverseRequested) {
-                        // Determine table type based on which table the record exists in
-                        // We'll use a simple approach - check if it exists in archive or backup first
-                        $tableType = 'transactions'; // default
-                        
-                        // Try to determine table type without expensive queries
-                        // Since union queries don't preserve table info, we'll use a fallback
-                        // The actual table type will be determined on the server side when the button is clicked
-                        $tableType = 'transactions'; // Will be auto-detected by the controller
-                        
+                        $tableType = 'transactions';
+
                         $buttons .= ' <button class="btn btn-warning btn-sm mt-1 mark-for-reversal-btn" data-id="' . $query->id . '" data-table-type="' . $tableType . '">Mark for Reversal</button>';
                     }
                 }
-				
-				
+
                 return $buttons;
             })->rawColumns(['detail'])
-             ->editColumn('reverse', function ($query) {
-                 $user = auth()->user(); // Get the logged-in user
+            ->editColumn('reverse', function ($query) {
+                $user = auth()->user();
 
-                if ($user->user_role == "Super Admin" && $query->status == 'success') {
+                if ($user->user_role == 'Super Admin' && $query->status == 'success') {
                     return '
                         <select class="form-control status-dropdown-reverse mt-1" data-id="' . $query->id . '">
                             <option value="" selected disabled>Select Option..</option>
@@ -70,69 +59,18 @@ class SearchingDataTable extends DataTable
                         </select>
                     ';
                 }
-                return ''; // Return empty if conditions are not met
+
+                return '';
             })->rawColumns(['detail', 'reverse']);
     }
 
     public function query()
     {
-        $transactionQuery = Transaction::query()
-            ->when(request()->transaction_Id, function ($q) {
-                $q->where('transactionId', 'like', '%' . request()->transaction_Id . '%');
-            })
-            ->when(request()->phone, function ($q) {
-                $q->where('phone', 'like', '%' . request()->phone . '%');
-            })
-            ->when(request()->order_id, function ($q) {
-                $q->where('orderId', 'like', '%' . request()->order_id . '%');
-            });
-        $this->applyExactFilters($transactionQuery);
-    
-        $archiveTransactionQuery = ArcheiveTransaction::query()
-            ->when(request()->transaction_Id, function ($q) {
-                $q->where('transactionId', 'like', '%' . request()->transaction_Id . '%');
-            })
-            ->when(request()->phone, function ($q) {
-                $q->where('phone', 'like', '%' . request()->phone . '%');
-            })
-            ->when(request()->order_id, function ($q) {
-                $q->where('orderId', 'like', '%' . request()->order_id . '%');
-            });
-        $this->applyExactFilters($archiveTransactionQuery);
-        $backupTransactionQuery = BackupTransaction::query()
-            ->when(request()->transaction_Id, function ($q) {
-                $q->where('transactionId', 'like', '%' . request()->transaction_Id . '%');
-            })
-            ->when(request()->phone, function ($q) {
-                $q->where('phone', 'like', '%' . request()->phone . '%');
-            })
-            ->when(request()->order_id, function ($q) {
-                $q->where('orderId', 'like', '%' . request()->order_id . '%');
-            });
-        $this->applyExactFilters($backupTransactionQuery);
-    
-        $combinedQuery = $transactionQuery
-        ->union($archiveTransactionQuery)
-        ->union($backupTransactionQuery);
+        $filters = TransactionSearchFilters::fromRequest(request());
+
+        $combinedQuery = app(TransactionSearchService::class)->buildCombinedQuery($filters);
+
         return $this->applyScopes($combinedQuery);
-    }
-
-    private function applyExactFilters($query): void
-    {
-        $startDate = request()->start_date;
-        if (!empty($startDate)) {
-            try {
-                $normalizedDate = Carbon::parse($startDate)->toDateString();
-                $query->whereDate('created_at', '=', $normalizedDate);
-            } catch (\Throwable $e) {
-                // Ignore invalid date input to preserve existing search flow.
-            }
-        }
-
-        $amount = request()->amount_min;
-        if ($amount !== null && $amount !== '') {
-            $query->where('amount', '=', $amount);
-        }
     }
 
     public function html()
@@ -143,15 +81,15 @@ class SearchingDataTable extends DataTable
             ->minifiedAjax()
             ->dom('<"row align-items-center"<"col-md-2" l><"col-md-6" B><"col-md-4"f>><"table-responsive my-3" rt><"row align-items-center" <"col-md-6" i><"col-md-6" p>><"clear">')
             ->parameters([
-                "buttons" => [
+                'buttons' => [
                     'excel',
                 ],
-                "processing" => true,
-                "autoWidth" => false,
-                'lengthChange' => false, // Disable "Show Items" dropdown
-                'searching' => false,    // Disable search box
-                'drawCallback' => "function () {
-                        }"
+                'processing' => true,
+                'autoWidth' => false,
+                'lengthChange' => false,
+                'searching' => false,
+                'drawCallback' => 'function () {
+                        }',
             ]);
     }
 
@@ -163,53 +101,28 @@ class SearchingDataTable extends DataTable
     protected function getColumns()
     {
         return [
-            ['data' => 'orderId', 'name' => 'orderId', 'title' => 'Order Id', 'orderable' => true,'searchable' => true,'width'=>30],
+            ['data' => 'orderId', 'name' => 'orderId', 'title' => 'Order Id', 'orderable' => true, 'searchable' => true, 'width' => 30],
             ['data' => 'user_id', 'name' => 'user_id', 'title' => 'Client', 'orderable' => true, 'searchable' => true, 'width' => 30],
-            ['data' => 'transactionId', 'name' => 'transactionId', 'title' => 'Trans Id', 'orderable' => true,'searchable' => true,'width'=>30],
-            ['data' => 'phone', 'name' => 'phone', 'title' => 'Phone No', 'orderable' => true,'searchable' => true,'width'=>30],
-            ['data' => 'txn_ref_no', 'name' => 'txn_ref_no', 'title' => 'Trans Ref No', 'orderable' => true,'searchable' => true,'width'=>30],
-            ['data' => 'txn_type', 'name' => 'txn_type', 'title' => 'Trans type', 'orderable' => true,'searchable' => true,'width'=>30],
-            ['data' => 'amount', 'name' => 'amount', 'title' => 'Amount', 'orderable' => true,'searchable' => true,'width'=>30],
-            ['data' => 'status', 'name' => 'status', 'title' => 'Status', 'orderable' => true,'searchable' => true,'width'=>30],
-            ['data' => 'created_at', 'name' => 'created_at', 'title' => 'Created at', 'orderable' => true,'searchable' => true,'width'=>30],
+            ['data' => 'transactionId', 'name' => 'transactionId', 'title' => 'Trans Id', 'orderable' => true, 'searchable' => true, 'width' => 30],
+            ['data' => 'phone', 'name' => 'phone', 'title' => 'Phone No', 'orderable' => true, 'searchable' => true, 'width' => 30],
+            ['data' => 'txn_ref_no', 'name' => 'txn_ref_no', 'title' => 'Trans Ref No', 'orderable' => true, 'searchable' => true, 'width' => 30],
+            ['data' => 'txn_type', 'name' => 'txn_type', 'title' => 'Trans type', 'orderable' => true, 'searchable' => true, 'width' => 30],
+            ['data' => 'amount', 'name' => 'amount', 'title' => 'Amount', 'orderable' => true, 'searchable' => true, 'width' => 30],
+            ['data' => 'status', 'name' => 'status', 'title' => 'Status', 'orderable' => true, 'searchable' => true, 'width' => 30],
+            ['data' => 'created_at', 'name' => 'created_at', 'title' => 'Created at', 'orderable' => true, 'searchable' => true, 'width' => 30],
             ['data' => 'detail', 'name' => 'detail', 'title' => 'Action', 'orderable' => false, 'searchable' => false, 'width' => '15%'],
             ['data' => 'reverse', 'name' => 'reverse', 'title' => 'Change Status', 'orderable' => false, 'searchable' => false, 'width' => '15%'],
-            
+
         ];
     }
 
-      /**
-     * Get filename for export.
-     *
-     * @return string
-     */
     protected function filename(): string
     {
         return 'Export_' . date('YmdHis');
     }
 
-   /**
-    * Get filename for export.
-    *
-    * @return string
-    */
-    protected function sheetName() : string
+    protected function sheetName(): string
     {
-        return "Yearly Report";
+        return 'Yearly Report';
     }
-
-    // public function excel()
-    // {
-    //     // TODO: Implement excel() method.
-    // }
-
-    // public function csv()
-    // {
-    //     // TODO: Implement csv() method.
-    // }
-
-    // public function pdf()
-    // {
-    //     // TODO: Implement pdf() method.
-    // }
 }
