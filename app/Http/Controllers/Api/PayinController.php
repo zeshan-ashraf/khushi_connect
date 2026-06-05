@@ -545,7 +545,7 @@ class PayinController extends Controller
         if (1==1) { // as per this function will only call when status is success
             $executionTime = microtime(true) - $startTime;
             
-            // Block the phone number for 5 minutes after successful transaction using cache
+            // Block the phone number for 2 minutes after successful transaction using cache
             $this->blockNumberAfterSuccess($request->phone, $paymentMethod, $user->id, $requestId);
           
             Log::channel('payin')->info("$paymentMethod payment completed successfully", [
@@ -554,7 +554,7 @@ class PayinController extends Controller
                 'carrier_latency_seconds' => $carrierDuration !== null ? $this->formatDuration($carrierDuration) : null,
                 'transaction_id' => $updatedTransaction->txn_ref_no,
                 'phone_cooldown_set' => true,
-                'cooldown_duration' => '5 minutes',
+                'cooldown_duration' => '2 minutes',
                 'original_request' => RequestPayloadForLog::from($request)
             ]);
             if($paymentMethod == "easypaisa"){
@@ -582,7 +582,7 @@ class PayinController extends Controller
     }
 
     /**
-     * Block phone number for 5 minutes after successful transaction using cache
+     * Block phone number for 2 minutes after successful transaction using cache
      */
     private function blockNumberAfterSuccess(string $phone, string $paymentMethod, int $userId, string $requestId): void
     {
@@ -591,15 +591,15 @@ class PayinController extends Controller
         }
 
         try {
-            Log::channel('payin')->info("+++2.1");
+           
             BlockedNumber::handleSuccessfulTransaction($phone, $paymentMethod, $userId);
-            Log::channel('payin')->info("+++2.2");
+            
             Log::channel('payin')->info('Phone number cooldown set after successful transaction', [
                 'request_id' => $requestId,
                 'phone' => $phone,
                 'payment_method' => $paymentMethod,
                 'user_id' => $userId,
-                'cooldown_until' => now()->addMinutes(5),
+                'cooldown_until' => now()->addMinutes(2),
                 'method' => 'cache_based',
                 'timestamp' => now(),
             ]);
