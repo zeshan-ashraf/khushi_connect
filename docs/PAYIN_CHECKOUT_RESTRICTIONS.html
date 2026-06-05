@@ -1,0 +1,320 @@
+<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">
+<head>
+<meta charset="utf-8">
+<title>Payin Checkout Restrictions</title>
+<!--[if gte mso 9]><xml><w:WordDocument><w:View>Print</w:View><w:Zoom>100</w:Zoom></w:WordDocument></xml><![endif]-->
+<style>
+body { font-family: Calibri, Arial, sans-serif; font-size: 11pt; line-height: 1.4; }
+h1 { font-size: 20pt; color: #1a1a1a; border-bottom: 2px solid #2563eb; padding-bottom: 6px; }
+h2 { font-size: 14pt; color: #1e40af; margin-top: 18pt; }
+h3 { font-size: 12pt; color: #334155; margin-top: 12pt; }
+p, li { margin: 4pt 0; }
+table { border-collapse: collapse; width: 100%; margin: 10pt 0; }
+th { background: #e2e8f0; font-weight: bold; text-align: left; }
+th, td { border: 1px solid #94a3b8; padding: 6pt 8pt; vertical-align: top; }
+code, .mono { font-family: Consolas, monospace; font-size: 10pt; background: #f1f5f9; }
+pre { font-family: Consolas, monospace; font-size: 9pt; background: #f8fafc; border: 1px solid #cbd5e1; padding: 10pt; white-space: pre-wrap; }
+.meta { color: #475569; }
+hr { border: none; border-top: 1px solid #cbd5e1; margin: 16pt 0; }
+</style>
+</head>
+<body>
+
+<h1>Payin Checkout — All Restrictions &amp; Limits</h1>
+<p class="meta"><strong>Document purpose:</strong> Complete reference of every restriction applied to the payin checkout API.<br>
+<strong>Last updated:</strong> June 2026<br>
+<strong>Primary route:</strong> <code>POST /api/payin/checkout</code><br>
+<strong>Controller:</strong> <code>App\Http\Controllers\Api\PayinController@checkout</code><br>
+<strong>Route file:</strong> <code>routes/api.php</code> (line 45)</p>
+
+<hr>
+
+<h2>1. Route Overview</h2>
+<h3>Main checkout endpoint</h3>
+<table>
+<tr><th>Item</th><th>Value</th></tr>
+<tr><td>HTTP method</td><td>POST</td></tr>
+<tr><td>URL path</td><td><code>/api/payin/checkout</code></td></tr>
+<tr><td>Route name</td><td><code>payin.checkout</code></td></tr>
+</table>
+
+<h3>Middleware stack (runs in this order)</h3>
+<ol>
+<li><code>payment.validate</code></li>
+<li><code>check.blocked.numbers</code></li>
+<li><code>easypaisa.limit</code></li>
+<li><code>easypaisa.pending.limit</code></li>
+<li><code>phone.verified</code></li>
+<li><code>restrict.user.transaction.range</code></li>
+</ol>
+<p>After middleware passes, <code>PayinController::checkout()</code> runs additional checks and post-payment rules.</p>
+
+<h3>Related route (v1 — fewer restrictions)</h3>
+<table>
+<tr><th>Item</th><th>Value</th></tr>
+<tr><td>URL</td><td><code>POST /api/v1/payment-checkout</code></td></tr>
+<tr><td>Auth</td><td>HMAC (<code>hmac.authenticate</code> group)</td></tr>
+<tr><td>Middleware</td><td><code>phone.verified</code>, <code>restrict.user.transaction.range</code> only</td></tr>
+<tr><td>Missing vs main route</td><td>No <code>payment.validate</code>, <code>check.blocked.numbers</code>, <code>easypaisa.limit</code>, <code>easypaisa.pending.limit</code></td></tr>
+</table>
+
+<hr>
+
+<h2>2. Request Validation (<code>payment.validate</code>)</h2>
+<p><strong>File:</strong> <code>app/Http/Middleware/PaymentValidationMiddleware.php</code></p>
+<p>Runs first. Validates input and loads the merchant user onto the request as <code>user_model</code>.</p>
+
+<h3>Required fields</h3>
+<table>
+<tr><th>Field</th><th>Rules</th></tr>
+<tr><td><code>client_email</code></td><td>Required, valid email (RFC + DNS)</td></tr>
+<tr><td><code>payment_method</code></td><td>Required, must be <code>jazzcash</code> or <code>easypaisa</code></td></tr>
+<tr><td><code>phone</code></td><td>Required, must match 03XXXXXXXXX (11 digits, starts with 03)</td></tr>
+<tr><td><code>callback_url</code></td><td>Required, valid URL, must start with https://</td></tr>
+<tr><td><code>orderId</code></td><td>Required, string, max 50 chars, must be unique in transactions table</td></tr>
+<tr><td><code>amount</code></td><td>Required, numeric — see amount limits below</td></tr>
+</table>
+
+<h3>Amount limits (per transaction)</h3>
+<table>
+<tr><th>Payment method</th><th>Minimum</th><th>Maximum</th></tr>
+<tr><td>Easypaisa</td><td>1 PKR</td><td>100,000 PKR</td></tr>
+<tr><td>JazzCash</td><td>1 PKR</td><td>50,000 PKR</td></tr>
+</table>
+
+<h3>Error responses</h3>
+<table>
+<tr><th>Condition</th><th>HTTP status</th><th>Message</th></tr>
+<tr><td>Validation failed</td><td>422</td><td>Validation failed (+ errors object)</td></tr>
+<tr><td>User email not found</td><td>404</td><td>User not found.</td></tr>
+</table>
+
+<hr>
+
+<h2>3. Blocked Phone Numbers (<code>check.blocked.numbers</code>)</h2>
+<p><strong>File:</strong> <code>app/Http/Middleware/CheckedBlockedNumbersMiddleware.php</code><br>
+<strong>Data table:</strong> <code>blocked_numbers</code><br>
+<strong>Model:</strong> <code>App\Models\BlockedNumber</code></p>
+
+<h3>When it applies</h3>
+<ul>
+<li>Checks phone + payment_method against the blocked_numbers table.</li>
+<li><strong>JazzCash:</strong> Skipped when config blocked_numbers.php → jazzcash_blocking_enabled is false (current default in repo).</li>
+<li><strong>Easypaisa:</strong> Always checked by middleware.</li>
+</ul>
+
+<h3>Block conditions</h3>
+<p>A request is rejected when a matching record exists AND either is_permanent = true OR block_until is in the future.</p>
+
+<h3>On blocked attempt</h3>
+<ol>
+<li>Returns HTTP 400: This number is currently blocked. Please try again later.</li>
+<li>Creates a failed transaction with status = blocked (if user is resolved)</li>
+<li>Increments attempt counters on the blocked record</li>
+<li>Escalates block duration:</li>
+</ol>
+<table>
+<tr><th>Attempt count</th><th>Block duration</th></tr>
+<tr><td>1</td><td>24 hours</td></tr>
+<tr><td>2–3</td><td>7 days</td></tr>
+<tr><td>4+</td><td>Permanent</td></tr>
+</table>
+
+<hr>
+
+<h2>4. Easypaisa Monthly Volume Limit (<code>easypaisa.limit</code>)</h2>
+<p><strong>File:</strong> <code>app/Http/Middleware/EasyPaisaLimitMiddleware.php</code></p>
+<ul>
+<li>Only when payment_method = easypaisa</li>
+<li>Only for client IDs in restrictedClientIds (currently [0] — effectively inactive unless client ID 0 is used)</li>
+</ul>
+<table>
+<tr><th>Setting</th><th>Value</th></tr>
+<tr><td>Monthly cap</td><td>480,000,000 PKR (480M)</td></tr>
+<tr><td>Period</td><td>Current calendar month</td></tr>
+<tr><td>Counts</td><td>Successful Easypaisa payins from transactions, archeive_transactions, backup_transactions</td></tr>
+<tr><td>Error HTTP</td><td>429 — Monthly EasyPaisa limit has been reached. Please contact support.</td></tr>
+<tr><td>Error code</td><td>MONTHLY_LIMIT_EXCEEDED</td></tr>
+</table>
+<p><strong>Note:</strong> Result cached 10 minutes per month key.</p>
+
+<hr>
+
+<h2>5. Easypaisa Pending Queue Limit (<code>easypaisa.pending.limit</code>)</h2>
+<p><strong>File:</strong> <code>app/Http/Middleware/EasypaisaPendingRequestsMiddleware.php</code></p>
+<table>
+<tr><th>Setting</th><th>Value</th></tr>
+<tr><td>Applies to</td><td>Easypaisa only</td></tr>
+<tr><td>Max pending transactions</td><td>400</td></tr>
+<tr><td>Count source</td><td>transactions where status = pending and txn_type = easypaisa</td></tr>
+<tr><td>Cache TTL</td><td>5 minutes</td></tr>
+<tr><td>Error HTTP</td><td>429 — System is processing pending Easypaisa requests. Please wait a few minutes and try again.</td></tr>
+</table>
+
+<hr>
+
+<h2>6. Phone Verification Gate (<code>phone.verified</code>)</h2>
+<p><strong>File:</strong> <code>app/Http/Middleware/EnsurePhoneIsVerified.php</code><br>
+<strong>Service:</strong> <code>App\Services\PhoneVerificationService</code><br>
+<strong>Config:</strong> <code>config/phone_verification.php</code></p>
+<ul>
+<li>Only when payment_method = easypaisa (JazzCash skips this middleware)</li>
+<li>Bypass if new_user_verification = false on merchant</li>
+<li>Bypass if phone already verified</li>
+<li>Bypass if amount ≤ new_user_max_amount for unverified phones</li>
+<li>Concurrent lock: 5 seconds per phone — HTTP 429 if busy</li>
+<li>Unverified + amount over limit → HTTP 200 with status: new_user (checkout stops)</li>
+</ul>
+
+<hr>
+
+<h2>7. Per-Merchant Transaction Amount Range (<code>restrict.user.transaction.range</code>)</h2>
+<p><strong>File:</strong> <code>app/Http/Middleware/RestrictUserTransactionRange.php</code></p>
+<ul>
+<li>Only for user_role = Client with transaction_limit_enabled = true</li>
+<li>Uses transaction_amount_min and transaction_amount_max (min ≥ 1, max ≤ 50,000, min &lt; max)</li>
+<li>For Easypaisa + new_user_verification: only applies if phone is verified</li>
+</ul>
+<table>
+<tr><th>Condition</th><th>HTTP</th><th>Message</th></tr>
+<tr><td>Misconfigured limits</td><td>422</td><td>Transaction limits are misconfigured for this merchant. Please contact support.</td></tr>
+<tr><td>Non-numeric amount</td><td>422</td><td>Amount is required and must be numeric.</td></tr>
+<tr><td>Out of range</td><td>422</td><td>Invalid transaction amount. Allowed range: {min} to {max}.</td></tr>
+</table>
+
+<hr>
+
+<h2>8. Controller-Level Restrictions (PayinController)</h2>
+<p><strong>File:</strong> <code>app/Http/Controllers/Api/PayinController.php</code></p>
+
+<h3>8.1 API access flag</h3>
+<table>
+<tr><th>Condition</th><th>Result</th></tr>
+<tr><td>JazzCash + jc_api = 0</td><td>HTTP 400 — Error:Daily limit exceeded.</td></tr>
+<tr><td>Easypaisa + ep_api = 0</td><td>HTTP 400 — Error:Daily limit exceeded.</td></tr>
+</table>
+
+<h3>8.2 Post-success phone cooldown</h3>
+<table>
+<tr><th>Setting</th><th>Value</th></tr>
+<tr><td>Duration</td><td>2 minutes</td></tr>
+<tr><td>Stored in</td><td>blocked_numbers.block_until</td></tr>
+<tr><td>JazzCash</td><td>Skipped when jazzcash_blocking_enabled = false</td></tr>
+</table>
+
+<h3>8.3 JazzCash insufficient balance block</h3>
+<p>Trigger: code 999 + insufficient balance message. Requires jazzcash_blocking_enabled = true.</p>
+<table>
+<tr><th>Attempt</th><th>Block duration</th></tr>
+<tr><td>1st</td><td>180 seconds (3 minutes)</td></tr>
+<tr><td>2nd</td><td>1 hour</td></tr>
+<tr><td>3rd</td><td>24 hours</td></tr>
+<tr><td>4th+</td><td>24 hours each</td></tr>
+</table>
+
+<h3>8.4 JazzCash manual cancellation</h3>
+<p>Trigger: code 999 + user cancelled via SMS N. Requires jazzcash_blocking_enabled = true.</p>
+<table>
+<tr><th>Rule</th><th>Block duration</th></tr>
+<tr><td>1st cancellation in a day</td><td>Logged, no block</td></tr>
+<tr><td>2nd cancellation same day</td><td>1 hour</td></tr>
+</table>
+
+<h3>8.5 JazzCash upstream rate limit</h3>
+<p>JazzCash HTTP 429 → HTTP 502: Upstream provider rate limited the request.</p>
+
+<h3>8.6 Disabled / commented</h3>
+<ul>
+<li>Block when JazzCash account does not exist — commented out</li>
+<li>Block when Easypaisa account does not exist — commented out</li>
+<li>isNumberBlocked() in controller — defined but never called</li>
+</ul>
+
+<hr>
+
+<h2>9. Configuration Flags</h2>
+<table>
+<tr><th>Config file</th><th>Key</th><th>Default</th><th>Effect</th></tr>
+<tr><td>config/blocked_numbers.php</td><td>jazzcash_blocking_enabled</td><td>false</td><td>Disables JazzCash blocked-number middleware, cooldown, and failure blocks when false</td></tr>
+<tr><td>config/phone_verification.php</td><td>lock_seconds</td><td>5</td><td>Concurrent Easypaisa lock per phone</td></tr>
+<tr><td>config/phone_verification.php</td><td>cache_ttl_hours</td><td>2</td><td>Verified phone cache TTL</td></tr>
+</table>
+
+<hr>
+
+<h2>10. Complete Restriction Summary</h2>
+<table>
+<tr><th>Restriction</th><th>Easypaisa</th><th>JazzCash</th><th>Where</th></tr>
+<tr><td>Phone format 03XXXXXXXXX</td><td>Yes</td><td>Yes</td><td>payment.validate</td></tr>
+<tr><td>Amount min 1</td><td>Yes</td><td>Yes</td><td>payment.validate</td></tr>
+<tr><td>Amount max</td><td>100k</td><td>50k</td><td>payment.validate</td></tr>
+<tr><td>Unique orderId</td><td>Yes</td><td>Yes</td><td>payment.validate</td></tr>
+<tr><td>HTTPS callback</td><td>Yes</td><td>Yes</td><td>payment.validate</td></tr>
+<tr><td>Blocked numbers</td><td>Yes</td><td>Yes*</td><td>check.blocked.numbers</td></tr>
+<tr><td>Monthly 480M cap</td><td>Yes**</td><td>No</td><td>easypaisa.limit</td></tr>
+<tr><td>Max 400 pending</td><td>Yes</td><td>No</td><td>easypaisa.pending.limit</td></tr>
+<tr><td>Phone verification</td><td>Yes</td><td>No</td><td>phone.verified</td></tr>
+<tr><td>Merchant min/max</td><td>Yes***</td><td>Yes***</td><td>restrict.user.transaction.range</td></tr>
+<tr><td>API access flags</td><td>ep_api</td><td>jc_api</td><td>Controller</td></tr>
+<tr><td>2-min success cooldown</td><td>Yes</td><td>Yes*</td><td>Controller</td></tr>
+<tr><td>Insufficient balance block</td><td>No</td><td>Yes*</td><td>Controller</td></tr>
+<tr><td>Manual cancel block</td><td>No</td><td>Yes*</td><td>Controller</td></tr>
+<tr><td>Upstream 429</td><td>No</td><td>Yes</td><td>Controller</td></tr>
+</table>
+<p>* JazzCash blocked features depend on jazzcash_blocking_enabled<br>
+** Monthly cap only for restricted client IDs (currently [0])<br>
+*** Merchant limits only when transaction_limit_enabled</p>
+
+<hr>
+
+<h2>11. Middleware Execution Flow</h2>
+<pre>POST /api/payin/checkout
+        |
+        v
+[1] payment.validate
+        |
+        v
+[2] check.blocked.numbers
+        |
+        v
+[3] easypaisa.limit
+        |
+        v
+[4] easypaisa.pending.limit
+        |
+        v
+[5] phone.verified
+        |
+        v
+[6] restrict.user.transaction.range
+        |
+        v
+PayinController::checkout()
+        |
+        +-- validateApiAccess()
+        +-- process payment
+        +-- on success: 2-min cooldown
+        +-- on JC failure: balance / cancellation blocks</pre>
+
+<hr>
+
+<h2>12. Source File Index</h2>
+<table>
+<tr><th>Component</th><th>File path</th></tr>
+<tr><td>Route definition</td><td>routes/api.php</td></tr>
+<tr><td>Payin controller</td><td>app/Http/Controllers/Api/PayinController.php</td></tr>
+<tr><td>Payment validation</td><td>app/Http/Middleware/PaymentValidationMiddleware.php</td></tr>
+<tr><td>Blocked numbers middleware</td><td>app/Http/Middleware/CheckedBlockedNumbersMiddleware.php</td></tr>
+<tr><td>Easypaisa monthly limit</td><td>app/Http/Middleware/EasyPaisaLimitMiddleware.php</td></tr>
+<tr><td>Easypaisa pending limit</td><td>app/Http/Middleware/EasypaisaPendingRequestsMiddleware.php</td></tr>
+<tr><td>Phone verification</td><td>app/Http/Middleware/EnsurePhoneIsVerified.php</td></tr>
+<tr><td>Merchant amount range</td><td>app/Http/Middleware/RestrictUserTransactionRange.php</td></tr>
+<tr><td>Blocked number logic</td><td>app/Models/BlockedNumber.php</td></tr>
+<tr><td>Blocked txn creation</td><td>app/Service/PaymentService.php</td></tr>
+<tr><td>JazzCash blocking toggle</td><td>config/blocked_numbers.php</td></tr>
+<tr><td>Phone verification config</td><td>config/phone_verification.php</td></tr>
+</table>
+
+<p><em>End of document</em></p>
+</body>
+</html>

@@ -242,12 +242,12 @@ class BlockedNumber extends Model
 
         if (!$blocked->exists) {
             $blocked->fill([
-                'user_id' => $userId,
+                'user_id'       => $userId,
                 'attempt_count' => 0,
                 'blocked_attempt_count' => 0,
                 'response_code' => 'SUCCESS',
                 'response_desc' => 'Successful transaction cooldown',
-                'reason' => 'Successful transaction cooldown',
+                'reason'        => 'Successful transaction cooldown',
             ]);
         }
 
