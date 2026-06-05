@@ -19,6 +19,7 @@ class Kernel extends ConsoleKernel
         Commands\TestingData::class,
         Commands\EasyPaisaCheckTransactionStatus::class,
         \App\Console\Commands\ReportGenerate::class,
+        \App\Console\Commands\RefillSettlment::class,
         \App\Console\Commands\SurplusAddition::class,
         \App\Console\Commands\RecountReportGenerate::class,
         \App\Console\Commands\AutoFailPendingTransactions::class,
