@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('payout_settings', function (Blueprint $table) {
             $table->id();
             $table->string('type');
-            $table->double('value', 12, 3)->default(0);
+            $table->boolean('value')->default(0);
             $table->timestamps();
         });
     }
