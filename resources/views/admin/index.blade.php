@@ -152,7 +152,7 @@
                                                         <th>JC</th>
                                                         <th>EP</th>
                                                         <th colspan="2">Action</th>
-                                                        <th colspan="4">Payout Setting</th>
+                                                        <th colspan="3">Payout Setting</th>
                                                     </tr>
                                                     <tr class="bg-warning">
                                                         <th>{{number_format(round($surplusAmount->jazzcash,0))}}</th>
