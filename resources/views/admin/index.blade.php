@@ -152,30 +152,30 @@
                                                         <th>JC</th>
                                                         <th>EP</th>
                                                         <th colspan="3">Action</th>
-                                                        <th colspan="3">Payout Setting</th>
+                                                        <th colspan="3">Payout EP Setting</th>
                                                     </tr>
                                                     <tr class="bg-warning">
                                                         <th>{{number_format(round($surplusAmount->jazzcash,0))}}</th>
                                                         <th>{{number_format(round($surplusAmount->easypaisa,0))}}</th>
                                                         <th colspan="3"><a data-target="#attributeModal" class="btn btn-primary waves-effect waves-float waves-light open_modal" data-url="{{route('admin.setting.modal_sec')}}">Add Amount</a></th>
-                                                       @foreach($payout_setting as $item)
-    <th>
-        <div class="d-flex align-items-center gap-2">
-            <span class="mb-0">{{ $item->type }}</span>
+                                                        @foreach($payout_setting as $item)
+                                                            <th>
+                                                                <div class="d-flex align-items-center gap-2">
+                                                                    <span class="mb-0">{{ $item->type }}</span>
 
-            <div class="form-check mb-0">
-                <input 
-                    class="form-check-input payout-radio"
-                    type="radio"
-                    name="payout_setting"
-                    value="{{ $item->id }}"
-                    data-id="{{ $item->id }}"
-                    @if($item->value == 1) checked @endif
-                >
-            </div>
-        </div>
-    </th>
-@endforeach
+                                                                    <div class="form-check mb-0">
+                                                                        <input 
+                                                                            class="form-check-input payout-radio"
+                                                                            type="radio"
+                                                                            name="payout_setting"
+                                                                            value="{{ $item->id }}"
+                                                                            data-id="{{ $item->id }}"
+                                                                            @if($item->value == 1) checked @endif
+                                                                        >
+                                                                    </div>
+                                                                </div>
+                                                            </th>
+                                                        @endforeach
                                                     </tr>
                                                     @endif
                                                     <tr>
