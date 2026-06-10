@@ -504,6 +504,8 @@ class PaymentServiceV1
             
             // Refresh the model to get updated attributes
             $transaction->refresh();
+
+            $this->notifyPayinCallback($transaction, $requestId, $user, 'checkout_jazzcash_failed');
         }
         
         return $transaction;
@@ -560,6 +562,8 @@ class PaymentServiceV1
             
             // Refresh the model to get updated attributes
             $transaction->refresh();
+
+            $this->notifyPayinCallback($transaction, $requestId, $user, 'checkout_easypaisa_failed');
         }
         
         return $transaction;
@@ -588,18 +592,16 @@ class PaymentServiceV1
         // }
         
         // Send callback
-        $this->sendCallback(
-            $transaction->url, 
-            [
-                'orderId' => $transaction->orderId,
-                'tid' => $transaction->transactionId,
-                'tRefNo' => $transaction->txn_ref_no,
-                'amount' => $transaction->amount,
-                'status' => $transaction->status,
-            ], 
-            $requestId,
-            $user
-        );
+        $this->notifyPayinCallback($transaction, $requestId, $user, 'checkout_'.$type.'_success');
+    }
+
+    private function notifyPayinCallback(Transaction $transaction, string $requestId, ?User $user, string $source): void
+    {
+        if (! $user) {
+            $user = User::find($transaction->user_id);
+        }
+
+        MerchantCallback::notifyPayin($transaction, $user, (int) config('payment.callback.timeout', 120), $requestId, $source);
     }
 
     /**
@@ -762,75 +764,6 @@ class PaymentServiceV1
         }
     }
     
-    /**
-     * Send callback notification
-     *
-     * @param string $url
-     * @param array $data
-     * @param string $requestId
-     * @param int|null $retries
-     * @return bool
-     */
-    private function sendCallback(string $url, array $data, string $requestId, ?User $user = null, ?int $retries = null): bool
-    {
-        $maxRetries = $retries ?? config('payment.callback.max_retries', 3);
-        $timeout = config('payment.callback.timeout', 120);
-        
-        $attempt = 0;
-        while ($attempt < $maxRetries) {
-            try {
-                Log::channel('payout')->info('[TestPaymentService] Sending callback notification', [
-                    'request_id' => $requestId,
-                    'attempt' => $attempt + 1,
-                    'url' => $url,
-                    'data' => $data
-                ]);
-                
-                $response = MerchantCallback::post($url, $data, $user, $timeout);
-                
-                if ($response->successful()) {
-                    Log::channel('payout')->info('[TestPaymentService] Callback successful', [
-                        'request_id' => $requestId,
-                        'attempt' => $attempt + 1,
-                        'status_code' => $response->status(),
-                        'url' => $url
-                    ]);
-                    return true;
-                }
-                
-                Log::channel('payout')->warning('[TestPaymentService] Callback returned non-success status', [
-                    'request_id' => $requestId,
-                    'attempt' => $attempt + 1,
-                    'status_code' => $response->status(),
-                    'response_body' => $response->body(),
-                    'url' => $url
-                ]);
-            } catch (\Exception $e) {
-                Log::channel('error')->error('[TestPaymentService] Callback attempt failed', [
-                    'request_id' => $requestId,
-                    'attempt' => $attempt + 1,
-                    'error' => $e->getMessage(),
-                    'url' => $url,
-                    'trace' => $e->getTraceAsString()
-                ]);
-            }
-            
-            $attempt++;
-            if ($attempt < $maxRetries) {
-                // Exponential backoff: 2^attempt seconds (2, 4, 8...)
-                sleep(pow(2, $attempt));
-            }
-        }
-        
-        Log::channel('error')->error('[TestPaymentService] All callback attempts failed', [
-            'request_id' => $requestId,
-            'max_attempts' => $maxRetries,
-            'url' => $url
-        ]);
-        
-        return false;
-    }
-
     /**
      * Create a transaction for a blocked number attempt
      *

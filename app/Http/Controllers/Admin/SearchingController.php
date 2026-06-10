@@ -161,13 +161,8 @@ class SearchingController extends Controller
                     'pp_code' => $result['pp_ResponseCode'],
                     'pp_message' => $result['pp_ResponseMessage']
                 ]);
-        
-                $data = [
-                    'orderId' => $item->orderId,
-                    'amount' => $item->amount,
-                    'status' => 'success',
-                ];
-                $response = MerchantCallback::post($url, $data, $user, 120);
+                $item->refresh();
+                MerchantCallback::notifyPayin($item, $user, 120, null, 'admin_manual_jazzcash_success');
             } elseif ($result['pp_PaymentResponseCode'] == '157'){
                 $item->update([
                     'status' => 'pending',
@@ -183,13 +178,8 @@ class SearchingController extends Controller
                     'pp_code' => $result['pp_PaymentResponseCode'],
                     'pp_message' => $result['pp_PaymentResponseMessage']
                 ]);
-        
-                $data = [
-                    'orderId' => $item->orderId,
-                    'amount' => $item->amount,
-                    'status' => 'failed',
-                ];
-                $response = MerchantCallback::post($url, $data, $user, 120);
+                $item->refresh();
+                MerchantCallback::notifyPayin($item, $user, 120, null, 'admin_manual_jazzcash_failed');
             }
         }
         else{
@@ -202,28 +192,8 @@ class SearchingController extends Controller
                         'status' => 'success',
                         'transactionId'=>$result['msisdn']  ?? null
                     ]);
-                    $data = [
-                        'orderId' => $item->orderId,
-                        'amount' => $item->amount,
-                        'status' => 'success',
-                    ];
-                    // if ($user && $user->per_payin_fee) {
-                    //     $percentage = $user->per_payin_fee;
-                    //     $amount = $item->amount * $percentage;
-                    
-                    //     $surplus = SurplusAmount::find(1);
-                    //     $setting = Setting::where('user_id', $item->user_id)->first();
-                    
-                    //     if ($setting && $surplus) {
-                    //         $setting->easypaisa += $amount;
-                    //         $setting->payout_balance += $amount;
-                    //         $setting->save();
-                    
-                    //         $surplus->easypaisa -= $amount;
-                    //         $surplus->save();
-                    //     }
-                    // }
-                    $response = MerchantCallback::post($url, $data, $user, 60);
+                    $item->refresh();
+                    MerchantCallback::notifyPayin($item, $user, 60, null, 'admin_manual_easypaisa_success');
                 } elseif ($result['transactionStatus'] == 'FAILED') {
                     $item->update([
                         'status' => 'failed',
@@ -231,12 +201,8 @@ class SearchingController extends Controller
                         'pp_code' => $result['errorCode'] ?? null,
                         'pp_message' => $result['errorReason'] ?? null
                     ]);
-                    $data = [
-                        'orderId' => $item->orderId,
-                        'amount' => $item->amount,
-                        'status' => 'failed',
-                    ];
-                    $response = MerchantCallback::post($url, $data, $user, 60);
+                    $item->refresh();
+                    MerchantCallback::notifyPayin($item, $user, 60, null, 'admin_manual_easypaisa_failed');
                 }
             } elseif ($result['responseCode'] == '0003') {
                 // Transaction failed, update and notify
@@ -245,12 +211,8 @@ class SearchingController extends Controller
                     'pp_code' => $result['responseCode'],
                     'pp_message' => $result['responseDesc']
                 ]);
-                $data = [
-                    'orderId' => $item->orderId,
-                    'amount' => $item->amount,
-                    'status' => 'failed',
-                ];
-                $response = MerchantCallback::post($url, $data, $user, 60);
+                $item->refresh();
+                MerchantCallback::notifyPayin($item, $user, 60, null, 'admin_manual_easypaisa_failed_0003');
             }
         }
         return redirect()->back()->with('message','Callback send manually successfully!');
