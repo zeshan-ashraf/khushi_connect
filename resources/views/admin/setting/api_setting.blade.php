@@ -170,6 +170,47 @@
                         </div>
                     </div>
                 </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="card">
+                            <div class="card-header border-bottom d-flex justify-content-between">
+                                <h4 class="card-title text-capitalize">Payout Setting</h4>
+                            </div>
+                            <div class="card-body p-0">
+                                <div class="material-datatables">
+                                    <table class="table table-hover m-b-0 datatables" cellspacing="0" width="100%" style="width:100%">
+                                        <thead class="table-dark">
+                                            <tr>
+                                                <th>#</th>
+                                                <th>Type</th>
+                                                <th>Value</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach($payout_setting as $item)
+                                            <tr>
+                                                <td>{{ $loop->iteration }}</td>
+                                                <td>{{ $item->type }}</td>
+                                                <td>
+                                                    <div class="form-check form-switch">
+                                                        <input 
+                                                            class="form-check-input toggle-switch-payout" 
+                                                            type="checkbox"
+                                                            data-id="{{ $item->id }}"
+                                                            @if($item->value == 1) checked @endif
+                                                            @if($item->id == 1) disabled @endif
+                                                        >
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 <div class="row mt-1">
                     <div class="col-12">
                         <div class="card">
@@ -644,6 +685,41 @@ $(document).ready(function () {
 
         function updateCheckedToggleEp(id) {
             var URL = '{{ route("admin.setting.schedule.save") }}';
+            $.ajax({
+                url: URL,
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                },
+                contentType: 'application/json',
+                data: JSON.stringify({ id: id }),
+                success: function (response) {
+                    console.log(response);
+                },
+                error: function (xhr, status, error) {
+                    console.error('Error:', error);
+                },
+            });
+        }
+    });
+</script>
+<script>
+    $(document).ready(function () {
+        const switches = $('.toggle-switch-payout');
+
+        switches.on('change', function () {
+            if ($(this).is(':checked')) {
+                // Uncheck all other switches
+                switches.not(this).prop('checked', false);
+
+                // Optional: Make an AJAX request to update the backend
+                const id = $(this).data('id');
+                updateCheckedTogglePayout(id);
+            }
+        });
+
+        function updateCheckedTogglePayout(id) {
+            var URL = '{{ route("admin.setting.payout_setting") }}';
             $.ajax({
                 url: URL,
                 method: 'POST',

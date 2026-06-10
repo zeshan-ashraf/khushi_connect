@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\{User, Summary, Setting, ScheduleSetting,SurplusAmount,Transaction,ManualPayout,Settlement};
+use App\Models\{User, Summary, Setting, ScheduleSetting,SurplusAmount,Transaction,PayoutSetting,Settlement};
 use Illuminate\Http\Request;
 use DB;
 
@@ -336,6 +336,19 @@ class SettingController extends Controller
         }else{
             User::where('id',$request->id)->update([$request->type => $request->status]);
         }
+        return redirect()->back();
+    }
+
+    public function payoutSetting(Request $request)
+    {
+        $selectedId = $request->id;
+
+        PayoutSetting::query()->update(['value' => 0]);
+
+        $setting = PayoutSetting::findOrFail($selectedId);
+        $setting->value = 1;
+        $setting->save();
+    
         return redirect()->back();
     }
 
