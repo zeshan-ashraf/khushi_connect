@@ -23,6 +23,7 @@ class ArcheivePayout extends Model
         'transaction_type',
         'status',
         'url',
+        'api_type',
     ];
     
     public $timestamps = true;

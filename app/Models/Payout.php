@@ -23,6 +23,7 @@ class Payout extends Model
         'transaction_type',
         'status',
         'url',
+        'api_type',
     ];
     
     public function user()
