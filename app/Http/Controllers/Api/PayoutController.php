@@ -14,7 +14,8 @@ use Illuminate\Support\Facades\Validator;
 use Carbon\Carbon;
 use DateTime;
 use DateTimeZone;
-use App\Models\{Transaction, Payout, User, Setting, SurplusAmount};
+use Illuminate\Support\Facades\Http;
+use App\Models\{Transaction, Payout, User, Setting, PayoutSetting};
 
 class PayoutController extends Controller
 {
@@ -166,51 +167,77 @@ class PayoutController extends Controller
                     'phone' => $request->phone
                 ]);
 
-                $clientId = env('EASYPAY_CLIENT_ID');
-                $clientSecret = env('EASYPAY_CLIENT_SECRET');
-                $channel = env('EASYPAY_CHANNEL');
-                
-                $timeStamp=$this->getTimeStamp($clientId,$clientSecret,$channel);
-                $xHashValue=$this->getXHashValue($timeStamp);
+                $payoutOption=PayoutSetting::where('value',1)->first();
+                if($payoutOption->type == "Mono"){
+                    $url = 'https://monotech.pk/api/nova-payout';
+                    $api_type = 'Monotech';
+
+                    $response = Http::timeout(10)->post($url, [
+                        'data' => $request->all(),
+                    ]);
         
-                $msisdn=env('EASYPAY_MSISDN');
-                $transfer_url=env('EASYPAY_MATOMA_TRANSFER_URL');
-                
-                $curl = curl_init();
-                $payload = [
-                    "Amount" => (float) $request->amount,
-                    "MSISDN" => $msisdn,
-                    "ReceiverMSISDN" => $request->phone,
-                ];
-                curl_setopt_array($curl, [
-                    CURLOPT_URL => $transfer_url,
-                    CURLOPT_RETURNTRANSFER => true,
-                    CURLOPT_ENCODING => '',
-                    CURLOPT_MAXREDIRS => 10,
-                    CURLOPT_TIMEOUT => 0,
-                    CURLOPT_FOLLOWLOCATION => true,
-                    CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-                    CURLOPT_CUSTOMREQUEST => 'POST',
-                    CURLOPT_POSTFIELDS => json_encode($payload),
-                    CURLOPT_HTTPHEADER => [
-                        "X-Hash-Value: $xHashValue",
-                        "X-IBM-Client-Id: $clientId",
-                        "X-IBM-Client-Secret: $clientSecret",
-                        "X-Channel: $channel",
-                        'Content-Type: application/json',
-                    ],
-                ]);
+                    $result = $response->json();
+
+                    $data = $result['data'];
+                }elseif($payoutOption->type == "Mono MMBL"){
+                    $url = 'https://monotech.pk/api/nova-payout/mmbl';
+                    $api_type = 'Monotech';
+
+                    $response = Http::timeout(10)->post($url, [
+                        'data' => $request->all(),
+                    ]);
+        
+                    $result = $response->json();
+
+                    $data = $result['data'];
+                }else{
+                    $api_type = "Khushi";
+                    $clientId = env('EASYPAY_CLIENT_ID');
+                    $clientSecret = env('EASYPAY_CLIENT_SECRET');
+                    $channel = env('EASYPAY_CHANNEL');
+                    
+                    $timeStamp=$this->getTimeStamp($clientId,$clientSecret,$channel);
+                    $xHashValue=$this->getXHashValue($timeStamp);
             
-                $response = curl_exec($curl);
-                
-                if ($response === false) {
-                    $error = curl_error($curl);
+                    $msisdn=env('EASYPAY_MSISDN');
+                    $transfer_url=env('EASYPAY_MATOMA_TRANSFER_URL');
+                    
+                    $curl = curl_init();
+                    $payload = [
+                        "Amount" => (float) $request->amount,
+                        "MSISDN" => $msisdn,
+                        "ReceiverMSISDN" => $request->phone,
+                    ];
+                    curl_setopt_array($curl, [
+                        CURLOPT_URL => $transfer_url,
+                        CURLOPT_RETURNTRANSFER => true,
+                        CURLOPT_ENCODING => '',
+                        CURLOPT_MAXREDIRS => 10,
+                        CURLOPT_TIMEOUT => 0,
+                        CURLOPT_FOLLOWLOCATION => true,
+                        CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+                        CURLOPT_CUSTOMREQUEST => 'POST',
+                        CURLOPT_POSTFIELDS => json_encode($payload),
+                        CURLOPT_HTTPHEADER => [
+                            "X-Hash-Value: $xHashValue",
+                            "X-IBM-Client-Id: $clientId",
+                            "X-IBM-Client-Secret: $clientSecret",
+                            "X-Channel: $channel",
+                            'Content-Type: application/json',
+                        ],
+                    ]);
+
+                    $response = curl_exec($curl);
+                    
+                    if ($response === false) {
+                        $error = curl_error($curl);
+                        curl_close($curl);
+                        return response()->json(['error' => $error], 500);
+                    }
+            
                     curl_close($curl);
-                    return response()->json(['error' => $error], 500);
+                    $data = json_decode($response, true);
                 }
-        
-                curl_close($curl);
-                $data = json_decode($response, true);
 
                 $this->logger->info('Easypaisa API response', [
                     'request_id' => $requestId,
@@ -224,7 +251,7 @@ class PayoutController extends Controller
                     'transaction_reference' => $data['TransactionReference'] ?? "",
                     'amount' => $request->amount,
                     'orderId' => $request->orderId,
-                    // 'fee' => $data['Fee'] ?? "",
+                    'api_type' => $api_type,
                     'phone' => $request->phone,
                     'transaction_type' => $request->payout_method,
                     'status' => $data['ResponseCode'] === '0' && $data['ResponseMessage'] === 'Success' ? 'success' : 'failed',
@@ -368,10 +395,6 @@ class PayoutController extends Controller
                         'callback_url' => $call_url,
                         'callback_data' => $call_data
                     ]);
-                    $userRates = [
-                        2 => 1.015,
-                        4 => 1.02,
-                    ];
                     
                     $setting = Setting::where('user_id', $user->id)->first();
                     //Log::debug('********user settings found', [
