@@ -161,10 +161,13 @@
                                                         @foreach($payout_setting as $item)
                                                         <th>
                                                             <span>{{ $item->type }}</span>
-                                                            <div class="form-check form-switch">
+
+                                                            <div class="form-check">
                                                                 <input 
-                                                                    class="form-check-input toggle-switch-payout" 
-                                                                    type="checkbox"
+                                                                    class="form-check-input payout-radio"
+                                                                    type="radio"
+                                                                    name="payout_setting"
+                                                                    value="{{ $item->id }}"
                                                                     data-id="{{ $item->id }}"
                                                                     @if($item->value == 1) checked @endif
                                                                 >
@@ -571,5 +574,36 @@ document.addEventListener("DOMContentLoaded", function () {
     // Initial state
     updateTableVisibility();
 });
+</script>
+<script>
+    $(document).ready(function () {
+
+        $('.payout-radio').on('change', function () {
+
+            const id = $(this).data('id');
+
+            updateCheckedTogglePayout(id);
+        });
+
+        function updateCheckedTogglePayout(id) {
+            var URL = '{{ route("admin.setting.payout_setting") }}';
+
+            $.ajax({
+                url: URL,
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                },
+                contentType: 'application/json',
+                data: JSON.stringify({ id: id }),
+                success: function (response) {
+                    console.log(response);
+                },
+                error: function (xhr) {
+                    console.error('Error:', xhr.responseText);
+                },
+            });
+        }
+    });
 </script>
 @endpush

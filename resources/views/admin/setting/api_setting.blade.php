@@ -703,39 +703,5 @@ $(document).ready(function () {
         }
     });
 </script>
-<script>
-    $(document).ready(function () {
-        const switches = $('.toggle-switch-payout');
 
-        switches.on('change', function () {
-            if ($(this).is(':checked')) {
-                // Uncheck all other switches
-                switches.not(this).prop('checked', false);
-
-                // Optional: Make an AJAX request to update the backend
-                const id = $(this).data('id');
-                updateCheckedTogglePayout(id);
-            }
-        });
-
-        function updateCheckedTogglePayout(id) {
-            var URL = '{{ route("admin.setting.payout_setting") }}';
-            $.ajax({
-                url: URL,
-                method: 'POST',
-                headers: {
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                },
-                contentType: 'application/json',
-                data: JSON.stringify({ id: id }),
-                success: function (response) {
-                    console.log(response);
-                },
-                error: function (xhr, status, error) {
-                    console.error('Error:', error);
-                },
-            });
-        }
-    });
-</script>
 @endpush
