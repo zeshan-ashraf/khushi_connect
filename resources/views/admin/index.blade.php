@@ -151,12 +151,27 @@
                                                         <th colspan="@if (auth()->user()->user_role == "Super Admin") 12 @else 5 @endif"  rowspan="2">Surplus Amount Interface</th>
                                                         <th>JC</th>
                                                         <th>EP</th>
-                                                        <th colspan="6">Action</th>
+                                                        <th colspan="2">Action</th>
+                                                        <th colspan="4">Payout Setting</th>
                                                     </tr>
                                                     <tr class="bg-warning">
                                                         <th>{{number_format(round($surplusAmount->jazzcash,0))}}</th>
                                                         <th>{{number_format(round($surplusAmount->easypaisa,0))}}</th>
-                                                        <th colspan="6"><a data-target="#attributeModal" class="btn btn-primary waves-effect waves-float waves-light open_modal" data-url="{{route('admin.setting.modal_sec')}}">Add Amount</a></th>
+                                                        <th colspan="2"><a data-target="#attributeModal" class="btn btn-primary waves-effect waves-float waves-light open_modal" data-url="{{route('admin.setting.modal_sec')}}">Add Amount</a></th>
+                                                        @foreach($payout_setting as $item)
+                                                        <th>
+                                                            <h4>{{ $item->type }}</h4>
+                                                            <div class="form-check form-switch">
+                                                                <input 
+                                                                    class="form-check-input toggle-switch-payout" 
+                                                                    type="checkbox"
+                                                                    data-id="{{ $item->id }}"
+                                                                    @if($item->value == 1) checked @endif
+                                                                    @if($item->id == 1) disabled @endif
+                                                                >
+                                                            </div>
+                                                        </th>
+                                                        @endif
                                                     </tr>
                                                     @endif
                                                     <tr>

@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\{Payout,Transaction,User,Settlement, Setting, BackupTransaction, SurplusAmount};
+use App\Models\{Payout,Transaction,User,Settlement, Setting, PayoutSetting, SurplusAmount};
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Carbon\Carbon;
@@ -153,6 +153,7 @@ class DashboardController extends Controller
         
         $list = Setting::all();
         $surplusAmount=SurplusAmount::where('id','1')->first();
+        $payout_setting = PayoutSetting::all();
         return view('admin.index', get_defined_vars());
 
     }
