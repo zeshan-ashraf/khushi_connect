@@ -171,7 +171,7 @@
                                                                 >
                                                             </div>
                                                         </th>
-                                                        @endif
+                                                        @endforeach
                                                     </tr>
                                                     @endif
                                                     <tr>
