@@ -168,16 +168,15 @@
                                                                 <span>{{ $item->type }} EP</span>
                                                             @endif
                                                             
-                                                            @if($item->value != 1)
-                                                                <div class="form-check form-switch">
-                                                                    <input 
-                                                                        class="form-check-input toggle-switch-payout" 
-                                                                        type="checkbox"
-                                                                        data-id="{{ $item->id }}"
-                                                                        @if($item->value == 1) checked @endif
-                                                                    >
-                                                                </div>
-                                                            @endif
+                                                            <div class="form-check form-switch">
+                                                                <input 
+                                                                    class="form-check-input toggle-switch-payout" 
+                                                                    type="checkbox"
+                                                                    data-id="{{ $item->id }}"
+                                                                    @if($item->value == 1) checked @endif
+                                                                    @if($item->id == 1) disabled @endif
+                                                                >
+                                                            </div>
                                                         </th>
                                                         @endforeach
                                                     </tr>
