@@ -327,6 +327,7 @@ class SettingController extends Controller
         $list = User::where('user_role','client')->get();
         $list2 = ScheduleSetting::where('txns_type','jazzcash')->get();
         $list3 = ScheduleSetting::where('txns_type','easypaisa')->get();
+        $payout_setting = PayoutSetting::all();
         return view("admin.setting.api_setting",get_defined_vars());
     }
     public function apiSuspendSetting(Request $request)
