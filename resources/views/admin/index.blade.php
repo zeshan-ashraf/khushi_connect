@@ -160,7 +160,7 @@
                                                         <th colspan="2"><a data-target="#attributeModal" class="btn btn-primary waves-effect waves-float waves-light open_modal" data-url="{{route('admin.setting.modal_sec')}}">Add Amount</a></th>
                                                         @foreach($payout_setting as $item)
                                                         <th>
-                                                            <h6>{{ $item->type }}</h6>
+                                                            <span>{{ $item->type }}</span>
                                                             <div class="form-check form-switch">
                                                                 <input 
                                                                     class="form-check-input toggle-switch-payout" 
