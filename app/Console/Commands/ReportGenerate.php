@@ -5,7 +5,7 @@ namespace App\Console\Commands;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
-use App\Models\{Settlement,SurplusAmount,Setting,User};
+use App\Models\{Settlement,SurplusAmount,TempAmountPayout,User};
 use Illuminate\Support\Facades\Http;
 
 class ReportGenerate extends Command
@@ -182,6 +182,10 @@ class ReportGenerate extends Command
                     'wallet_transfer' => '0',
                     'settled' => '0',
                     'closing_bal' => '0',
+                ]);
+                TempAmountPayout::query()->update([
+                    'jc_amount' => 0,
+                    'ep_amount' => 0,
                 ]);
             }
         }
