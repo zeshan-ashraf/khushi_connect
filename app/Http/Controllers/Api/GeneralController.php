@@ -505,4 +505,34 @@ class GeneralController extends Controller
         $encryptedData = base64_encode($encryptedData);
         return $encryptedData;
     }
+    public function getKhushiPayout()
+    {
+
+        $todayEPKhushiPayout = DB::table('payouts')
+            ->where('status','success')
+            ->where('transaction_type','easypaisa')
+            ->where('api_type','khushi')
+            ->whereDate('created_at', Carbon::today())
+            ->sum('amount');
+
+        $todayEPMonoPayout = DB::table('payouts')
+            ->where('status','success')
+            ->where('transaction_type','easypaisa')
+            ->where('api_type','Monotech')
+            ->whereDate('created_at', Carbon::today())
+            ->sum('amount');
+
+        $todayEpMonoMmblPayout = DB::table('payouts')
+            ->where('status','success')
+            ->where('transaction_type','easypaisa')
+            ->where('api_type','Monotech MMBL')
+            ->whereDate('created_at', Carbon::today())
+            ->sum('amount');
+
+        return [
+            'today_ep_khushi_payout' => $todayEPKhushiPayout,
+            'today_ep_mono_payout' => $todayEPMonoPayout,
+            'today_ep_mono_mmbl_payout' => $todayEpMonoMmblPayout,
+        ];
+    }
 }
