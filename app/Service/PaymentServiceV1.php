@@ -722,10 +722,10 @@ class PaymentServiceV1
         try {
             if ($type == "jazzcash") {
                 $setting->jazzcash += $amount;
-                $surplus->jazzcash -= $amount;
+                // $surplus->jazzcash -= $amount;
             } else {
                 $setting->easypaisa += $amount;
-                $surplus->easypaisa -= $amount;
+                // $surplus->easypaisa -= $amount;
             }
             
             $setting->payout_balance += $amount;

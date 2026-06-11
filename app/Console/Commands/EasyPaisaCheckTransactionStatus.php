@@ -90,8 +90,8 @@ class EasyPaisaCheckTransactionStatus extends Command
             $setting->payout_balance += $amount;
             $setting->save();
 
-            $surplus->easypaisa -= $amount;
-            $surplus->save();
+            // $surplus->easypaisa -= $amount;
+            // $surplus->save();
         }
     }
 }

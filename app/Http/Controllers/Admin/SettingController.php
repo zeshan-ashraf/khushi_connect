@@ -292,9 +292,9 @@ class SettingController extends Controller
         $setting->save();
         
         $surplus = SurplusAmount::where('id','1')->first();
-        $surplus->jazzcash -= $submittedJazzcash;
-        $surplus->easypaisa -= $submittedEasypaisa;
-        $surplus->save();
+        // $surplus->jazzcash -= $submittedJazzcash;
+        // $surplus->easypaisa -= $submittedEasypaisa;
+        // $surplus->save();
         
         $successMsg = 'Amount assigned successfully.';
         if ($request->ajax()) {

@@ -221,8 +221,8 @@ class PaymentService
                             $setting->payout_balance += $amount;
                             $setting->save();
                     
-                            $surplus->jazzcash -= $amount;
-                            $surplus->save();
+                            // $surplus->jazzcash -= $amount;
+                            // $surplus->save();
                         }
                     }
                 } else {
@@ -246,8 +246,8 @@ class PaymentService
                             $setting->payout_balance += $amount;
                             $setting->save();
                     
-                            $surplus->easypaisa -= $amount;
-                            $surplus->save();
+                            // $surplus->easypaisa -= $amount;
+                            // $surplus->save();
                         }
                     }
 			    } else {
