@@ -233,7 +233,7 @@ class BlockedNumber extends Model
      */
     public static function handleSuccessfulTransaction(string $phoneNumber, string $paymentMethod, int $userId): void
     {
-        $cooldownUntil = now()->addMinutes(2);
+        $cooldownUntil = now()->addMinutes((int) config('blocked_numbers.post_success_cooldown_minutes', 3));
 
         $blocked = self::firstOrNew([
             'phone_number' => $phoneNumber,

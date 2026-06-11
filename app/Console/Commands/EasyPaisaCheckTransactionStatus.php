@@ -2,21 +2,20 @@
 
 namespace App\Console\Commands;
 
-use Illuminate\Console\Command;
-use App\Models\{Transaction,SurplusAmount,Setting,User};
+use App\Models\Setting;
+use App\Models\SurplusAmount;
+use App\Models\Transaction;
+use App\Models\User;
 use App\Service\StatusService;
-use Illuminate\Support\Facades\Http;
-use Carbon\Carbon;
+use App\Support\MerchantCallback;
+use Illuminate\Console\Command;
 
 class EasyPaisaCheckTransactionStatus extends Command
 {
-    // The name and signature of the console command.
     protected $signature = 'transactions:easypaisa-check-status';
 
-    // The console command description.
     protected $description = 'Check status of pending transactions and update them.';
 
-    // Dependency injection for the StatusService
     protected $statusService;
 
     public function __construct(StatusService $statusService)
@@ -25,90 +24,74 @@ class EasyPaisaCheckTransactionStatus extends Command
         $this->statusService = $statusService;
     }
 
-    // Execute the console command.
     public function handle()
     {
-        $now=Carbon::now();
-        
         $list = Transaction::where('status', 'pending')->where('txn_type', 'easypaisa')->get();
-        // \Log::info('Response from notifyurl:', ['response' => $now]);
-        
+
         set_time_limit(0);
 
         if ($list->isNotEmpty()) {
             foreach ($list as $item) {
-                $url=$item->url;
-
                 $result = $this->statusService->process($item);
-              
-                // Check if the response code is successful
+                $user = User::find($item->user_id);
+
                 if ($result['responseCode'] == '0000') {
-                    // Check transactionStatus in response
                     if ($result['transactionStatus'] == 'PAID') {
                         $item->update([
                             'status' => 'success',
-                            'transactionId' => $result['transactionId'] ?? $result['msisdn'] ?? null
+                            'transactionId' => $result['transactionId'] ?? $result['msisdn'] ?? null,
                         ]);
-                        $data = [
-                            'orderId' => $item->orderId,
-                            'tid' => $item->transactionId,
-                            'amount' => $item->amount,
-                            'status' => 'success',
-                        ];
-                        
-                        $user = User::find($item->user_id);
+                        $item->refresh();
 
                         if ($user && $user->per_payin_fee) {
-                            $rate = $user->per_payin_fee;
-                            $amount = $item->amount * $rate;
-                        
-                            $surplus = SurplusAmount::find(1);
-                            $setting = Setting::where('user_id', $item->user_id)->first();
-                        
-                            if ($setting && $surplus && $setting->auto ==1) {
-                                $setting->easypaisa += $amount;
-                                $setting->payout_balance += $amount;
-                                $setting->save();
-                        
-                                $surplus->easypaisa -= $amount;
-                                $surplus->save();
-                            }
+                            $this->applyEasypaisaBalance($item, $user);
                         }
-                        $response = Http::timeout(60)->post($url, $data);
+
+                        MerchantCallback::notifyPayin($item, $user, 60, null, 'cron_easypaisa_pending_success');
                     } elseif ($result['transactionStatus'] == 'FAILED') {
                         $item->update([
                             'status' => 'failed',
-                            'transactionId'=>$result['transactionId'] ?? $result['msisdn'] ?? null,
+                            'transactionId' => $result['transactionId'] ?? $result['msisdn'] ?? null,
                             'pp_code' => $result['errorCode'] ?? null,
-                            'pp_message' => $result['errorReason'] ?? null
+                            'pp_message' => $result['errorReason'] ?? null,
                         ]);
-                        $data = [
-                            'orderId' => $item->orderId,
-                            'TID' => $item->transactionId,
-                            'amount' => $item->amount,
-                            'status' => 'failed',
-                        ];
-                        $response = Http::timeout(60)->post($url, $data);
+                        $item->refresh();
+
+                        if (MerchantCallback::shouldNotifyFailedFromCron($item)) {
+                            MerchantCallback::notifyPayin($item, $user, 60, null, 'cron_easypaisa_pending_failed');
+                        }
                     }
                 } elseif ($result['responseCode'] == '0003') {
-                    // Transaction failed, update and notify
                     $item->update([
                         'status' => 'failed',
                         'pp_code' => $result['responseCode'],
-                        'pp_message' => $result['responseDesc']
+                        'pp_message' => $result['responseDesc'],
                     ]);
-                    $data = [
-                        'orderId' => $item->orderId,
-                        'TID' => $item->transactionId,
-                        'amount' => $item->amount,
-                        'status' => 'failed',
-                    ];
-                    $response = Http::timeout(60)->post($url, $data);
-                }
+                    $item->refresh();
 
+                    if (MerchantCallback::shouldNotifyFailedFromCron($item)) {
+                        MerchantCallback::notifyPayin($item, $user, 60, null, 'cron_easypaisa_pending_failed_0003');
+                    }
+                }
             }
         }
 
         $this->info('Pending transactions checked and updated.');
+    }
+
+    private function applyEasypaisaBalance(Transaction $item, User $user): void
+    {
+        $amount = $item->amount * $user->per_payin_fee;
+        $surplus = SurplusAmount::find(1);
+        $setting = Setting::where('user_id', $item->user_id)->first();
+
+        if ($setting && $surplus && $setting->auto == 1) {
+            $setting->easypaisa += $amount;
+            $setting->payout_balance += $amount;
+            $setting->save();
+
+            $surplus->easypaisa -= $amount;
+            $surplus->save();
+        }
     }
 }

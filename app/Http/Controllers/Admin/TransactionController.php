@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\DataTables\Admin\TransactionDataTable;
 use App\Http\Controllers\Controller;
+use App\Support\MerchantCallback;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Http\Request;
 use App\Models\{Transaction,ArcheiveTransaction,BackupTransaction,Settlement};
@@ -185,16 +186,9 @@ class TransactionController extends Controller
         // Update the status
         $transaction->status = $request->status;
         $transaction->save();
-    
-        // Prepare the data for the HTTP request
-        $data = [
-            'orderId' => $transaction->orderId,
-            'amount' => $transaction->amount,
-            'status' => $transaction->status,
-        ];
-    
-        // Make an HTTP request
-        $response = Http::timeout(60)->post($transaction->url, $data);
+        $transaction->refresh();
+
+        MerchantCallback::notifyPayin($transaction, $transaction->user, 60, null, 'admin_change_status');
     
         return response()->json(['message' => 'Status changed successfully!']);
     }
