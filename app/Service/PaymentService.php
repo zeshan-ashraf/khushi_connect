@@ -217,7 +217,7 @@ class PaymentService
                         $surplus = SurplusAmount::find(1);
                     
                         if ($setting && $surplus) {
-                            $setting->jazzcash += $amount;
+                            // $setting->jazzcash += $amount;
                             $setting->payout_balance += $amount;
                             $setting->save();
                     
@@ -242,7 +242,7 @@ class PaymentService
                         $surplus = SurplusAmount::find(1);
                     
                         if ($setting && $surplus) {
-                            $setting->easypaisa += $amount;
+                            // $setting->easypaisa += $amount;
                             $setting->payout_balance += $amount;
                             $setting->save();
                     

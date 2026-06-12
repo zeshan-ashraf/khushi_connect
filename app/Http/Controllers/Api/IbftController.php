@@ -139,7 +139,7 @@ class IbftController extends Controller
                     $rate = $user->per_payout_fee;
                     $amount = $request->amount * $rate;
                 
-                    $setting->jazzcash -= $amount;
+                    // $setting->jazzcash -= $amount;
                     $setting->payout_balance -= $amount;
                     $setting->save();
                 }

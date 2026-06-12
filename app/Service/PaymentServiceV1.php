@@ -720,13 +720,13 @@ class PaymentServiceV1
     private function updateBalances(Setting $setting, SurplusAmount $surplus, float $amount, string $type): void
     {
         try {
-            if ($type == "jazzcash") {
-                $setting->jazzcash += $amount;
-                // $surplus->jazzcash -= $amount;
-            } else {
-                $setting->easypaisa += $amount;
-                // $surplus->easypaisa -= $amount;
-            }
+            // if ($type == "jazzcash") {
+            //     $setting->jazzcash += $amount;
+            //     // $surplus->jazzcash -= $amount;
+            // } else {
+            //     $setting->easypaisa += $amount;
+            //     // $surplus->easypaisa -= $amount;
+            // }
             
             $setting->payout_balance += $amount;
             

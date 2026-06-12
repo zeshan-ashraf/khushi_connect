@@ -86,7 +86,7 @@ class EasyPaisaCheckTransactionStatus extends Command
         $setting = Setting::where('user_id', $item->user_id)->first();
 
         if ($setting && $surplus && $setting->auto == 1) {
-            $setting->easypaisa += $amount;
+            // $setting->easypaisa += $amount;
             $setting->payout_balance += $amount;
             $setting->save();
 
