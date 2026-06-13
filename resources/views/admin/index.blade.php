@@ -195,6 +195,7 @@ thead .sticky-balance {
                                                                             value="{{ $item->id }}"
                                                                             data-id="{{ $item->id }}"
                                                                             @if($item->value == 1) checked @endif
+                                                                            @if($item->id == 4) disabled @endif
                                                                         >
                                                                     </div>
                                                                 </div>
