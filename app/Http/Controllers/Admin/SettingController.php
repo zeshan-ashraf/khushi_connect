@@ -258,7 +258,7 @@ class SettingController extends Controller
         
         // Get and validate submitted amounts
         $submittedEasypaisa = floatval($request->easypaisa ?? 0);
-        $submittedJazzcash = floatval($request->jazzcash ?? 0);
+        // $submittedJazzcash = floatval($request->jazzcash ?? 0);
         
         /*
         // Ensure submitted amounts are non-negative
@@ -270,14 +270,15 @@ class SettingController extends Controller
             return redirect()->back()->with('error', $errorMsg);
         }*/
         
-        $submittedTotal = $submittedEasypaisa + $submittedJazzcash;
+        // $submittedTotal = $submittedEasypaisa + $submittedJazzcash;
+        $submittedTotal = $submittedEasypaisa;
        // dd($submittedTotal,$currentSetting->easypaisa ,  $currentSetting->jazzcash,( $submittedTotal +$currentSetting->easypaisa +  $currentSetting->jazzcash),$unsettletdAmount);
         // Validate: submitted amount should not be greater than unsettled_amount_balance
         // Skip this validation for Admin and Super Admin
         $userRole = auth()->user()->user_role ?? '';
         if ($userRole !== "Admin" && $userRole !== "Super Admin" && $userRole !== "Manager") {// this couold be Client role only
-            if ( ( $submittedTotal +$currentSetting->easypaisa +  $currentSetting->jazzcash) > $unsettletdAmount) {
-                $errorMsg = 'Submitted amount (Easypaisa + Jazzcash) cannot be greater than unsettled amount balance. Available balance: ' . number_format(round($unsettledAmountBalance, 0));
+            if ( ( $submittedTotal +$submittedEasypaisa) > $unsettletdAmount) {
+                $errorMsg = 'Submitted amount of wallet cannot be greater than unsettled amount balance. Available balance: ' . number_format(round($unsettledAmountBalance, 0));
                 if ($request->ajax()) {
                     return response()->json(['error' => $errorMsg]);
                 }
@@ -286,15 +287,15 @@ class SettingController extends Controller
         }
         
         $setting = $currentSetting;
-        $setting->easypaisa += $submittedEasypaisa;
-        $setting->jazzcash += $submittedJazzcash;
-        $setting->payout_balance = $setting->easypaisa + $setting->jazzcash;
+        // $setting->easypaisa += $submittedEasypaisa;
+        // $setting->jazzcash += $submittedJazzcash;
+        $setting->payout_balance += $submittedEasypaisa;;
         $setting->save();
         
-        $surplus = SurplusAmount::where('id','1')->first();
-        $surplus->jazzcash -= $submittedJazzcash;
-        $surplus->easypaisa -= $submittedEasypaisa;
-        $surplus->save();
+        // $surplus = SurplusAmount::where('id','1')->first();
+        // $surplus->jazzcash -= $submittedJazzcash;
+        // $surplus->easypaisa -= $submittedEasypaisa;
+        // $surplus->save();
         
         $successMsg = 'Amount assigned successfully.';
         if ($request->ajax()) {

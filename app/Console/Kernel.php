@@ -84,6 +84,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('transactions:jazzcash-recheck-status')->everyMinute();
         $schedule->command('transactions:easypaisa-recheck-status')->everyMinute();
         $schedule->command('report:generate')->everyMinute();
+        $schedule->command('suplus:addition')->everyMinute();
         $schedule->command('recount-report-generate')->dailyAt('01:00');
         $schedule->command('transactions:archive')->dailyAt('02:15');
         $schedule->command('transactions:backup')->dailyAt('02:30');

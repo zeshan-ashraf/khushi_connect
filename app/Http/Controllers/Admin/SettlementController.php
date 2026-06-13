@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\{Transaction,Payout,Settlement,WalletTransfer};
+use App\Models\{Transaction,Payout,Settlement,WalletTransfer,Setting};
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -62,6 +62,7 @@ class SettlementController extends Controller
         //     'usdt'=>'required',
         // ]);
         $item = Settlement::findOrFail($request->id);
+        $setting=Setting::where('user_id',$item->user_id)->first();
 
         if($request->wallet_transfer > 0 && $request->store_name != "None"){
             $request->validate([
@@ -122,7 +123,8 @@ class SettlementController extends Controller
         $item->wallet_transfer = $totalWalletTrans;
         $item->settled = $item->settled+$totalUsdt+$totalWallet+$totalWalletTrans;
         $item->save();
-
+        $setting->payout_balance = $setting->payout_balance - ($request->usdt + $request->wallet_transfer);
+        $setting->save();
 
         $msg = "Summary Updated Successfully!";
         return redirect()->back()->with('message',$msg);

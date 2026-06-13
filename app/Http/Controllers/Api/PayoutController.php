@@ -96,12 +96,12 @@ class PayoutController extends Controller
             $callback_url = $request->callback_url;
             if($user->email == "okpaysev@gmail.com"){
                 $setting=Setting::where('user_id',$user->id)->first();
-                $assigned_amount=0;
-                if($request->payout_method == "easypaisa"){
-                    $assigned_amount=$setting->easypaisa;
-                }else {
-                    $assigned_amount=$setting->jazzcash;
-                }
+                $assigned_amount=$setting->payout_balance;
+                // if($request->payout_method == "easypaisa"){
+                //     $assigned_amount=$setting->easypaisa;
+                // }else {
+                //     $assigned_amount=$setting->jazzcash;
+                // }
                 if($request->amount > $assigned_amount){
                     $values=[
                         'user_id' => $user->id,
@@ -132,12 +132,12 @@ class PayoutController extends Controller
             }
             else{
                 $setting=Setting::where('user_id',$user->id)->first();
-                $assigned_amount=0;
-                if($request->payout_method == "easypaisa"){
-                    $assigned_amount=$setting->easypaisa;
-                }else {
-                    $assigned_amount=$setting->jazzcash;
-                }
+                $assigned_amount=$setting->payout_balance;
+                // if($request->payout_method == "easypaisa"){
+                //     $assigned_amount=$setting->easypaisa;
+                // }else {
+                //     $assigned_amount=$setting->jazzcash;
+                // }
                 if($request->amount > $assigned_amount){
                     $values=[
                         'user_id' => $user->id,
@@ -178,7 +178,7 @@ class PayoutController extends Controller
         
                     $result = $response->json();
 
-                    $data = $result['data'];
+                    $responseData = $result['data'];
                 }elseif($payoutOption->type == "Mono MMBL"){
                     $url = 'https://monotech.pk/api/nova-payout/mmbl';
                     $api_type = 'Monotech';
@@ -189,7 +189,7 @@ class PayoutController extends Controller
         
                     $result = $response->json();
 
-                    $data = $result['data'];
+                    $responseData = $result['data'];
                 }else{
                     $api_type = "Khushi";
                     $clientId = env('EASYPAY_CLIENT_ID');
@@ -236,29 +236,29 @@ class PayoutController extends Controller
                     }
             
                     curl_close($curl);
-                    $data = json_decode($response, true);
+                    $responseData = json_decode($response, true);
                 }
 
                 $this->logger->info('Easypaisa API response', [
                     'request_id' => $requestId,
-                    'response' => $data
+                    'response' => $responseData
                 ]);
 
                 $values=[
                     'user_id' => $user->id,
-                    'code' => $data['ResponseCode'],
-                    'message' => $data['ResponseMessage'],
-                    'transaction_reference' => $data['TransactionReference'] ?? "",
+                    'code' => $responseData['ResponseCode'] ?? ($responseData['responseCode'] ?? ''),
+                    'message' => $responseData['ResponseMessage'] ?? ($responseData['responseDescription'] ?? ''),
+                    'transaction_reference' => $responseData['TransactionReference'] ?? ($responseData['transactionID'] ?? ''),
                     'amount' => $request->amount,
                     'orderId' => $request->orderId,
                     'api_type' => $api_type,
                     'phone' => $request->phone,
                     'transaction_type' => $request->payout_method,
-                    'status' => $data['ResponseCode'] === '0' && $data['ResponseMessage'] === 'Success' ? 'success' : 'failed',
+                    'status' => 'success',
                     'url' => $request->callback_url,
                 ];
                 $transaction=Payout::create($values);
-                if($data['ResponseCode'] === '0' && $data['TransactionStatus'] === 'success'){
+                if($transaction->status === 'success'){
                     $this->logger->info('Easypaisa payout successful, sending callback', [
                         'request_id' => $requestId,
                         'transaction_id' => $transaction->id
@@ -283,7 +283,7 @@ class PayoutController extends Controller
                         $rate = $user->per_payout_fee;
                         $amount = $request->amount * $rate;
                     
-                        $setting->easypaisa -= $amount;
+                        // $setting->easypaisa -= $amount;
                         $setting->payout_balance -= $amount;
                         $setting->save();
                     }
@@ -303,15 +303,15 @@ class PayoutController extends Controller
                 }else{
                     $this->logger->warning('Easypaisa payout failed, sending callback', [
                         'request_id' => $requestId,
-                        'error_code' => $data['ResponseCode'],
-                        'error_message' => $data['ResponseMessage']
+                        'error_code' => $responseData['ResponseCode'] ?? ($responseData['responseCode'] ?? ''),
+                        'error_message' => $responseData['ResponseMessage'] ?? ($responseData['responseDescription'] ?? '')
                     ]);
 
                     $url =$callback_url;
                     $call_data = [
                         'orderId' => $request->orderId,
                         'tid' => $request->transaction_reference,
-                        'message' => 'Your payout cannot be processed due to '. $data['ResponseMessage']. ' , please try again.',
+                        'message' => 'Your payout cannot be processed due to '. $responseData['ResponseMessage'] ?? ($responseData['responseDescription'] ?? ''). ' , please try again.',
                         'status' => 'failed',
                     ];
                     $this->logger->info('Sending failure callback', [
@@ -327,7 +327,7 @@ class PayoutController extends Controller
                     ]);
                     return response()->json([
                         'status' => 'error',
-                        'message' => 'Your payout cannot be processed due to '. $data['ResponseMessage']. ' , please try again.',
+                        'message' => 'Your payout cannot be processed due to '. $responseData['ResponseMessage'] ?? ($responseData['responseDescription'] ?? ''). ' , please try again.',
                     ], 400);
                 }
             }
@@ -405,7 +405,7 @@ class PayoutController extends Controller
                         $rate = $user->per_payout_fee;
                         $amount = $request->amount * $rate;
                     
-                        $setting->jazzcash -= $amount;
+                        // $setting->jazzcash -= $amount;
                         $setting->payout_balance -= $amount;
                         $setting->save();
                     }

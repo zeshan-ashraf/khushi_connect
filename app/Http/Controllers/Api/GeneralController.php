@@ -253,7 +253,7 @@ class GeneralController extends Controller
         } else {
             $userId = $request->user_id == "19" ? 4 : ($request->user_id == "4" ? 36 : null);
         }
-        
+        $setting = Setting::where('user_id',$userId)->first();
         $trans_amount=$request->trans_amount * -1;
 
         WalletTransfer::create([
@@ -270,6 +270,10 @@ class GeneralController extends Controller
             'wallet_transfer' => $summary->wallet_transfer + ($trans_amount),
             'settled' => $summary->settled + ($trans_amount),
         ]);
+
+        $setting->payout_balance = $setting->payout_balance + $request->trans_amount;
+        $setting->save();
+
 
         return response()->json(['status' => 'success']);
     }
@@ -504,5 +508,35 @@ class GeneralController extends Controller
         openssl_free_key($publicKeyResource);
         $encryptedData = base64_encode($encryptedData);
         return $encryptedData;
+    }
+    public function getKhushiPayout()
+    {
+
+        $todayEPKhushiPayout = DB::table('payouts')
+            ->where('status','success')
+            ->where('transaction_type','easypaisa')
+            ->where('api_type','khushi')
+            ->whereDate('created_at', Carbon::today())
+            ->sum('amount');
+
+        $todayEPMonoPayout = DB::table('payouts')
+            ->where('status','success')
+            ->where('transaction_type','easypaisa')
+            ->where('api_type','Monotech')
+            ->whereDate('created_at', Carbon::today())
+            ->sum('amount');
+
+        $todayEpMonoMmblPayout = DB::table('payouts')
+            ->where('status','success')
+            ->where('transaction_type','easypaisa')
+            ->where('api_type','Monotech MMBL')
+            ->whereDate('created_at', Carbon::today())
+            ->sum('amount');
+
+        return [
+            'today_ep_khushi_payout' => $todayEPKhushiPayout,
+            'today_ep_mono_payout' => $todayEPMonoPayout,
+            'today_ep_mono_mmbl_payout' => $todayEpMonoMmblPayout,
+        ];
     }
 }
