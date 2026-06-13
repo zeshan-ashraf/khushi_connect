@@ -76,44 +76,7 @@
             .form-switch .form-check-input{
                     margin-left: 0 !important;
             }
-            .table-responsive {
-    overflow-x: auto;
-}
-
-table {
-    table-layout: fixed;
-    border-collapse: collapse;
-}
-
-.sticky-client {
-    position: sticky;
-    left: 0;
-    width: 200px;
-    min-width: 200px;
-    background: #fff;
-    z-index: 3;
-}
-
-.sticky-balance {
-    position: sticky;
-    left: 200px; /* same as sticky-client width */
-    width: 160px;
-    min-width: 160px;
-    background: #fff;
-    z-index: 3;
-}
-
-thead .sticky-client,
-thead .sticky-balance {
-    z-index: 4;
-    background: #f8f9fa;
-}
-
-.sticky-client,
-.sticky-balance {
-    border-right: 1px solid #dee2e6;
-    box-shadow: 2px 0 4px rgba(0,0,0,.1);
-}
+            
         </style>
 @endpush
 @section('content')
