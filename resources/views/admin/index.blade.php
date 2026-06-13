@@ -102,7 +102,11 @@ thead .sticky-balance {
     z-index: 3;
     background: #f8f9fa;
 }
-            
+.sticky-client,
+.sticky-balance {
+    border-right: 1px solid #dee2e6;
+    box-shadow: 2px 0 5px rgba(0,0,0,.05);
+}  
         </style>
 @endpush
 @section('content')
