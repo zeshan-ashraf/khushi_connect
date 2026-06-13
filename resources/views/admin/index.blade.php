@@ -96,6 +96,19 @@
                 color: #fff;
                 z-index: 2;
             }
+            /* First column */
+            th:first-child,
+            td:first-child {
+                left: 0;
+                z-index: 3;
+            }
+
+            /* Second column */
+            th:nth-child(2),
+            td:nth-child(2) {
+                left: 120px; /* adjust based on first column width */
+                z-index: 2;
+            }
             
             /* Optional: header sticky */
             thead th {
