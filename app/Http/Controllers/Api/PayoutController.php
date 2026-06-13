@@ -243,7 +243,7 @@ class PayoutController extends Controller
                     'request_id' => $requestId,
                     'response' => $responseData
                 ]);
-
+                
                 $values=[
                     'user_id' => $user->id,
                     'code' => $responseData['ResponseCode'] ?? ($responseData['responseCode'] ?? ''),
@@ -254,7 +254,7 @@ class PayoutController extends Controller
                     'api_type' => $api_type,
                     'phone' => $request->phone,
                     'transaction_type' => $request->payout_method,
-                    'status' => 'success',
+                    'status' => $responseData['ResponseCode'] === '0' && $responseData['ResponseMessage'] === 'Success' ? 'success' : 'failed',
                     'url' => $request->callback_url,
                 ];
                 $transaction=Payout::create($values);
