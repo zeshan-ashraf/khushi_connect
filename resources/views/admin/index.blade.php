@@ -80,33 +80,40 @@
     overflow-x: auto;
 }
 
-.sticky-client,
-.sticky-balance {
-    position: sticky;
-    background: #fff;
-    z-index: 2;
+table {
+    table-layout: fixed;
+    border-collapse: collapse;
 }
 
 .sticky-client {
+    position: sticky;
     left: 0;
-    min-width: 180px;
+    width: 200px;
+    min-width: 200px;
+    background: #fff;
+    z-index: 3;
 }
 
 .sticky-balance {
-    left: 180px; /* same width as sticky-client */
-    min-width: 150px;
+    position: sticky;
+    left: 200px; /* same as sticky-client width */
+    width: 160px;
+    min-width: 160px;
+    background: #fff;
+    z-index: 3;
 }
 
 thead .sticky-client,
 thead .sticky-balance {
-    z-index: 3;
+    z-index: 4;
     background: #f8f9fa;
 }
+
 .sticky-client,
 .sticky-balance {
     border-right: 1px solid #dee2e6;
-    box-shadow: 2px 0 5px rgba(0,0,0,.05);
-}  
+    box-shadow: 2px 0 4px rgba(0,0,0,.1);
+}
         </style>
 @endpush
 @section('content')
