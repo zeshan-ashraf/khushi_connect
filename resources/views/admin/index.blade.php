@@ -76,6 +76,62 @@
             .form-switch .form-check-input{
                     margin-left: 0 !important;
             }
+            .table-container {
+                overflow-x: auto;
+                position: relative;
+            }
+            
+            table {
+                border-collapse: collapse;
+                width: max-content;
+            }
+            
+            th:first-child,
+            td:first-child {
+                position: sticky;
+                left: 0;
+                background: #2c2c2c; /* match your table bg */
+                color: #fff;
+                z-index: 2;
+            }
+            
+            /* Optional: header sticky */
+            thead th {
+                position: sticky;
+                top: 0;
+                z-index: 3;
+            }
+            
+            /* Ensure first header cell stays above others */
+            thead th:first-child {
+                z-index: 4;
+            }
+            .refresh-floating {
+                position: fixed;
+                bottom: 20px;
+                right: 20px;
+                background: #1f2937;
+                color: #fff;
+                padding: 10px 14px;
+                border-radius: 50px;
+                font-size: 14px;
+                font-weight: 600;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+                cursor: pointer;
+                z-index: 9999;
+                transition: all 0.3s ease;
+            }
+            
+            /* hover effect */
+            .refresh-floating:hover {
+                background: #374151;
+                transform: scale(1.05);
+            }
+            
+            /* warning state */
+            .refresh-floating.warning {
+                background: #dc2626;
+            }
             
         </style>
 @endpush
