@@ -76,6 +76,7 @@
             .form-switch .form-check-input{
                     margin-left: 0 !important;
             }
+
             .table-container {
                 overflow-x: auto;
                 position: relative;
@@ -87,10 +88,11 @@
             }
             
             th:first-child,
-            td:first-child {
+            td:first-child,
+            th:nth-child(2),
+            td:nth-child(2) {
                 position: sticky;
-                left: 0;
-                background: #2c2c2c; /* match your table bg */
+                background: #2c2c2c;
                 color: #fff;
                 z-index: 2;
             }
