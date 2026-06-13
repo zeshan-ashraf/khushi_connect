@@ -76,6 +76,32 @@
             .form-switch .form-check-input{
                     margin-left: 0 !important;
             }
+            .table-responsive {
+    overflow-x: auto;
+}
+
+.sticky-client,
+.sticky-balance {
+    position: sticky;
+    background: #fff;
+    z-index: 2;
+}
+
+.sticky-client {
+    left: 0;
+    min-width: 180px;
+}
+
+.sticky-balance {
+    left: 180px; /* same width as sticky-client */
+    min-width: 150px;
+}
+
+thead .sticky-client,
+thead .sticky-balance {
+    z-index: 3;
+    background: #f8f9fa;
+}
             
         </style>
 @endpush
@@ -181,7 +207,7 @@
                                                     </tr>
                                                     @endif
                                                     <tr>
-                                                        <th rowspan="2">
+                                                        <th rowspan="2" class="sticky-client">
                                                             Client
                                                             @if(auth()->user()->user_role == "Super Admin")
                                                                 <div class="dropdown" style="display:inline-block;">
@@ -215,7 +241,7 @@
                                                             @endif
                                                         </th>
                                                         @if(auth()->user()->user_role == "Super Admin" || auth()->user()->user_role == "Client")
-                                                        <th rowspan="2">Previous Balance</th>
+                                                        <th rowspan="2" class="sticky-balance">Previous Balance</th>
                                                         <th colspan="4">Payin</th>
                                                         <th colspan="3">Payout</th>
                                                         <th rowspan="2">USDT</th>
@@ -259,10 +285,10 @@
                                                     
                                                         @if(auth()->user()->user_role == "Super Admin" || auth()->user()->user_role == "Manager" || auth()->user()->id == $user->id)
                                                         <tr data-user-id="{{ $user->id }}">
-                                                            <td class="client">{{ $user->name }}</td>
+                                                            <td class="client"  class="sticky-client">{{ $user->name }}</td>
                                                     
                                                             @if(auth()->user()->user_role == "Super Admin" || auth()->user()->id == $user->id)
-                                                                <td>{{ number_format($item['prev_balance']) }}</td>
+                                                                <td class="sticky-balance">{{ number_format($item['prev_balance']) }}</td>
                                                                 <td class="bg-green">{{ number_format($item['jc_payin']) }}</td>
                                                                 <td class="bg-green">{{ number_format($item['ep_payin']) }}</td>
                                                                 <td class="bg-green font-weight-bold">{{ number_format($item['total_payin']) }}</td>
