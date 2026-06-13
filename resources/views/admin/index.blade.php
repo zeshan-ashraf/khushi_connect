@@ -106,7 +106,7 @@
             /* Second column */
             th:nth-child(2),
             td:nth-child(2) {
-                left: 120px; /* adjust based on first column width */
+                left: 130px; /* adjust based on first column width */
                 z-index: 2;
             }
             
