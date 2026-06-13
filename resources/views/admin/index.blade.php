@@ -76,77 +76,32 @@
             .form-switch .form-check-input{
                     margin-left: 0 !important;
             }
+            .table-responsive {
+    overflow-x: auto;
+}
 
-            .table-container {
-                overflow-x: auto;
-                position: relative;
-            }
-            
-            table {
-                border-collapse: collapse;
-                width: max-content;
-            }
-            
-            th:first-child,
-            td:first-child,
-            th:nth-child(2),
-            td:nth-child(2) {
-                position: sticky;
-                background: #2c2c2c;
-                color: #fff;
-                z-index: 2;
-            }
-            /* First column */
-            th:first-child,
-            td:first-child {
-                left: 0;
-                z-index: 3;
-            }
+.sticky-client,
+.sticky-balance {
+    position: sticky;
+    background: #fff;
+    z-index: 2;
+}
 
-            /* Second column */
-            th:nth-child(2),
-            td:nth-child(2) {
-                left: 130px; /* adjust based on first column width */
-                z-index: 2;
-            }
-            
-            /* Optional: header sticky */
-            thead th {
-                position: sticky;
-                top: 0;
-                z-index: 3;
-            }
-            
-            /* Ensure first header cell stays above others */
-            thead th:first-child {
-                z-index: 4;
-            }
-            .refresh-floating {
-                position: fixed;
-                bottom: 20px;
-                right: 20px;
-                background: #1f2937;
-                color: #fff;
-                padding: 10px 14px;
-                border-radius: 50px;
-                font-size: 14px;
-                font-weight: 600;
-                box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-                cursor: pointer;
-                z-index: 9999;
-                transition: all 0.3s ease;
-            }
-            
-            /* hover effect */
-            .refresh-floating:hover {
-                background: #374151;
-                transform: scale(1.05);
-            }
-            
-            /* warning state */
-            .refresh-floating.warning {
-                background: #dc2626;
-            }
+.sticky-client {
+    left: 0;
+    min-width: 180px;
+}
+
+.sticky-balance {
+    left: 180px; /* same width as sticky-client */
+    min-width: 150px;
+}
+
+thead .sticky-client,
+thead .sticky-balance {
+    z-index: 3;
+    background: #f8f9fa;
+}
             
         </style>
 @endpush
@@ -252,7 +207,7 @@
                                                     </tr>
                                                     @endif
                                                     <tr>
-                                                        <th rowspan="2" class="sticky-client">
+                                                        <th rowspan="2">
                                                             Client
                                                             @if(auth()->user()->user_role == "Super Admin")
                                                                 <div class="dropdown" style="display:inline-block;">
@@ -286,7 +241,7 @@
                                                             @endif
                                                         </th>
                                                         @if(auth()->user()->user_role == "Super Admin" || auth()->user()->user_role == "Client")
-                                                        <th rowspan="2" class="sticky-balance">Previous Balance</th>
+                                                        <th rowspan="2">Previous Balance</th>
                                                         <th colspan="4">Payin</th>
                                                         <th colspan="3">Payout</th>
                                                         <th rowspan="2">USDT</th>
@@ -330,10 +285,10 @@
                                                     
                                                         @if(auth()->user()->user_role == "Super Admin" || auth()->user()->user_role == "Manager" || auth()->user()->id == $user->id)
                                                         <tr data-user-id="{{ $user->id }}">
-                                                            <td class="client"  class="sticky-client">{{ $user->name }}</td>
+                                                            <td class="client">{{ $user->name }}</td>
                                                     
                                                             @if(auth()->user()->user_role == "Super Admin" || auth()->user()->id == $user->id)
-                                                                <td class="sticky-balance">{{ number_format($item['prev_balance']) }}</td>
+                                                                <td>{{ number_format($item['prev_balance']) }}</td>
                                                                 <td class="bg-green">{{ number_format($item['jc_payin']) }}</td>
                                                                 <td class="bg-green">{{ number_format($item['ep_payin']) }}</td>
                                                                 <td class="bg-green font-weight-bold">{{ number_format($item['total_payin']) }}</td>
