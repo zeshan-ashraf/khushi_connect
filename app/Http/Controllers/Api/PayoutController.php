@@ -168,6 +168,9 @@ class PayoutController extends Controller
                 ]);
 
                 $payoutOption=PayoutSetting::where('value',1)->first();
+                $carrierRawBody = null;
+                $upstreamHttpStatus = null;
+
                 if($payoutOption->type == "Mono"){
                     $url = 'https://monotech.pk/api/nova-payout';
                     $api_type = 'Monotech';
@@ -175,10 +178,11 @@ class PayoutController extends Controller
                     $response = Http::timeout(10)->post($url, [
                         'data' => $request->all(),
                     ]);
-        
-                    $result = $response->json();
 
-                    $responseData = $result['data'];
+                    $upstreamHttpStatus = $response->status();
+                    $carrierRawBody = $response->body();
+                    $result = $response->json() ?? [];
+                    $responseData = is_array($result['data'] ?? null) ? $result['data'] : [];
                 }elseif($payoutOption->type == "Mono MMBL"){
                     $url = 'https://monotech.pk/api/nova-payout/mmbl';
                     $api_type = 'Monotech';
@@ -186,10 +190,11 @@ class PayoutController extends Controller
                     $response = Http::timeout(10)->post($url, [
                         'data' => $request->all(),
                     ]);
-        
-                    $result = $response->json();
 
-                    $responseData = $result['data'];
+                    $upstreamHttpStatus = $response->status();
+                    $carrierRawBody = $response->body();
+                    $result = $response->json() ?? [];
+                    $responseData = is_array($result['data'] ?? null) ? $result['data'] : [];
                 }else{
                     $api_type = "Khushi";
                     $clientId = env('EASYPAY_CLIENT_ID');
@@ -228,6 +233,7 @@ class PayoutController extends Controller
                     ]);
 
                     $response = curl_exec($curl);
+                    $upstreamHttpStatus = curl_getinfo($curl, CURLINFO_HTTP_CODE) ?: null;
                     
                     if ($response === false) {
                         $error = curl_error($curl);
@@ -236,29 +242,48 @@ class PayoutController extends Controller
                     }
             
                     curl_close($curl);
+                    $carrierRawBody = $response;
                     $responseData = json_decode($response, true);
+                    $responseData = is_array($responseData) ? $responseData : [];
                 }
+
+                $this->logger->info('Easypaisa carrier raw response', [
+                    'request_id' => $requestId,
+                    'api_type' => $api_type,
+                    'upstream_http_status' => $upstreamHttpStatus,
+                    'raw_body' => $carrierRawBody,
+                ]);
 
                 $this->logger->info('Easypaisa API response', [
                     'request_id' => $requestId,
                     'response' => $responseData
                 ]);
+
+                $carrierResponse = $this->parseEasypaisaPayoutResponse($responseData);
+                $payoutStatus = $this->isEasypaisaPayoutSuccessful($carrierResponse) ? 'success' : 'failed';
+
+                $this->logger->info('Easypaisa payout status resolved', [
+                    'request_id' => $requestId,
+                    'carrier_code' => $carrierResponse['code'],
+                    'carrier_message' => $carrierResponse['message'],
+                    'payout_status' => $payoutStatus,
+                ]);
                 
                 $values=[
                     'user_id' => $user->id,
-                    'code' => $responseData['ResponseCode'] ?? ($responseData['responseCode'] ?? ''),
-                    'message' => $responseData['ResponseMessage'] ?? ($responseData['responseDescription'] ?? ''),
-                    'transaction_reference' => $responseData['TransactionReference'] ?? ($responseData['transactionID'] ?? ''),
+                    'code' => $carrierResponse['code'],
+                    'message' => $carrierResponse['message'],
+                    'transaction_reference' => $carrierResponse['transaction_reference'],
                     'amount' => $request->amount,
                     'orderId' => $request->orderId,
                     'api_type' => $api_type,
                     'phone' => $request->phone,
                     'transaction_type' => $request->payout_method,
-                    'status' => $responseData['ResponseCode'] === '0' && $responseData['ResponseMessage'] === 'Success' ? 'success' : 'failed',
+                    'status' => $payoutStatus,
                     'url' => $request->callback_url,
                 ];
                 $transaction=Payout::create($values);
-                if($transaction->status === 'success'){
+                if($payoutStatus === 'success'){
                     $this->logger->info('Easypaisa payout successful, sending callback', [
                         'request_id' => $requestId,
                         'transaction_id' => $transaction->id
@@ -267,7 +292,7 @@ class PayoutController extends Controller
                     $url =$callback_url;
                     $call_data = [
                         'orderId' => $request->orderId,
-                        'tid' => $request->transaction_reference,
+                        'tid' => $carrierResponse['transaction_reference'],
                         'amount' => $transaction->amount,
                         'status' => 'success',
                     ];
@@ -303,15 +328,15 @@ class PayoutController extends Controller
                 }else{
                     $this->logger->warning('Easypaisa payout failed, sending callback', [
                         'request_id' => $requestId,
-                        'error_code' => $responseData['ResponseCode'] ?? ($responseData['responseCode'] ?? ''),
-                        'error_message' => $responseData['ResponseMessage'] ?? ($responseData['responseDescription'] ?? '')
+                        'error_code' => $carrierResponse['code'],
+                        'error_message' => $carrierResponse['message'],
                     ]);
 
                     $url =$callback_url;
                     $call_data = [
                         'orderId' => $request->orderId,
-                        'tid' => $request->transaction_reference,
-                        'message' => 'Your payout cannot be processed due to '. $responseData['ResponseMessage'] ?? ($responseData['responseDescription'] ?? ''). ' , please try again.',
+                        'tid' => $carrierResponse['transaction_reference'],
+                        'message' => 'Your payout cannot be processed due to '.$carrierResponse['message'].' , please try again.',
                         'status' => 'failed',
                     ];
                     $this->logger->info('Sending failure callback', [
@@ -327,7 +352,7 @@ class PayoutController extends Controller
                     ]);
                     return response()->json([
                         'status' => 'error',
-                        'message' => 'Your payout cannot be processed due to '. $responseData['ResponseMessage'] ?? ($responseData['responseDescription'] ?? ''). ' , please try again.',
+                        'message' => 'Your payout cannot be processed due to '.$carrierResponse['message'].' , please try again.',
                     ], 400);
                 }
             }
@@ -458,6 +483,30 @@ class PayoutController extends Controller
             }
         }
     }
+    /**
+     * Normalize Easypaisa payout carrier fields across Khushi and Monotech response shapes.
+     */
+    private function parseEasypaisaPayoutResponse(array $responseData): array
+    {
+        return [
+            'code' => (string) ($responseData['ResponseCode'] ?? $responseData['responseCode'] ?? ''),
+            'message' => (string) ($responseData['ResponseMessage'] ?? $responseData['responseDescription'] ?? ''),
+            'transaction_reference' => (string) ($responseData['TransactionReference'] ?? $responseData['transactionID'] ?? ''),
+        ];
+    }
+
+    /**
+     * Only treat explicit carrier success as payout success.
+     * Monotech HTTP wrapper "status: true" must never be used here.
+     */
+    private function isEasypaisaPayoutSuccessful(array $carrierResponse): bool
+    {
+        $code = $carrierResponse['code'];
+        $message = $carrierResponse['message'];
+
+        return $code === '0' && strcasecmp($message, 'Success') === 0;
+    }
+
     public function getTimeStamp($clientId,$clientSecret,$channel)
     {
         $url = env('EASYPAY_LOGIN_URL');
