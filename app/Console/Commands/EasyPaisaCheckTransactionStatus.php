@@ -26,12 +26,22 @@ class EasyPaisaCheckTransactionStatus extends Command
 
     public function handle()
     {
-        $list = Transaction::where('status', 'pending')->where('txn_type', 'easypaisa')->get();
+        $minAgeMinutes = (int) config('easypaisa.cron_pending_min_age_minutes', 5);
+
+        $list = Transaction::where('status', 'pending')
+            ->where('txn_type', 'easypaisa')
+            ->where('created_at', '<=', now()->subMinutes($minAgeMinutes))
+            ->get();
 
         set_time_limit(0);
 
         if ($list->isNotEmpty()) {
             foreach ($list as $item) {
+                $item->refresh();
+                if ($item->status !== 'pending') {
+                    continue;
+                }
+
                 $result = $this->statusService->process($item);
                 $user = User::find($item->user_id);
 

@@ -32,7 +32,7 @@ final class MerchantCallback
     }
 
     /**
-     * Send payin merchant callback with unified payload and logging.
+     * Send payin merchant callback with unified payload and logging (single POST, no retries).
      */
     public static function notifyPayin(
         object $transaction,
@@ -40,68 +40,47 @@ final class MerchantCallback
         int $timeout = 120,
         ?string $requestId = null,
         string $source = 'payin',
-        ?int $maxRetries = null,
     ): bool {
         $requestId = $requestId ?: uniqid();
         $url = (string) $transaction->url;
         $data = self::buildPayinPayload($transaction);
-        $maxRetries = $maxRetries ?? (int) config('payment.callback.max_retries', 3);
 
-        $attempt = 0;
-        while ($attempt < $maxRetries) {
-            try {
-                Log::channel('payout')->info('[TestPaymentService] Sending callback notification', [
+        try {
+            Log::channel('payout')->info('[TestPaymentService] Sending callback notification', [
+                'request_id' => $requestId,
+                'source' => $source,
+                'url' => $url,
+                'data' => $data,
+            ]);
+
+            $response = self::post($url, $data, $user, $timeout);
+
+            if ($response->successful()) {
+                Log::channel('payout')->info('[TestPaymentService] Callback successful', [
                     'request_id' => $requestId,
                     'source' => $source,
-                    'attempt' => $attempt + 1,
-                    'url' => $url,
-                    'data' => $data,
-                ]);
-
-                $response = self::post($url, $data, $user, $timeout);
-
-                if ($response->successful()) {
-                    Log::channel('payout')->info('[TestPaymentService] Callback successful', [
-                        'request_id' => $requestId,
-                        'source' => $source,
-                        'attempt' => $attempt + 1,
-                        'status_code' => $response->status(),
-                        'url' => $url,
-                    ]);
-
-                    return true;
-                }
-
-                Log::channel('payout')->warning('[TestPaymentService] Callback returned non-success status', [
-                    'request_id' => $requestId,
-                    'source' => $source,
-                    'attempt' => $attempt + 1,
                     'status_code' => $response->status(),
-                    'response_body' => $response->body(),
                     'url' => $url,
                 ]);
-            } catch (\Throwable $e) {
-                Log::channel('error')->error('[TestPaymentService] Callback attempt failed', [
-                    'request_id' => $requestId,
-                    'source' => $source,
-                    'attempt' => $attempt + 1,
-                    'error' => $e->getMessage(),
-                    'url' => $url,
-                ]);
+
+                return true;
             }
 
-            $attempt++;
-            if ($attempt < $maxRetries) {
-                sleep((int) pow(2, $attempt));
-            }
+            Log::channel('payout')->warning('[TestPaymentService] Callback returned non-success status', [
+                'request_id' => $requestId,
+                'source' => $source,
+                'status_code' => $response->status(),
+                'response_body' => $response->body(),
+                'url' => $url,
+            ]);
+        } catch (\Throwable $e) {
+            Log::channel('error')->error('[TestPaymentService] Callback failed', [
+                'request_id' => $requestId,
+                'source' => $source,
+                'error' => $e->getMessage(),
+                'url' => $url,
+            ]);
         }
-
-        Log::channel('error')->error('[TestPaymentService] All callback attempts failed', [
-            'request_id' => $requestId,
-            'source' => $source,
-            'max_attempts' => $maxRetries,
-            'url' => $url,
-        ]);
 
         return false;
     }

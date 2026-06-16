@@ -31,4 +31,12 @@ return [
     'prod_url'=> env('EASYPAISA_PRODUCTION_URL'),
 
     'hosted'=> env('EASYPAISA_HOSTED_CHECKOUT'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Easypaisa status crons — minimum transaction age before inquiry/recheck
+    |--------------------------------------------------------------------------
+    | Used by pending-status and recheck-status commands. Avoids racing checkout.
+    */
+    'cron_pending_min_age_minutes' => (int) env('EASYPAISA_CRON_PENDING_MIN_AGE_MINUTES', 5),
 ];

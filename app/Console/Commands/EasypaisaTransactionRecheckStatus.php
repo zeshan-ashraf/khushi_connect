@@ -27,17 +27,25 @@ class EasypaisaTransactionRecheckStatus extends Command
 
     public function handle()
     {
+        $minAgeMinutes = (int) config('easypaisa.cron_pending_min_age_minutes', 5);
+
         $list = Transaction::where('status', 'failed')
             ->where('pp_message', 'INVALID ORDER ID')
             ->where('pp_code', '0003')
             ->where('txn_type', 'easypaisa')
             ->where('created_at', '>=', Carbon::now()->subMinutes(30))
+            ->where('created_at', '<=', now()->subMinutes($minAgeMinutes))
             ->get();
 
         set_time_limit(0);
 
         if ($list->isNotEmpty()) {
             foreach ($list as $item) {
+                $item->refresh();
+                if ($item->status !== 'failed') {
+                    continue;
+                }
+
                 $result = $this->statusService->process($item);
                 $user = User::find($item->user_id);
 
