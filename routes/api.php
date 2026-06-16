@@ -23,7 +23,7 @@ Route::as('payin.')->prefix('payin')->group(function () {
     
     
 Route::as('payout.')->prefix('payout')->group(function () {
-    Route::middleware('whitelist.ip')->group(function () {
+    Route::middleware(['whitelist.ip', 'throttle:payout'])->group(function () {
         Route::post('/checkout',[PayoutController::class, 'checkout']);
     });
     // Route::post('/test-jc-dist',[PayoutController::class, 'testJc']);
@@ -78,5 +78,5 @@ Route::prefix('v1')->middleware(['hmac.authenticate'])->group(function () {
  */
     // Payout Route
     Route::post('payout/checkout', [PayoutController::class, 'checkout'])
-        ->middleware('whitelist.ip');
+        ->middleware(['whitelist.ip', 'throttle:payout']);
 });

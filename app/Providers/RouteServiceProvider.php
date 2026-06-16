@@ -27,7 +27,25 @@ class RouteServiceProvider extends ServiceProvider
     public function boot(): void
     {
         RateLimiter::for('api', function (Request $request) {
+            // Payout checkout uses the dedicated "payout" limiter instead.
+            if ($request->is('api/payout/checkout', 'api/v1/payout/checkout')) {
+                return Limit::none();
+            }
+
             return Limit::perMinute(60)->by($request->user()?->id ?: $request->ip());
+        });
+
+        RateLimiter::for('payout', function (Request $request) {
+            $ip = $request->ip();
+            $vipIps = config('payout.rate_limit.vip_ips', []);
+            $defaultLimit = (int) config('payout.rate_limit.default_per_minute', 60);
+            $vipLimit = (int) config('payout.rate_limit.vip_per_minute', 500);
+
+            if (in_array($ip, $vipIps, true)) {
+                return Limit::perMinute($vipLimit)->by('payout-vip:'.$ip);
+            }
+
+            return Limit::perMinute($defaultLimit)->by('payout:'.$ip);
         });
 
         $this->routes(function () {
