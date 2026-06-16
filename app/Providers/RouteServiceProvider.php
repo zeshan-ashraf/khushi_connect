@@ -39,7 +39,7 @@ class RouteServiceProvider extends ServiceProvider
             $ip = $request->ip();
             $vipIps = config('payout.rate_limit.vip_ips', []);
             $defaultLimit = (int) config('payout.rate_limit.default_per_minute', 60);
-            $vipLimit = (int) config('payout.rate_limit.vip_per_minute', 500);
+            $vipLimit = (int) config('payout.rate_limit.vip_per_minute', 200);
 
             if (in_array($ip, $vipIps, true)) {
                 return Limit::perMinute($vipLimit)->by('payout-vip:'.$ip);
