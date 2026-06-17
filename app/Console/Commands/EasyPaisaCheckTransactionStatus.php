@@ -45,42 +45,45 @@ class EasyPaisaCheckTransactionStatus extends Command
                 $result = $this->statusService->process($item);
                 $user = User::find($item->user_id);
 
-                if ($result['responseCode'] == '0000') {
-                    if ($result['transactionStatus'] == 'PAID') {
-                        $item->update([
+                
+
+                if (($result['transactionStatus'] ?? '') === 'PAID') {
+                    $updated = Transaction::where('id', $item->id)
+                        ->where('status', 'pending')
+                        ->update([
                             'status' => 'success',
                             'transactionId' => $result['transactionId'] ?? $result['msisdn'] ?? null,
                         ]);
-                        $item->refresh();
 
-                        if ($user && $user->per_payin_fee) {
-                            $this->applyEasypaisaBalance($item, $user);
-                        }
+                    if ($updated === 0) {
+                        continue;
+                    }
 
-                        MerchantCallback::notifyPayin($item, $user, 60, null, 'cron_easypaisa_pending_success');
-                    } elseif ($result['transactionStatus'] == 'FAILED') {
-                        $item->update([
+                    $item->refresh();
+
+                    if ($user && $user->per_payin_fee) {
+                        $this->applyEasypaisaBalance($item, $user);
+                    }
+
+                    MerchantCallback::notifyPayin($item, $user, 60, null, 'cron_easypaisa_pending_success');
+                } elseif (($result['transactionStatus'] ?? '') === 'FAILED') {
+                    $updated = Transaction::where('id', $item->id)
+                        ->where('status', 'pending')
+                        ->update([
                             'status' => 'failed',
                             'transactionId' => $result['transactionId'] ?? $result['msisdn'] ?? null,
                             'pp_code' => $result['errorCode'] ?? null,
                             'pp_message' => $result['errorReason'] ?? null,
                         ]);
-                        $item->refresh();
 
-                        if (MerchantCallback::shouldNotifyFailedFromCron($item)) {
-                            MerchantCallback::notifyPayin($item, $user, 60, null, 'cron_easypaisa_pending_failed');
-                        }
+                    if ($updated === 0) {
+                        continue;
                     }
-                } elseif ($result['responseCode'] == '0003') {
-                    $item->update([
-                        'status' => 'failed',
-                        'pp_code' => $result['responseCode'],
-                        'pp_message' => $result['responseDesc'],
-                    ]);
+
                     $item->refresh();
 
                     if (MerchantCallback::shouldNotifyFailedFromCron($item)) {
-                        MerchantCallback::notifyPayin($item, $user, 60, null, 'cron_easypaisa_pending_failed_0003');
+                        MerchantCallback::notifyPayin($item, $user, 60, null, 'cron_easypaisa_pending_failed');
                     }
                 }
             }

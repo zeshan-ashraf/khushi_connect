@@ -47,41 +47,55 @@ class EasypaisaTransactionRecheckStatus extends Command
                 }
 
                 $result = $this->statusService->process($item);
+
+                // 0003 = order not yet visible in inquiry; wait for a later recheck.
+                if (($result['responseCode'] ?? '') === '0003') {
+                    continue;
+                }
+
                 $user = User::find($item->user_id);
 
-                if ($result['responseCode'] == '0000') {
-                    if ($result['transactionStatus'] == 'PAID') {
-                        $item->update([
+                if (($result['responseCode'] ?? '') !== '0000') {
+                    continue;
+                }
+
+                if (($result['transactionStatus'] ?? '') === 'PAID') {
+                    $updated = Transaction::where('id', $item->id)
+                        ->where('status', 'failed')
+                        ->update([
                             'status' => 'success',
                             'transactionId' => $result['transactionId'] ?? $result['msisdn'] ?? null,
                         ]);
-                        $item->refresh();
 
-                        if ($user && $user->per_payin_fee) {
-                            $this->applyEasypaisaBalance($item, $user);
-                        }
+                    if ($updated === 0) {
+                        continue;
+                    }
 
-                        MerchantCallback::notifyPayin($item, $user, 60, null, 'cron_easypaisa_recheck_success');
-                    } elseif ($result['transactionStatus'] == 'FAILED') {
-                        $item->update([
-                            'status' => 'failed',
+                    $item->refresh();
+
+                    if ($user && $user->per_payin_fee) {
+                        $this->applyEasypaisaBalance($item, $user);
+                    }
+
+                    MerchantCallback::notifyPayin($item, $user, 60, null, 'cron_easypaisa_recheck_success');
+                } elseif (($result['transactionStatus'] ?? '') === 'FAILED') {
+                    $updated = Transaction::where('id', $item->id)
+                        ->where('status', 'failed')
+                        ->update([
                             'transactionId' => $result['transactionId'] ?? $result['msisdn'] ?? null,
                             'pp_code' => $result['errorCode'] ?? null,
                             'pp_message' => $result['errorReason'] ?? null,
                         ]);
-                        $item->refresh();
 
-                        MerchantCallback::notifyPayin($item, $user, 60, null, 'cron_easypaisa_recheck_failed');
-                    }
-                } elseif ($result['responseCode'] == '0003') {
-                    $item->update([
-                        'status' => 'failed',
-                        'pp_code' => $result['responseCode'],
-                        'pp_message' => $result['responseDesc'],
-                    ]);
+                    if ($updated === 0) {
+                        continue;
+                    } 
+
                     $item->refresh();
 
-                    MerchantCallback::notifyPayin($item, $user, 60, null, 'cron_easypaisa_recheck_failed_0003');
+                    if (MerchantCallback::shouldNotifyFailedFromCron($item)) {
+                        MerchantCallback::notifyPayin($item, $user, 60, null, 'cron_easypaisa_recheck_failed');
+                    }
                 }
             }
         }
