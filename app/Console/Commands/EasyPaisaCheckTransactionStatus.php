@@ -43,9 +43,17 @@ class EasyPaisaCheckTransactionStatus extends Command
                 }
 
                 $result = $this->statusService->process($item);
+
+                // 0003 = order not yet visible in inquiry; checkout may still be in flight.
+                if (($result['responseCode'] ?? '') === '0003') {
+                    continue;
+                }
+
                 $user = User::find($item->user_id);
 
-                
+                if (($result['responseCode'] ?? '') !== '0000') {
+                    continue;
+                }
 
                 if (($result['transactionStatus'] ?? '') === 'PAID') {
                     $updated = Transaction::where('id', $item->id)

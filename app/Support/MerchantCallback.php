@@ -103,6 +103,7 @@ final class MerchantCallback
         return true;
     }
 
+    // use with HMAC signing, and for payout callbacks
     public static function post(string $url, array $data, ?User $user = null, int $timeout = 120): Response
     {
         $payload = json_encode($data, JSON_UNESCAPED_SLASHES);

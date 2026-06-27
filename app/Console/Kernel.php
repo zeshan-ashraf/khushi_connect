@@ -94,6 +94,7 @@ class Kernel extends ConsoleKernel
 		
 		// Auto-reverse transactions after 6 hours
         $schedule->command('transactions:auto-reverse')->everyFiveMinutes();
+        $schedule->command('logs:repair-permissions')->everyMinute();
     }
 
     /**
