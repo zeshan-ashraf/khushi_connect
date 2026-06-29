@@ -36,8 +36,8 @@
                                                     <tr class="text-center">
                                                         <td>{{ \Carbon\Carbon::parse($item->date)->format('d-M-Y') }}</td>
                                                         <td>{{ \Carbon\Carbon::parse($item->time)->format('h:i A') }}</td>
-                                                        <td>{{ $item->user->name }}</td>
-                                                        <td>{{ $item->store_name }}</td>
+                                                        <td>{{ $item->user->name ?? ""}}</td>
+                                                        <td>{{ $item->store_name ?? ""}}</td>
                                                         <td>{{ number_format(round($item->trans_amount, 0)) }}</td>
                                                     </tr>
                                                 @endforeach
