@@ -249,7 +249,11 @@ class GeneralController extends Controller
         $userId = null;
 
         if ($request->from_store_name == "Monotech") {
-            $userId = $request->user_id == "2" ? 4 : ($request->user_id == "4" ? 3 : null);
+            // $userId = $request->user_id == "2" ? 4 : ($request->user_id == "4" ? 3 : null);
+
+            $userId = $request->user_id == "2" ? 4
+                    : ($request->user_id == "4" ? 3
+                    : ($request->user_id == "25" ? 12 : null));
         } else {
             $userId = $request->user_id == "19" ? 4 : ($request->user_id == "4" ? 36 : null);
         }
