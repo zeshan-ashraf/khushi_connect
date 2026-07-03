@@ -39,4 +39,15 @@ return [
     | Used by pending-status and recheck-status commands. Avoids racing checkout.
     */
     'cron_pending_min_age_minutes' => (int) env('EASYPAISA_CRON_PENDING_MIN_AGE_MINUTES', 5),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Easypaisa payin pending-queue throttle (easypaisa.pending.limit middleware)
+    |--------------------------------------------------------------------------
+    | Block new Easypaisa payins when pending count >= block threshold.
+    | While blocked, requests stay rejected until pending count <= resume threshold.
+    */
+    'pending_block_threshold' => (int) env('EASYPAISA_PENDING_BLOCK_THRESHOLD', 500),
+    'pending_resume_threshold' => (int) env('EASYPAISA_PENDING_RESUME_THRESHOLD', 100),
+    'pending_count_cache_minutes' => (int) env('EASYPAISA_PENDING_COUNT_CACHE_MINUTES', 1),
 ];

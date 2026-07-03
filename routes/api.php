@@ -70,7 +70,7 @@ Route::prefix('v1')->middleware(['hmac.authenticate'])->group(function () {
     //Route::post('payment-checkout', [TestPayinController::class, 'checkout']);// testing purpose only
     // payin route
     Route::post('payment-checkout', [PayinController::class, 'checkout'])
-        ->middleware(['phone.verified', 'restrict.user.transaction.range']);
+        ->middleware(['phone.verified', 'restrict.user.transaction.range', 'easypaisa.pending.limit']);
 /*
  * 
   Route::post('payment-checkout', [PayinController::class, 'checkout'])
