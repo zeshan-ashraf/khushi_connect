@@ -89,7 +89,9 @@ class Kernel extends ConsoleKernel
         $schedule->command('transactions:archive')->dailyAt('02:15');
         $schedule->command('transactions:backup')->dailyAt('02:30');
         $schedule->command('payouts:archive')->dailyAt('02:45');
-        $schedule->command('transactions:auto-fail')->everyMinute();
+        $schedule->command('transactions:auto-fail')
+        ->everyTenMinutes()
+        ->withoutOverlapping();
         // $event = $schedule->command('transactions:auto-fail')->everyMinute();
         // $wrapSchedule($event, 'transactions:auto-fail');
 		
