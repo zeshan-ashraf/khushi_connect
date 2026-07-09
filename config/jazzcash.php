@@ -11,6 +11,9 @@ return[
         'RETURN_URL'=>env('JAZZCASH_RETURN_URL'),
         'INTEGERITY_SALT'=>env('JAZZCASH_INTEGERITY_SALT'),
         'TRANSACTION_POST_URL'=>env('JAZZCASH_TRANSACTION_POST_URL'),
-        'STATUS_INQUIRY'=>env('JAZZCASH_STATUS_INQUIRY'),
+        'STATUS_INQUIRY' => env(
+            'JAZZCASH_STATUS_INQUIRY',
+            'https://pgw.jazzcash.com.pk/ApplicationAPI/API/PaymentInquiry/Inquire'
+        ),
     ],
 ];
