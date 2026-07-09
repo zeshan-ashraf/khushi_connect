@@ -39,6 +39,7 @@ class Kernel extends HttpKernel
         ],
 
         'api' => [
+            \App\Http\Middleware\ApiTrafficMiddleware::class,
             // \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
             \Illuminate\Routing\Middleware\ThrottleRequests::class.':api',
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
@@ -75,6 +76,9 @@ class Kernel extends HttpKernel
         'check.blocked.numbers' => \App\Http\Middleware\CheckedBlockedNumbersMiddleware::class,
         'payment.validate' => \App\Http\Middleware\PaymentValidationMiddleware::class,
         'log.rejected' => \App\Http\Middleware\LogRejectedRequests::class,
+        'gateway.metrics' => \App\Http\Middleware\RecordGatewayRequestMetricsMiddleware::class,
+        'api.traffic' => \App\Http\Middleware\ApiTrafficMiddleware::class,
+        'super.admin' => \App\Http\Middleware\EnsureSuperAdmin::class,
         'throttle.phone' => \App\Http\Middleware\ThrottlePhoneNumberMiddleware::class,
         'easypaisa.limit' => \App\Http\Middleware\EasyPaisaLimitMiddleware::class,
         'easypaisa.pending.limit' => \App\Http\Middleware\EasypaisaPendingRequestsMiddleware::class,

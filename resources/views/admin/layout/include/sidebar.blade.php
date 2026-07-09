@@ -18,6 +18,12 @@
                     class="d-flex align-items-center" href="{{ route('admin.dashboard') }}">
                     <i data-feather="home"></i>Dashboard</a>
             </li>
+            @if(auth()->user()->user_role == "Super Admin")
+                <li class="@if(Route::is('admin.ops.dashboard*')) active @endif nav-item">
+                    <a class="d-flex align-items-center" href="{{ route('admin.ops.dashboard') }}">
+                        <i data-feather="activity"></i>OPS Dashboard</a>
+                </li>
+            @endif
             {{--<li class="@if(url()->current() == route('admin.profile')) active @endif nav-item"><a
                     class="d-flex align-items-center" href="{{ route('admin.profile') }}">
                     <i data-feather="user-check"></i>Profile</a>

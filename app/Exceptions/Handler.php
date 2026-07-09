@@ -2,7 +2,12 @@
 
 namespace App\Exceptions;
 
+use App\Helpers\GatewayMetricHelper;
+use App\Services\Dashboard\PayinCheckoutMetricsRecorder;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Illuminate\Http\Exceptions\ThrottleRequestsException;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Throwable;
 
 class Handler extends ExceptionHandler
@@ -25,6 +30,50 @@ class Handler extends ExceptionHandler
     {
         $this->reportable(function (Throwable $e) {
             //
+        });
+
+        $this->reportable(function (ThrottleRequestsException $e, Request $request) {
+            Log::channel('rejected_requests')->warning('Rate limit exceeded', [
+                'ip' => $request->ip(),
+                'method' => $request->method(),
+                'path' => $request->path(),
+                'full_url' => $request->fullUrl(),
+                'payment_method' => $request->input('payment_method'),
+                'user_agent' => $request->header('User-Agent'),
+                'content_type' => $request->header('Content-Type'),
+                'request_body' => $request->getContent(),
+                'request_parameters' => $request->all(),
+                'request_headers' => $request->headers->all(),
+                'exception_message' => $e->getMessage(),
+                'timestamp' => now()->toDateTimeString(),
+                'request_id' => uniqid('rate_limited_'),
+            ]);
+
+            if (GatewayMetricHelper::isPayinCheckoutRequest($request)) {
+                $gateway = GatewayMetricHelper::resolveCheckoutGateway($request);
+
+                if ($gateway !== null) {
+                    $startTime = (float) ($request->attributes->get(GatewayMetricHelper::REQUEST_ATTR_START_TIME) ?? microtime(true));
+
+                    app(PayinCheckoutMetricsRecorder::class)->recordPreGatewayRejection(
+                        $request,
+                        $gateway,
+                        $startTime,
+                        GatewayMetricHelper::APPLICATION_ERROR_RATE_LIMITED
+                    );
+                }
+            }
+        });
+
+        $this->renderable(function (ThrottleRequestsException $e, Request $request) {
+            if (!$request->is('api/payout/checkout', 'api/v1/payout/checkout')) {
+                return null;
+            }
+
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Too many requests. Please try again later.',
+            ], 429, $e->getHeaders());
         });
     }
 }

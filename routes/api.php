@@ -16,7 +16,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 Route::as('payin.')->prefix('payin')->group(function () {
     //Route::post('/checkout',[PayinController::class, 'checkout'])->middleware(['payment.validate', 'check.blocked.numbers', 'easypaisa.limit', 'easypaisa.pending.limit','phone.verified', 'restrict.user.transaction.range']);
-    Route::post('/checkout',[PayinController::class, 'checkout'])->middleware(['payment.validate', 'phone.verified', 'restrict.user.transaction.range', 'check.blocked.numbers', 'easypaisa.limit', 'easypaisa.pending.limit']);
+    Route::post('/checkout',[PayinController::class, 'checkout'])->middleware(['gateway.metrics', 'log.rejected', 'payment.validate', 'phone.verified', 'restrict.user.transaction.range', 'check.blocked.numbers', 'easypaisa.limit', 'easypaisa.pending.limit']);
 });
 
 
@@ -62,7 +62,8 @@ Route::match(['get', 'post'], '/simple-curl-test', [TestEasypaisaController::cla
 |--------------------------------------------------------------------------
 |    
 */
-Route::post('v1/test-payin-checkout', [PayinController::class, 'checkout']);
+Route::post('v1/test-payin-checkout', [PayinController::class, 'checkout'])
+    ->middleware(['gateway.metrics', 'log.rejected']);
 
 
 Route::get('v1/get-dashboard-data', [GeneralController::class , 'dashboardDataV1'])->middleware('auth.api.key');
@@ -70,7 +71,7 @@ Route::prefix('v1')->middleware(['hmac.authenticate'])->group(function () {
     //Route::post('payment-checkout', [TestPayinController::class, 'checkout']);// testing purpose only
     // payin route
     Route::post('payment-checkout', [PayinController::class, 'checkout'])
-        ->middleware(['phone.verified', 'restrict.user.transaction.range', 'easypaisa.pending.limit']);
+        ->middleware(['gateway.metrics', 'log.rejected', 'phone.verified', 'restrict.user.transaction.range', 'easypaisa.pending.limit']);
 /*
  * 
   Route::post('payment-checkout', [PayinController::class, 'checkout'])

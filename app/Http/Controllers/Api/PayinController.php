@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Log;
 use Zfhassaan\Easypaisa\Easypaisa;
 use App\Service\PaymentServiceV1;
 use App\Services\PhoneVerificationService;
+use App\Services\Payin\InstrumentedEasypaisaPayinClient;
 use Illuminate\Http\Response;
 use Illuminate\Http\JsonResponse;
 use Carbon\Carbon;
@@ -193,12 +194,17 @@ class PayinController extends Controller
                 'api_url' => $url
             ]);
 
-            $easypaisa = new Easypaisa;
-            // dd($post_data);
             $carrierStart = microtime(true);
-            $response = $easypaisa->sendRequest($post_data);
-            //dd($post_data,$response);
-            $carrierDuration = microtime(true) - $carrierStart;
+            $payinResult = app(InstrumentedEasypaisaPayinClient::class)->sendRequest(
+                $post_data,
+                $requestId,
+                $post_data['orderId'] ?? null,
+                $request->orderId
+            );
+            $response = $payinResult['response'];
+            $carrierDuration = isset($payinResult['diagnostics']['total_time'])
+                ? (float) $payinResult['diagnostics']['total_time']
+                : (microtime(true) - $carrierStart);
             $upstreamBody = is_string($response) ? $response : json_encode($response);
             // Decode the response into an array if needed
             if ($response instanceof \Illuminate\Http\JsonResponse) {

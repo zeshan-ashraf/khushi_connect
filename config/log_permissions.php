@@ -43,6 +43,7 @@ return [
     'daily_log_basenames' => [
         'payin',
         'payout',
+        'payin_diagnostics',
     ],
 
     'date_format' => 'Y-m-d',
