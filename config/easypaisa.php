@@ -29,6 +29,8 @@ return [
     
     'prod_hashkey'=> env('EASYPAISA_PRODUCTION_HASHKEY'),
     'prod_url'=> env('EASYPAISA_PRODUCTION_URL'),
+    'status_inquiry_url' => env('EASYPAISA_STATUS_INQUIRY'),
+    'account_num' => env('EASYPAISA_ACCOUNT_NUM'),
 
     'hosted'=> env('EASYPAISA_HOSTED_CHECKOUT'),
 

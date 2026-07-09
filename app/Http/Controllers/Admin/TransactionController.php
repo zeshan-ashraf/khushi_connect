@@ -30,15 +30,15 @@ class TransactionController extends Controller
     {
         $this->middleware(['permission:Transactions']);
         $this->transactionDatatable = new TransactionDataTable();
-        $this->merchantId = env('JAZZCASH_MERCHANT_ID');
-        $this->password = env('JAZZCASH_PASSWORD');
-        $this->jazzcashStatusUrl = env('JAZZCASH_STATUS_INQUIRY');
-        $this->integritySalt = env('JAZZCASH_INTEGERITY_SALT');
-        $this->easyUsername = env('EASYPAISA_PRODUCTION_USERNAME');
-        $this->easyPassword = env('EASYPAISA_PRODUCTION_PASSWORD');
-        $this->storeId = env('EASYPAISA_PRODUCTION_STOREID');
-        $this->accountNumber = env('EASYPAISA_ACCOUNT_NUM');
-        $this->easyStatusUrl = env('EASYPAISA_STATUS_INQUIRY');
+        $this->merchantId = config('jazzcash.constants.MERCHANT_ID');
+        $this->password = config('jazzcash.constants.PASSWORD');
+        $this->jazzcashStatusUrl = config('jazzcash.constants.STATUS_INQUIRY');
+        $this->integritySalt = config('jazzcash.constants.INTEGERITY_SALT');
+        $this->easyUsername = config('easypaisa.prod_username');
+        $this->easyPassword = config('easypaisa.prod_password');
+        $this->storeId = config('easypaisa.prod_storeid');
+        $this->accountNumber = config('easypaisa.account_num');
+        $this->easyStatusUrl = config('easypaisa.status_inquiry_url');
     }
 
     public function list()

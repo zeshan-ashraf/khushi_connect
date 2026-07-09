@@ -53,7 +53,7 @@ class StatusService
         // ->withOptions([
         //     'verify' => public_path('jazz_public_key/new-cert.crt'), // SSL cert
         // ])
-        ->post(env('JAZZCASH_STATUS_INQUIRY'), $data);
+        ->post(config('jazzcash.constants.STATUS_INQUIRY'), $data);
         $result = $response->json();
         return $result;
     }
@@ -75,16 +75,16 @@ class StatusService
 	{
 	    
         $data = [
-            "storeId" => env('EASYPAISA_PRODUCTION_STOREID'),
+            'storeId' => config('easypaisa.prod_storeid'),
             'orderId' => $request->txn_ref_no,
-            'accountNum' => env('EASYPAISA_ACCOUNT_NUM'),
+            'accountNum' => config('easypaisa.account_num'),
 		];
         $credentials=$this->getCredentials();
         
 		$response = Http::timeout(120)->retry(3, 1000)->withHeaders([
             'credentials'=>$credentials,
             'Content-Type'=> 'application/json'
-        ])->post(env('EASYPAISA_STATUS_INQUIRY'),$data);
+        ])->post(config('easypaisa.status_inquiry_url'), $data);
 
         $result = $response->json();
         return $result;
@@ -92,6 +92,8 @@ class StatusService
 	}
 
     protected function getCredentials() {
-        return base64_encode(env('EASYPAISA_PRODUCTION_USERNAME').':'.env('EASYPAISA_PRODUCTION_PASSWORD'));
+        return base64_encode(
+            config('easypaisa.prod_username') . ':' . config('easypaisa.prod_password')
+        );
     }
 }
