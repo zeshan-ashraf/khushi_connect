@@ -2,9 +2,6 @@
 @section('title','Home')
 @section('content')
 
-<!-- Server Upgrade Notification -->
-@include('frontend.component.server-upgrade-notification')
-
 <!-- slider-area -->
 <section id="home" class="slider-area fix p-relative">
     <div class="slider-circal"></div>
