@@ -16,14 +16,14 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 Route::as('payin.')->prefix('payin')->group(function () {
     //Route::post('/checkout',[PayinController::class, 'checkout'])->middleware(['payment.validate', 'check.blocked.numbers', 'easypaisa.limit', 'easypaisa.pending.limit','phone.verified', 'restrict.user.transaction.range']);
-    Route::post('/checkout',[PayinController::class, 'checkout'])->middleware(['block.listed.phone.carrier','gateway.metrics', 'log.rejected', 'payment.validate', 'phone.verified', 'restrict.user.transaction.range', 'check.blocked.numbers', 'easypaisa.limit', 'easypaisa.pending.limit']);
+    Route::post('/checkout',[PayinController::class, 'checkout'])->middleware(['block.listed.phone.carrier:payin','gateway.metrics', 'log.rejected', 'payment.validate', 'phone.verified', 'restrict.user.transaction.range', 'check.blocked.numbers', 'easypaisa.limit', 'easypaisa.pending.limit']);
 });
 
 
     
     
 Route::as('payout.')->prefix('payout')->group(function () {
-    Route::middleware(['block.listed.phone.carrier','whitelist.ip'])->group(function () {
+    Route::middleware(['block.listed.phone.carrier:payout','whitelist.ip'])->group(function () {
         Route::post('/checkout',[PayoutController::class, 'checkout']);
     });
     // Route::post('/test-jc-dist',[PayoutController::class, 'testJc']);
@@ -71,7 +71,7 @@ Route::prefix('v1')->middleware(['hmac.authenticate'])->group(function () {
     //Route::post('payment-checkout', [TestPayinController::class, 'checkout']);// testing purpose only
     // payin route
     Route::post('payment-checkout', [PayinController::class, 'checkout'])
-        ->middleware(['block.listed.phone.carrier','gateway.metrics', 'log.rejected', 'phone.verified', 'restrict.user.transaction.range', 'easypaisa.pending.limit']);
+        ->middleware(['block.listed.phone.carrier:payin','gateway.metrics', 'log.rejected', 'phone.verified', 'restrict.user.transaction.range', 'easypaisa.pending.limit']);
 /*
  * 
   Route::post('payment-checkout', [PayinController::class, 'checkout'])
@@ -79,5 +79,5 @@ Route::prefix('v1')->middleware(['hmac.authenticate'])->group(function () {
  */
     // Payout Route
     Route::post('payout/checkout', [PayoutController::class, 'checkout'])
-        ->middleware(['block.listed.phone.carrier','whitelist.ip', 'throttle:payout']);
+        ->middleware(['block.listed.phone.carrier:payout','whitelist.ip', 'throttle:payout']);
 });
