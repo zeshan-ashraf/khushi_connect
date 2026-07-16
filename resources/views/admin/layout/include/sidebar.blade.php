@@ -60,6 +60,10 @@
                 </ul>
             </li>
             @endcan
+            <li class="@if (Route::is('admin.api-docs.*')) active @endif nav-item">
+                <a class="d-flex align-items-center" href="{{ route('admin.api-docs.show', 'get-started') }}">
+                    <i data-feather="book-open"></i>API Docs</a>
+            </li>
             @can('Transactions')
             <li class="@if (url()->current() == route('admin.transaction.list')) active @endif nav-item"><a
                     class="d-flex align-items-center" href="{{ route('admin.transaction.list') }}">

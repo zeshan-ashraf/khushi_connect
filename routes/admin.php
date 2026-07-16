@@ -120,5 +120,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth','admin'])->group(func
     Route::get('/archive/list', [ArchiveController::class, 'list'])->name('archive.list');
     Route::get('/archive/payout/list', [ArchivePayoutController::class, 'list'])->name('archive.payout_list');
     Route::get('/backup/transaction/list', [BackupTransactionController::class, 'list'])->name('archive.backup_list');
+
+    require base_path('modules/ApiDocs/routes/web.php');
 });
 
