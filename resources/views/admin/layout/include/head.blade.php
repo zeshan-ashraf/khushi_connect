@@ -214,4 +214,13 @@ cursor: auto !important;
 .main-menu .navbar-header {
   height: 6.45rem !important;
 }
+.main-menu .main-menu-content {
+  height: calc(100% - 6.45rem) !important;
+}
+.main-menu ul.navigation-main {
+  padding-bottom: 2.5rem !important;
+}
+.main-menu ul#main-menu-navigation > li:last-child {
+  margin-bottom: 1rem;
+}
 </style>
