@@ -22,6 +22,8 @@ class ArcheivePayout extends Model
         'phone',
         'transaction_type',
         'status',
+        'is_settled',
+        'settled_date',
         'url',
         'api_type',
     ];
