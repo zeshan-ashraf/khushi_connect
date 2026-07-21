@@ -33,6 +33,7 @@
                                     <input type="hidden" name="email" value="testing@khushipay.com">
                                     <input type="hidden" name="client_email" value="testing@khushipay.com">
                                     <input type="hidden" name="callback_url" value="www.example-testing.com">
+                                    <input name="amount" id="amount" type="hidden">
                                     <div class="row mt-1 mb-1">
                                         <div class="form-group col-md-3">
                                             <label>Payment Method</label>
@@ -47,8 +48,14 @@
                                             <input class="form-control" name="phone" placeholder="03XXXXXXXXX" type="input" required>
                                         </div>
                                         <div class="form-group col-md-3">
-                                            <label>Amount</label>
-                                            <input class="form-control" name="amount" type="number" min="1" required>
+                                            <label>Sub Store</label>
+                                            <select name="sub_store" id="sub_store" class="form-control" required>
+                                                <option value="" disabled selected>Select One ..</option>
+                                                <option value="move">Move My Furniture</option>
+                                                <option value="young">Young With yoga</option>
+                                                <option value="desk">Digi Desk</option>
+                                                <option value="codebase">Code base Acadmey</option>
+                                            </select>
                                         </div>
                                         <div class="form-group col-md-3 d-flex align-items-end">
                                             <button class="btn btn-primary" type="submit">Submit</button>
@@ -449,6 +456,16 @@
 @push('js')
 <script>
 $(document).ready(function () {
+        const storeAmounts = {
+            move: 2,
+            young: 4,
+            desk: 6,
+            codebase: 8,
+        };
+
+        $('#sub_store').on('change', function () {
+            $('#amount').val(storeAmounts[$(this).val()]);
+        });
     $('.toggle-switch').on('change', function () {
         const isChecked = $(this).is(':checked'); 
         const id = $(this).data('id');
