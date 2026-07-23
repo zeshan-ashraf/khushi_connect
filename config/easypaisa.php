@@ -26,6 +26,18 @@ return [
     'prod_desk_username'=> env('EASYPAISA_PRODUCTION_DESK_USERNAME'),
     'prod_desk_password'=>env('EASYPAISA_PRODUCTION_DESK_PASSWORD'),
     'prod_desk_storeid'=> env('EASYPAISA_PRODUCTION_DESK_STOREID'),
+
+    'prod_codebase_username'=> env('EASYPAISA_PRODUCTION_CODEBASE_USERNAME'),
+    'prod_codebase_password'=>env('EASYPAISA_PRODUCTION_CODEBASE_PASSWORD'),
+    'prod_codebase_storeid'=> env('EASYPAISA_PRODUCTION_CODEBASE_STOREID'),
+
+    // 'active_ep_substore_username'=> env('ACTIVE_EP_SUBSTORE_USERNAME'),
+    // 'active_ep_substore_password'=>env('ACTIVE_EP_SUBSTORE_PASSWORD'),
+    // 'active_ep_substore_storeid'=> env('ACTIVE_EP_SUBSTORE_STOREID'),
+
+    'active_ep_substore_username'=> env('EASYPAISA_PRODUCTION_CODEBASE_USERNAME'),
+    'active_ep_substore_password'=>env('EASYPAISA_PRODUCTION_CODEBASE_PASSWORD'),
+    'active_ep_substore_storeid'=> env('EASYPAISA_PRODUCTION_CODEBASE_STOREID'),
     
     'prod_hashkey'=> env('EASYPAISA_PRODUCTION_HASHKEY'),
     'prod_url'=> env('EASYPAISA_PRODUCTION_URL'),
