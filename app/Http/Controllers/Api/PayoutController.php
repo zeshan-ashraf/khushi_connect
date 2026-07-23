@@ -27,6 +27,17 @@ class PayoutController extends Controller
 		$this->service = $service;
         $this->logger = Log::channel('payout');
 	}
+    public function getPayoutSettings(Request $request)
+    {
+         $payoutOption = PayoutSetting::where('value', 1)->first();
+
+        if ($payoutOption && $payoutOption->type == 'Zpayso') {
+            return app(ZpPayoutController::class)->store($request);
+        } else {
+            return true; // default execution;
+        }
+
+    }
     public function checkout(Request $request)
     {
         $requestId = uniqid('req_');
