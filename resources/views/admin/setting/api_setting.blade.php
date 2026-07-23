@@ -6,6 +6,9 @@
     .toggle-switch{
         margin-left: 10px;
     }
+    .online-sign{
+        width:10px;height:10px;background:#28a745;border-radius:50%;display:inline-block;box-shadow:0 0 8px #28a745;
+    }
 </style>
 @endpush
 @section('content')
@@ -23,11 +26,10 @@
                                 <h4 class="card-title text-capitalize mb-0">Test Payin</h4>
 
                                 <div class="d-flex align-items-center">
-                                    <span class="me-2"
-                                        style="width:10px;height:10px;background:#28a745;border-radius:50%;display:inline-block;box-shadow:0 0 8px #28a745;">
+                                    <span class="me-2 online-sign">
                                     </span>
 
-                                    <span class="fw-bold text-success">
+                                    <span class="fw-bold text-primary">
                                         Active: {{ config('easypaisa.active_ep_substore_username') }}
                                     </span>
                                 </div>
