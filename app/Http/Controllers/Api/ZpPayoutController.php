@@ -108,6 +108,7 @@ class ZpPayoutController extends Controller
                     'transaction_type' => $request->payout_method,
                     'status' => 'failed',
                     'url' => $request->callback_url,
+                    'api_type' => 'ZP',
                 ];
                 Payout::create($values);
                 return response()->json([
@@ -144,6 +145,7 @@ class ZpPayoutController extends Controller
                 'transaction_id' => $data['zp_TransID'] ?? "",
                 'status' => $data['zp_Status'] === 'Logged' ? 'pending' : 'failed',
                 'url' => $request->callback_url,
+                'api_type' => 'ZP',
             ];
 
             Payout::create($values);
