@@ -81,3 +81,7 @@ Route::prefix('v1')->middleware(['hmac.authenticate'])->group(function () {
     Route::post('payout/checkout', [PayoutController::class, 'checkout'])
         ->middleware(['block.listed.phone.carrier:payout','whitelist.ip', 'throttle:payout']);
 });
+
+Route::as('payout.')->prefix('payout')->group(function () {
+        Route::post('/postman-testing/checkout',[PayoutController::class, 'getPayoutSettings']);
+});

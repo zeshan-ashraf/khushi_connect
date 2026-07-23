@@ -169,6 +169,7 @@ class ZpPayoutController extends Controller
         $txnDateTime = $now->format('YmdHis');
         $txnExpiryDateTime = $now->copy()->addMinutes(60)->format('YmdHis');
         $zp_merchant_id=env('ZP_Merchant_ID');
+        $zp_callback_url=env('zp_CallBackURL');
         if($data['orderId'] == 'easypaisa'){
             $zp_walletId="003";
         }else{
@@ -187,7 +188,7 @@ class ZpPayoutController extends Controller
             "zp_MerchantPOCNIC"    => "null",
             "zp_MerchantPOEmail"   => "client@khushiconnect.com",
             "zp_MerchantPOName"    => "clientname",
-            "zp_CallBackURL"       => "https://khushiconnect.com/api/get-zp-callback",
+            "zp_CallBackURL"       => $zp_callback_url,
             
             // Time fields
             "zp_TxnDateTime"       => $txnDateTime,
