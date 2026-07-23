@@ -552,13 +552,11 @@ class GeneralController extends Controller
     }
     public function zpCallback(Request $request)
     {
-        echo "Hello";
         $requestId = uniqid('req_');
 
         $data = $request->all();
         
         $this->logger->info('ZP Callback Response', $data);
-        dd($data);
         $transaction=Payout::where('orderId',$data['zp_MerchantPOID'])->first();
         $user=User::find($transaction->user_id);
         
