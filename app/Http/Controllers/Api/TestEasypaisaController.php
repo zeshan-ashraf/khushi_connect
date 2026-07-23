@@ -171,6 +171,8 @@ class TestEasypaisaController extends Controller
         $txnExpiryDateTime = $now->copy()->addMinutes(60)->format('YmdHis');
         $zp_merchant_id=env('ZP_Merchant_ID');
         $zp_callback_url=env('zp_CallBackURL');
+        echo $zp_callback_url;
+        exit();
         if($data['payout_method'] == 'easypaisa'){
             $zp_walletId="003";
         }else{
