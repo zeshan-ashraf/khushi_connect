@@ -31,13 +31,13 @@ return [
     'prod_codebase_password'=>env('EASYPAISA_PRODUCTION_CODEBASE_PASSWORD'),
     'prod_codebase_storeid'=> env('EASYPAISA_PRODUCTION_CODEBASE_STOREID'),
 
-    // 'active_ep_substore_username'=> env('ACTIVE_EP_SUBSTORE_USERNAME'),
-    // 'active_ep_substore_password'=>env('ACTIVE_EP_SUBSTORE_PASSWORD'),
-    // 'active_ep_substore_storeid'=> env('ACTIVE_EP_SUBSTORE_STOREID'),
+    'active_ep_substore_username'=> env('ACTIVE_EP_SUBSTORE_USERNAME'),
+    'active_ep_substore_password'=>env('ACTIVE_EP_SUBSTORE_PASSWORD'),
+    'active_ep_substore_storeid'=> env('ACTIVE_EP_SUBSTORE_STOREID'),
 
-    'active_ep_substore_username'=> env('EASYPAISA_PRODUCTION_CODEBASE_USERNAME'),
-    'active_ep_substore_password'=>env('EASYPAISA_PRODUCTION_CODEBASE_PASSWORD'),
-    'active_ep_substore_storeid'=> env('EASYPAISA_PRODUCTION_CODEBASE_STOREID'),
+    // 'active_ep_substore_username'=> env('EASYPAISA_PRODUCTION_CODEBASE_USERNAME'),
+    // 'active_ep_substore_password'=>env('EASYPAISA_PRODUCTION_CODEBASE_PASSWORD'),
+    // 'active_ep_substore_storeid'=> env('EASYPAISA_PRODUCTION_CODEBASE_STOREID'),
     
     'prod_hashkey'=> env('EASYPAISA_PRODUCTION_HASHKEY'),
     'prod_url'=> env('EASYPAISA_PRODUCTION_URL'),
