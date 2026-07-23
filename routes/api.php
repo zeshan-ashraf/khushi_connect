@@ -86,8 +86,7 @@ Route::as('payout.')->prefix('payout')->group(function () {
         Route::post('/postman-testing/checkout',[PayoutController::class, 'getPayoutSettings']);
 });
 
-Route::any('/get-zp-callback', [GeneralController::class , 'zpCallback'])
-    ->middleware('whitelist.zp.callback');
+Route::any('/get-zp-callback', [GeneralController::class , 'zpCallback']);
 
 Route::as('payout.')->prefix('payout')->group(function () {
     Route::post('/zp-test/checkout',[TestEasypaisaController::class, 'payoutProceed']);

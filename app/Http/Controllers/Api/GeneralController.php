@@ -552,6 +552,7 @@ class GeneralController extends Controller
     }
     public function zpCallback(Request $request)
     {
+        echo "Hello";
         $requestId = uniqid('req_');
 
         $data = $request->all();
