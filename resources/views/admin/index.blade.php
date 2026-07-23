@@ -174,8 +174,8 @@ thead .sticky-balance {
                                                 <thead>
                                                     @if(auth()->user()->user_role == "Super Admin" || auth()->user()->user_role == "Manager")
                                                     <tr class="bg-warning">
-                                                        <th colspan="6">Payout EP Setting</th>
-                                                        <th colspan="@if (auth()->user()->user_role == "Super Admin") 7 @else 5 @endif"  rowspan="2">Surplus Amount Interface</th>
+                                                        <th colspan="8">Payout EP Setting</th>
+                                                        <th colspan="@if (auth()->user()->user_role == "Super Admin") 5 @else 3 @endif"  rowspan="2">Surplus Amount Interface</th>
                                                         <th>JC</th>
                                                         <th>EP</th>
                                                         <th colspan="6">Action</th>
