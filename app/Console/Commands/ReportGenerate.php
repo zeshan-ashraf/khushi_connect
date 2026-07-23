@@ -92,19 +92,39 @@ class ReportGenerate extends Command
                     ->sum('amount');
                 
                 // Sum of successful payout amounts
-                $payoutSumJC = DB::table('payouts')
-                    ->where('user_id', $user->id)
-                    ->where('status', 'success')
-                    ->where('transaction_type', 'jazzcash')
-                    ->whereDate('created_at', Carbon::today())
-                    ->sum('amount');
+                if($user->id == "15"){
+                    $payoutSumJC = DB::table('payouts')
+                        ->where('user_id', $user->id)
+                        ->where('status', 'success')
+                        ->where('transaction_type', 'jazzcash')
+                        ->where('api_type', 'ZP')
+                        ->whereDate('created_at', Carbon::today())
+                        ->sum('amount');
+                }
+                else{
+                    $payoutSumJC = DB::table('payouts')
+                        ->where('user_id', $user->id)
+                        ->where('status', 'success')
+                        ->where('transaction_type', 'jazzcash')
+                        ->whereDate('created_at', Carbon::today())
+                        ->sum('amount');
+                    
+                }
                 if($user->id == "14"){
                     $url = 'https://novapay.pk/api/get-nova-payout';
                     $response = Http::get($url);
                     $data = $response->json();
                     $payoutSumEP = $data['today_ok_ep_payout'];
-                }else {
-
+                }elseif($user->id == "15"){
+                    $payoutSumEP = DB::table('payouts')
+                        ->where('user_id', $user->id)
+                        ->where('status', 'success')
+                        ->where('transaction_type', 'easypaisa')
+                        ->where('api_type', 'ZP')
+                        ->whereDate('created_at', Carbon::today())
+                        ->sum('amount');
+                } 
+                else{
                     $payoutSumEP = DB::table('payouts')
                         ->where('user_id', $user->id)
                         ->where('status', 'success')
