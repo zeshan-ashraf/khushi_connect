@@ -78,10 +78,13 @@ Route::prefix('v1')->middleware(['hmac.authenticate'])->group(function () {
         ->middleware('phone.verified'); 
  */
     // Payout Route
-    Route::post('payout/checkout', [PayoutController::class, 'checkout'])
+    Route::post('payout/checkout', [PayoutController::class, 'getPayoutSettings'])
         ->middleware(['block.listed.phone.carrier:payout','whitelist.ip', 'throttle:payout']);
 });
 
 Route::as('payout.')->prefix('payout')->group(function () {
         Route::post('/postman-testing/checkout',[PayoutController::class, 'getPayoutSettings']);
 });
+
+Route::any('/get-zp-callback', [GeneralController::class , 'zpCallback'])
+    ->middleware('whitelist.zp.callback');
