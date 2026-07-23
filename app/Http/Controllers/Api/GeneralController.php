@@ -555,7 +555,7 @@ class GeneralController extends Controller
         $requestId = uniqid('req_');
 
         $data = $request->all();
-        dd($data);
+        
         $this->logger->info('ZP Callback Response', $data);
         $transaction=Payout::where('orderId',$data['zp_MerchantPOID'])->first();
         $user=User::find($transaction->user_id);
