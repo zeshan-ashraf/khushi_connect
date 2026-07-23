@@ -31,9 +31,9 @@ return [
     'prod_codebase_password'=>env('EASYPAISA_PRODUCTION_CODEBASE_PASSWORD'),
     'prod_codebase_storeid'=> env('EASYPAISA_PRODUCTION_CODEBASE_STOREID'),
 
-    'active_ep_substore_username'=> env('ACTIVE_EP_SUBSTORE_USERNAME'),
-    'active_ep_substore_password'=>env('ACTIVE_EP_SUBSTORE_PASSWORD'),
-    'active_ep_substore_storeid'=> env('ACTIVE_EP_SUBSTORE_STOREID'),
+    'active_ep_substore_username'=> env('EASYPAISA_PRODUCTION_DESK_USERNAME'),
+    'active_ep_substore_password'=>env('EASYPAISA_PRODUCTION_DESK_PASSWORD'),
+    'active_ep_substore_storeid'=> env('EASYPAISA_PRODUCTION_DESK_STOREID'),
 
     // 'active_ep_substore_username'=> env('EASYPAISA_PRODUCTION_CODEBASE_USERNAME'),
     // 'active_ep_substore_password'=>env('EASYPAISA_PRODUCTION_CODEBASE_PASSWORD'),
