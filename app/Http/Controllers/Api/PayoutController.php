@@ -34,7 +34,7 @@ class PayoutController extends Controller
         if ($payoutOption && $payoutOption->type == 'Zpayso') {
             return app(ZpPayoutController::class)->store($request);
         } else {
-            return true; // default execution;
+            $this->checkout($request); // default execution;
         }
 
     }

@@ -87,123 +87,78 @@ class ZpPayoutController extends Controller
         }
         else{
             $callback_url = $request->callback_url;
-            if($user->email == "okpaysev@gmail.com"){
-                $setting=Setting::where('user_id',$user->id)->first();
-                $assigned_amount=0;
-                if($request->payout_method == "easypaisa"){
-                    $assigned_amount=$setting->easypaisa;
-                }else {
-                    $assigned_amount=$setting->jazzcash;
-                }
-                if($request->amount > $assigned_amount){
-                    $values=[
-                        'user_id' => $user->id,
-                        'code' => "Nova-Failed",
-                        'message' => "Merchant assigned limit breached",
-                        'transaction_reference' => "",
-                        'amount' => $request->amount,
-                        'orderId' => $request->orderId,
-                        'fee' => "",
-                        'phone' => $request->phone,
-                        'transaction_type' => $request->payout_method,
-                        'status' => 'failed',
-                        'url' => $request->callback_url,
-                    ];
-                    Payout::create($values);
-                    $url =$callback_url;
-                    $call_data = [
-                        'orderId' => $request->orderId,
-                        'message' => 'Your payout cannot be processed due to not enough balance , please try again.',
-                        'status' => 'failed',
-                    ];
-                    $response = Http::timeout(60)->post($url, $call_data);
-                    return response()->json([
-                        'status' => 'error',
-                        'message' => 'Merchant assigned limit breached',
-                    ], 400);
-                }
-            }
-            else{
-                $setting=Setting::where('user_id',$user->id)->first();
-                $assigned_amount=0;
-                if($request->payout_method == "easypaisa"){
-                    $assigned_amount=$setting->easypaisa;
-                }else {
-                    $assigned_amount=$setting->jazzcash;
-                }
-                if($request->amount > $assigned_amount){
-                    $values=[
-                        'user_id' => $user->id,
-                        'code' => "Nova-Failed",
-                        'message' => "Merchant assigned limit breached",
-                        'transaction_reference' => "",
-                        'amount' => $request->amount,
-                        'orderId' => $request->orderId,
-                        'fee' => "",
-                        'phone' => $request->phone,
-                        'transaction_type' => $request->payout_method,
-                        'status' => 'failed',
-                        'url' => $request->callback_url,
-                    ];
-                    Payout::create($values);
-                    return response()->json([
-                        'status' => 'error',
-                        'message' => 'Merchant assigned limit breached',
-                    ], 400);
-                }
-            }
+            
+            $setting=Setting::where('user_id',$user->id)->first();
+            $assigned_amount=0;
             if($request->payout_method == "easypaisa"){
-
-                $data=$request->all();
-                
-                $get_zp_paarams_data=$this->getZpParams($data);
-                $json_data=json_encode($get_zp_paarams_data, true);
-    
-                $transactionUrl=env('ZP_Payout_URL');
-    
-                $curl = curl_init($transactionUrl);
-                curl_setopt($curl, CURLOPT_POST, 1);
-                curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-                curl_setopt($curl, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
-                curl_setopt($curl, CURLOPT_POSTFIELDS, $json_data);
-                
-                $response = curl_exec($curl);
-                $data=json_decode($response, true);
-
+                $assigned_amount=$setting->easypaisa;
+            }else {
+                $assigned_amount=$setting->jazzcash;
+            }
+            if($request->amount > $assigned_amount){
                 $values=[
                     'user_id' => $user->id,
-                    'code' => $data['zp_RespCode'] ?? "",
-                    'message' => $data['zp_RespMsg'] ?? "",
-                    'transaction_reference' => $data['zp_TransID'] ?? "",
+                    'code' => "Nova-Failed",
+                    'message' => "Merchant assigned limit breached",
+                    'transaction_reference' => "",
                     'amount' => $request->amount,
                     'orderId' => $request->orderId,
+                    'fee' => "",
                     'phone' => $request->phone,
                     'transaction_type' => $request->payout_method,
-                    'transaction_id' => $data['zp_TransID'] ?? "",
-                    'status' => $data['zp_Status'] === 'Logged' ? 'pending' : 'failed',
+                    'status' => 'failed',
                     'url' => $request->callback_url,
                 ];
-
                 Payout::create($values);
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Merchant assigned limit breached',
+                ], 400);
+            }
+            
+            $data=$request->all();
+            
+            $get_zp_paarams_data=$this->getZpParams($data);
+            $json_data=json_encode($get_zp_paarams_data, true);
 
-                if($data['zp_Status'] === 'Logged' || $data['zp_Status'] === 'Paid'){
-                    return response()->json([
-                        'success' => true,
-                        'message' => 'Payout processed successfully.',
-                        'transaction_id' => $data['zp_MerchantPOID'],
-                    ], 200);
-                }
-                else{
-                    return response()->json([
-                        'status' => 'error',
-                        'message' => 'Your payout cannot be processed due to '. $data['zp_RespMsg']. ' , please try again.',
-                    ], 400);
-                }
+            $transactionUrl=env('ZP_Payout_URL');
+
+            $curl = curl_init($transactionUrl);
+            curl_setopt($curl, CURLOPT_POST, 1);
+            curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($curl, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
+            curl_setopt($curl, CURLOPT_POSTFIELDS, $json_data);
+            
+            $response = curl_exec($curl);
+            $data=json_decode($response, true);
+
+            $values=[
+                'user_id' => $user->id,
+                'code' => $data['zp_RespCode'] ?? "",
+                'message' => $data['zp_RespMsg'] ?? "",
+                'transaction_reference' => $data['zp_TransID'] ?? "",
+                'amount' => $request->amount,
+                'orderId' => $request->orderId,
+                'phone' => $request->phone,
+                'transaction_type' => $request->payout_method,
+                'transaction_id' => $data['zp_TransID'] ?? "",
+                'status' => $data['zp_Status'] === 'Logged' ? 'pending' : 'failed',
+                'url' => $request->callback_url,
+            ];
+
+            Payout::create($values);
+
+            if($data['zp_Status'] === 'Logged' || $data['zp_Status'] === 'Paid'){
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Payout processed successfully.',
+                    'transaction_id' => $data['zp_MerchantPOID'],
+                ], 200);
             }
             else{
                 return response()->json([
                     'status' => 'error',
-                    'message' => 'Jazzcash Payout method not allowed.',
+                    'message' => 'Your payout cannot be processed due to '. $data['zp_RespMsg']. ' , please try again.',
                 ], 400);
             }
         }
@@ -214,21 +169,25 @@ class ZpPayoutController extends Controller
         $txnDateTime = $now->format('YmdHis');
         $txnExpiryDateTime = $now->copy()->addMinutes(60)->format('YmdHis');
         $zp_merchant_id=env('ZP_Merchant_ID');
-        
+        if($data['orderId'] == 'easypaisa'){
+            $zp_walletId="003";
+        }else{
+            $zp_walletId="002";
+        }
 
         $params = [
             "zp_MerchantID"        => $zp_merchant_id,
             "zp_SubMerchantID"     => "",
-            "zp_WalletID"          => "003",
+            "zp_WalletID"          => $zp_walletId,
 
             // Dynamic mapping
             "zp_MerchantPOID"      => $data['orderId'],
             "zp_MerchantPOAmount"  => $data['amount'],
             "zp_MerchantPOCell"    => '0' . substr($data['phone'], -10),
             "zp_MerchantPOCNIC"    => "null",
-            "zp_MerchantPOEmail"   => "client@novapay.com",
+            "zp_MerchantPOEmail"   => "client@khushiconnect.com",
             "zp_MerchantPOName"    => "clientname",
-            "zp_CallBackURL"       => "https://novapay.pk/api/get-zp-callback",
+            "zp_CallBackURL"       => "https://khushiconnect.com/api/get-zp-callback",
             
             // Time fields
             "zp_TxnDateTime"       => $txnDateTime,
