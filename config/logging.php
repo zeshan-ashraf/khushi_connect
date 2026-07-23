@@ -204,6 +204,12 @@ return [
             'days' => 14,
             'replace_placeholders' => true,
         ],
+        'zp_callback' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/zp_callback.log'),
+            'level' => 'info',
+            'days' => 14,
+        ],
     ],
 
 ];

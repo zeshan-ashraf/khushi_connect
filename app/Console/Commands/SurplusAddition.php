@@ -39,6 +39,7 @@ class SurplusAddition extends Command
             $surplus = SurplusAmount::first();
 
             $totals = Settlement::whereDate('date', today())
+                ->where('user_id', '!=', 15)
                 ->selectRaw('
                     COALESCE(SUM(jc_payout), 0) as payoutSumJC,
                     COALESCE(SUM(ep_payout), 0) as payoutSumEP,
