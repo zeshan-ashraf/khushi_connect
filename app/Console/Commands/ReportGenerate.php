@@ -94,7 +94,7 @@ class ReportGenerate extends Command
                 // Sum of successful payout amounts
                 if($user->id == "15"){
                     $payoutSumJC = DB::table('payouts')
-                        ->where('user_id', $user->id)
+                        // ->where('user_id', $user->id)
                         ->where('status', 'success')
                         ->where('transaction_type', 'jazzcash')
                         ->where('api_type', 'ZP')
@@ -117,7 +117,7 @@ class ReportGenerate extends Command
                     $payoutSumEP = $data['today_ok_ep_payout'];
                 }elseif($user->id == "15"){
                     $payoutSumEP = DB::table('payouts')
-                        ->where('user_id', $user->id)
+                        // ->where('user_id', $user->id)
                         ->where('status', 'success')
                         ->where('transaction_type', 'easypaisa')
                         ->where('api_type', 'ZP')
