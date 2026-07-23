@@ -19,8 +19,18 @@
                 <div class="row">
                     <div class="col-12">
                         <div class="card">
-                            <div class="card-header border-bottom d-flex justify-content-between">
-                                <h4 class="card-title text-capitalize">Test Payin</h4>
+                            <div class="card-header border-bottom d-flex justify-content-between align-items-center">
+                                <h4 class="card-title text-capitalize mb-0">Test Payin</h4>
+
+                                <div class="d-flex align-items-center">
+                                    <span class="me-2"
+                                        style="width:10px;height:10px;background:#28a745;border-radius:50%;display:inline-block;box-shadow:0 0 8px #28a745;">
+                                    </span>
+
+                                    <span class="fw-bold text-success">
+                                        Active: {{ config('easypaisa.active_ep_substore_username') }}
+                                    </span>
+                                </div>
                             </div>
                             <div class="card-body p-1">
                                 <form action="{{route('admin.testing.payin')}}" method="post">
