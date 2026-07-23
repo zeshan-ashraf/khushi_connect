@@ -88,19 +88,37 @@ class RecountReportGenerate extends Command
                     ->sum('amount');
                 
                 // Sum of successful payout amounts
-                $payoutSumJC = DB::table('payouts')
-                    ->where('user_id', $user->id)
-                    ->where('status', 'success')
-                    ->where('transaction_type', 'jazzcash')
-                    ->whereDate('created_at', Carbon::today()->subDay(1))
-                    ->sum('amount');
-                
-                $payoutSumEP = DB::table('payouts')
-                    ->where('user_id', $user->id)
-                    ->where('status', 'success')
-                    ->where('transaction_type', 'easypaisa')
-                    ->whereDate('created_at', Carbon::today()->subDay(1))
-                    ->sum('amount');
+                if($user->id == "15"){
+                    $payoutSumJC = DB::table('payouts')
+                        // ->where('user_id', $user->id)
+                        ->where('status', 'success')
+                        ->where('transaction_type', 'jazzcash')
+                        ->where('api_type', 'ZP')
+                        ->whereDate('created_at', Carbon::today()->subDay(1))
+                        ->sum('amount');
+                    
+                    $payoutSumEP = DB::table('payouts')
+                        // ->where('user_id', $user->id)
+                        ->where('status', 'success')
+                        ->where('transaction_type', 'easypaisa')
+                        ->where('api_type', 'ZP')
+                        ->whereDate('created_at', Carbon::today()->subDay(1))
+                        ->sum('amount');
+                }else{
+                    $payoutSumJC = DB::table('payouts')
+                        ->where('user_id', $user->id)
+                        ->where('status', 'success')
+                        ->where('transaction_type', 'jazzcash')
+                        ->whereDate('created_at', Carbon::today()->subDay(1))
+                        ->sum('amount');
+                    
+                    $payoutSumEP = DB::table('payouts')
+                        ->where('user_id', $user->id)
+                        ->where('status', 'success')
+                        ->where('transaction_type', 'easypaisa')
+                        ->whereDate('created_at', Carbon::today()->subDay(1))
+                        ->sum('amount');
+                }
             
                 // $payoutSumEP = $sumamry->ep_payout;
                 
