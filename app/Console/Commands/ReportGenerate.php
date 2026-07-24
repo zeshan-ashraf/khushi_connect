@@ -138,8 +138,10 @@ class ReportGenerate extends Command
                 $rev_cln=($transactionSumJC * $payinFeeJC + $transactionSumEP * $payinFeeEP)  + ($payoutSumJC * $PayoutFeeJC + $payoutSumEP * $PayoutFeeEP) -  $op_cln;  
                 $settleAmount = $payoutSumJC + $payoutSumEP + ($payoutSumJC * $PayoutFeeJC) + ($payoutSumEP * $PayoutFeeEP) + $todayUsdt +$todayWalletTrans;
                 if($user->id == "15"){
+                    $op_cln = 0;
+                    $rev_cln = 0;
+                    $settleAmount = 0;
                     $payinBal = 0;
-
                     $closingBal=0;
                 } else {
 
