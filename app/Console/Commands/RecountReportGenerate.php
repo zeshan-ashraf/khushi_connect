@@ -135,6 +135,14 @@ class RecountReportGenerate extends Command
                 // $payinBal = $closingBal + $transactionSumEP - ($transactionSumEP * $payinFeeEP) - $transactionReverseHalf;
                 $settleAmount = $payoutSumJC + $payoutSumEP + ($payoutSumJC * $PayoutFeeJC) + ($payoutSumEP * $PayoutFeeEP) + $todayUsdt +$todayWalletTrans;
             
+                if($user->id == "15"){
+                    $op_cln = 0;
+                    $rev_cln = 0;
+                    $settleAmount = 0;
+                    $payinBal = 0;
+                    $closingBal=0;
+                }
+                
                 // Create a summary for the user
                 $sumamry->update([
                     'date' => Carbon::today()->subDay(1)->format('y-m-d'),
