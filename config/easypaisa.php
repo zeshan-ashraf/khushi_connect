@@ -31,6 +31,34 @@ return [
     'prod_codebase_password'=>env('EASYPAISA_PRODUCTION_CODEBASE_PASSWORD'),
     'prod_codebase_storeid'=> env('EASYPAISA_PRODUCTION_CODEBASE_STOREID'),
 
+    'prod_reheaven_username'=> env('EASYPAISA_PRODUCTION_REHEAVEN_USERNAME'),
+    'prod_reheaven_password'=>env('EASYPAISA_PRODUCTION_REHEAVEN_PASSWORD'),
+    'prod_reheaven_storeid'=> env('EASYPAISA_PRODUCTION_REHEAVEN_STOREID'),
+
+    'prod_prime_username'=> env('EASYPAISA_PRODUCTION_PRIME_USERNAME'),
+    'prod_prime_password'=>env('EASYPAISA_PRODUCTION_PRIME_PASSWORD'),
+    'prod_prime_storeid'=> env('EASYPAISA_PRODUCTION_PRIME_STOREID'),
+
+    'prod_grandv_username'=> env('EASYPAISA_PRODUCTION_GRANDV_USERNAME'),
+    'prod_grandv_password'=>env('EASYPAISA_PRODUCTION_GRANDV_PASSWORD'),
+    'prod_grandv_storeid'=> env('EASYPAISA_PRODUCTION_GRANDV_STOREID'),
+
+    'prod_autov_username'=> env('EASYPAISA_PRODUCTION_AUTOV_USERNAME'),
+    'prod_autov_password'=>env('EASYPAISA_PRODUCTION_AUTOV_PASSWORD'),
+    'prod_autov_storeid'=> env('EASYPAISA_PRODUCTION_AUTOV_STOREID'),
+
+    'prod_novexal_username'=> env('EASYPAISA_PRODUCTION_NOVEXAL_USERNAME'),
+    'prod_novexal_password'=>env('EASYPAISA_PRODUCTION_NOVEXAL_PASSWORD'),
+    'prod_novexal_storeid'=> env('EASYPAISA_PRODUCTION_NOVEXAL_STOREID'),
+
+    'prod_zentroxer_username'=> env('EASYPAISA_PRODUCTION_ZENTROXER_USERNAME'),
+    'prod_zentroxer_password'=>env('EASYPAISA_PRODUCTION_ZENTROXER_PASSWORD'),
+    'prod_zentroxer_storeid'=> env('EASYPAISA_PRODUCTION_ZENTROXER_STOREID'),
+
+    'prod_velmoray_username'=> env('EASYPAISA_PRODUCTION_VELMORAY_USERNAME'),
+    'prod_velmoray_password'=>env('EASYPAISA_PRODUCTION_VELMORAY_PASSWORD'),
+    'prod_velmoray_storeid'=> env('EASYPAISA_PRODUCTION_VELMORAY_STOREID'),
+
     'active_ep_substore_username'=> env('EASYPAISA_PRODUCTION_DESK_USERNAME'),
     'active_ep_substore_password'=>env('EASYPAISA_PRODUCTION_DESK_PASSWORD'),
     'active_ep_substore_storeid'=> env('EASYPAISA_PRODUCTION_DESK_STOREID'),
