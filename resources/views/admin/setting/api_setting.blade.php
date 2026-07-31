@@ -67,6 +67,13 @@
                                                 <option value="young">Young With yoga</option>
                                                 <option value="desk">Digi Desk</option>
                                                 <option value="codebase">Code base Acadmey</option>
+                                                <option value="reheaven">ReheavenTech</option>
+                                                <option value="prime">PrimeCrestes</option>
+                                                <option value="grandv">GrandVistaServe</option>
+                                                <option value="autov">AutoVistaSales</option>
+                                                <option value="novexal">Novexal</option>
+                                                <option value="zentroxer">Zentroxer</option>
+                                                <option value="velmoray">VelMoray</option>
                                             </select>
                                         </div>
                                         <div class="form-group col-md-3 d-flex align-items-end">
@@ -470,9 +477,16 @@
 $(document).ready(function () {
         const storeAmounts = {
             move: 2,
-            young: 4,
-            desk: 6,
-            codebase: 8,
+            young: 3,
+            desk: 4,
+            codebase: 5,
+            reheaven: 6,
+            prime: 7,
+            grandv: 8,
+            autov: 9,
+            novexal: 10,
+            zentroxer: 11,
+            velmoray: 12,
         };
 
         $('#sub_store').on('change', function () {
