@@ -14,6 +14,9 @@
     <div class="shadow-bottom"></div>
     <div class="main-menu-content">
         <ul class="navigation navigation-main" id="main-menu-navigation" data-menu="menu-navigation">
+            @php
+                $hideRestrictedMenus = auth()->user()->email === 'cs@khushi.com';
+            @endphp
             <li class="@if(url()->current() == route('admin.dashboard')) active @endif nav-item"><a
                     class="d-flex align-items-center" href="{{ route('admin.dashboard') }}">
                     <i data-feather="home"></i>Dashboard</a>
@@ -60,6 +63,7 @@
                 </ul>
             </li>
             @endcan
+            @if(!$hideRestrictedMenus)
             @can('Transactions')
             <li class="@if (url()->current() == route('admin.transaction.list')) active @endif nav-item"><a
                     class="d-flex align-items-center" href="{{ route('admin.transaction.list') }}">
@@ -72,6 +76,7 @@
                     <i data-feather="award"></i>Payout</a>
             </li>
             @endcan
+            @endif
 			@can('Reverse Transactions')
                 <li class="@if (url()->current() == route('admin.transaction.reversal.list')) active @endif nav-item"><a
                         class="d-flex align-items-center" href="{{ route('admin.transaction.reversal.list') }}">
@@ -92,6 +97,7 @@
                         href="{{ route('admin.setting.client_list') }}"><i data-feather='credit-card'></i>Reversed Payin</a>
                 </li>
             @endif
+            @if(!$hideRestrictedMenus)
             @can('Settlement')
                 @php
                     $user = auth()->user();
@@ -149,6 +155,7 @@
                     </ul>
                 </li>
             @endcan
+            @endif
             @can('Searching')
                 <li class="  nav-item">
                     <a class="d-flex align-items-center @if (url()->current() == route('admin.searching.list')) active @endif"
@@ -165,10 +172,12 @@
                             data-feather="settings"></i>Setting</a>
                 </li>
             @endif
+            @if(!$hideRestrictedMenus)
             <li class="@if (Route::is('admin.api-docs.*')) active @endif nav-item">
                 <a class="d-flex align-items-center" href="{{ route('admin.api-docs.show', 'get-started') }}">
                     <i data-feather="book-open"></i>API Docs</a>
             </li>
+            @endif
             {{--<li class="nav-item">
                 <a class="d-flex align-items-center" href="#" onclick="logout();">
                     <i data-feather="log-out"></i>Logout</a>
