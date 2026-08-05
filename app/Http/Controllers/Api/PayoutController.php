@@ -31,7 +31,7 @@ class PayoutController extends Controller
     {
          $payoutOption = PayoutSetting::where('value', 1)->first();
 
-        if ($payoutOption && $payoutOption->type == 'Zpayso') {
+        if ($payoutOption && $payoutOption->type == 'Zpayso JC' && $request->payout_method == "jazzcash") {
             return app(ZpPayoutController::class)->payoutProceed($request);
         } else {
            return $this->checkout($request); // default execution;
