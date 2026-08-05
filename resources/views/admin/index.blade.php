@@ -248,7 +248,7 @@ thead .sticky-balance {
                                                         <th rowspan="2">USDT</th>
                                                         <th rowspan="2">Wallet Transfer</th>
                                                         @endif
-                                                        <th rowspan="2">PAYABLETO CLIENT</th>
+                                                        <th rowspan="2">PAYABLE TO CLIENT</th>
                                                         <th rowspan="2" colspan="2">CLIENT WALLET</th>
                                                         @if(auth()->user()->user_role == "Super Admin" || auth()->user()->user_role == "Manager" || auth()->user()->user_role == "Client")
                                                         <th colspan="3" rowspan="3">REMAINING BALANCE</th>
