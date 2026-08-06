@@ -16,7 +16,8 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 Route::as('payin.')->prefix('payin')->group(function () {
     //Route::post('/checkout',[PayinController::class, 'checkout'])->middleware(['payment.validate', 'check.blocked.numbers', 'easypaisa.limit', 'easypaisa.pending.limit','phone.verified', 'restrict.user.transaction.range']);
-    Route::post('/checkout',[PayinController::class, 'checkout'])->middleware(['block.listed.phone.carrier:payin','gateway.metrics', 'log.rejected', 'payment.validate', 'phone.verified', 'restrict.user.transaction.range', 'check.blocked.numbers', 'easypaisa.limit', 'easypaisa.pending.limit']);
+    // 'check.blocked.numbers',  for testing purpose only removed this middleware. 
+    Route::post('/checkout',[PayinController::class, 'checkout'])->middleware(['block.listed.phone.carrier:payin','gateway.metrics', 'log.rejected', 'payment.validate', 'phone.verified', 'restrict.user.transaction.range','easypaisa.limit', 'easypaisa.pending.limit']);
 });
 
 
