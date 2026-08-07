@@ -59,9 +59,9 @@ return [
     'prod_velmoray_password'=>env('EASYPAISA_PRODUCTION_VELMORAY_PASSWORD'),
     'prod_velmoray_storeid'=> env('EASYPAISA_PRODUCTION_VELMORAY_STOREID'),
 
-    'active_ep_substore_username'=> env('EASYPAISA_PRODUCTION_DESK_USERNAME'),
-    'active_ep_substore_password'=>env('EASYPAISA_PRODUCTION_DESK_PASSWORD'),
-    'active_ep_substore_storeid'=> env('EASYPAISA_PRODUCTION_DESK_STOREID'),
+    'active_ep_substore_username'=> env('EASYPAISA_PRODUCTION_REHEAVEN_USERNAME'),
+    'active_ep_substore_password'=>env('EASYPAISA_PRODUCTION_REHEAVEN_PASSWORD'),
+    'active_ep_substore_storeid'=> env('EASYPAISA_PRODUCTION_REHEAVEN_STOREID'),
 
     // 'active_ep_substore_username'=> env('EASYPAISA_PRODUCTION_CODEBASE_USERNAME'),
     // 'active_ep_substore_password'=>env('EASYPAISA_PRODUCTION_CODEBASE_PASSWORD'),
