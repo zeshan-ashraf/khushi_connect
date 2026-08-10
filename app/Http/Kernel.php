@@ -85,6 +85,7 @@ class Kernel extends HttpKernel
 		 'phone.verified' => \App\Http\Middleware\EnsurePhoneIsVerified::class,
         'restrict.user.transaction.range' => \App\Http\Middleware\RestrictUserTransactionRange::class,
         'block.listed.phone.carrier' => \App\Http\Middleware\BlockListedPhoneAndCarrierMiddleware::class,
-        
+        'payout.amount' => \App\Http\Middleware\CheckPayoutAmount::class,
+        'payout.daily.limit' => \App\Http\Middleware\CheckPayoutDailyLimit::class,
     ];
 }

@@ -9,6 +9,8 @@ class Payout extends Model
 {
     use HasFactory;
 
+    public const STATUS_SUCCESS = 'success';
+
     protected $table = 'payouts';
 
     protected $fillable = [

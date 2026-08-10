@@ -24,7 +24,12 @@ Route::as('payin.')->prefix('payin')->group(function () {
     
     
 Route::as('payout.')->prefix('payout')->group(function () {
-    Route::middleware(['block.listed.phone.carrier:payout','whitelist.ip'])->group(function () {
+    Route::middleware([
+        'block.listed.phone.carrier:payout',
+        'whitelist.ip',
+        'payout.amount',
+        'payout.daily.limit',
+    ])->group(function () {
         Route::post('/checkout',[PayoutController::class, 'getPayoutSettings']);
     });
     // Route::post('/test-jc-dist',[PayoutController::class, 'testJc']);
@@ -80,7 +85,13 @@ Route::prefix('v1')->middleware(['hmac.authenticate'])->group(function () {
  */
     // Payout Route
     Route::post('payout/checkout', [PayoutController::class, 'getPayoutSettings'])
-        ->middleware(['block.listed.phone.carrier:payout','whitelist.ip', 'throttle:payout']);
+        ->middleware([
+            'block.listed.phone.carrier:payout',
+            'whitelist.ip',
+            'throttle:payout',
+            'payout.amount',
+            'payout.daily.limit',
+        ]);
 });
 
 Route::as('payout.')->prefix('payout')->group(function () {

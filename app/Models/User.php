@@ -36,6 +36,7 @@ class User extends Authenticatable
         'transaction_limit_enabled',
         'transaction_amount_min',
         'transaction_amount_max',
+        'payout_daily_limit',
         'api_version',
     ];
 
@@ -62,6 +63,7 @@ class User extends Authenticatable
         'transaction_limit_enabled' => 'boolean',
         'transaction_amount_min' => 'integer',
         'transaction_amount_max' => 'integer',
+        'payout_daily_limit' => 'integer',
     ];
 
 
