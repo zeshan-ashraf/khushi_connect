@@ -58,7 +58,36 @@ class PayoutLimitMiddlewareTest extends TestCase
         $this->assertStringContainsString('Invalid payout amount', $response->getData(true)['message']);
     }
 
-    public function test_daily_limit_middleware_allows_when_under_limit(): void
+    public function test_daily_limit_allows_exact_remaining_10000(): void
+    {
+        $user = $this->makeUser();
+        $this->insertPayout($user->id, 90000, Payout::STATUS_SUCCESS);
+
+        $response = $this->runDailyLimitMiddleware([
+            'client_email' => $user->email,
+            'phone' => self::PHONE,
+            'amount' => 10000,
+        ]);
+
+        $this->assertSame(200, $response->getStatusCode());
+    }
+
+    public function test_daily_limit_rejects_when_request_exceeds_remaining(): void
+    {
+        $user = $this->makeUser();
+        $this->insertPayout($user->id, 90000, Payout::STATUS_SUCCESS);
+
+        $response = $this->runDailyLimitMiddleware([
+            'client_email' => $user->email,
+            'phone' => self::PHONE,
+            'amount' => 10001,
+        ]);
+
+        $this->assertSame(429, $response->getStatusCode());
+        $this->assertSame('Daily payout limit exceeded.', $response->getData(true)['message']);
+    }
+
+    public function test_daily_limit_rejects_50000_when_only_10000_remaining(): void
     {
         $user = $this->makeUser();
         $this->insertPayout($user->id, 90000, Payout::STATUS_SUCCESS);
@@ -69,7 +98,8 @@ class PayoutLimitMiddlewareTest extends TestCase
             'amount' => 50000,
         ]);
 
-        $this->assertSame(200, $response->getStatusCode());
+        $this->assertSame(429, $response->getStatusCode());
+        $this->assertSame('Daily payout limit exceeded.', $response->getData(true)['message']);
     }
 
     public function test_daily_limit_middleware_returns_429_when_limit_reached(): void
@@ -105,19 +135,34 @@ class PayoutLimitMiddlewareTest extends TestCase
         $this->assertSame('Daily payout limit exceeded.', $response->getData(true)['message']);
     }
 
-    public function test_daily_limit_does_not_leak_totals_in_response(): void
+    public function test_remaining_80000_allows_50000(): void
     {
         $user = $this->makeUser();
-        $this->insertPayout($user->id, 100000, Payout::STATUS_SUCCESS);
+        $this->insertPayout($user->id, 20000, Payout::STATUS_SUCCESS);
 
         $response = $this->runDailyLimitMiddleware([
             'client_email' => $user->email,
             'phone' => self::PHONE,
-            'amount' => 1000,
+            'amount' => 50000,
+        ]);
+
+        $this->assertSame(200, $response->getStatusCode());
+    }
+
+    public function test_daily_limit_does_not_leak_totals_in_response(): void
+    {
+        $user = $this->makeUser();
+        $this->insertPayout($user->id, 90000, Payout::STATUS_SUCCESS);
+
+        $response = $this->runDailyLimitMiddleware([
+            'client_email' => $user->email,
+            'phone' => self::PHONE,
+            'amount' => 50000,
         ]);
 
         $payload = json_encode($response->getData(true));
-        $this->assertStringNotContainsString('100000', (string) $payload);
+        $this->assertStringNotContainsString('10000', (string) $payload);
+        $this->assertStringNotContainsString('90000', (string) $payload);
         $this->assertStringNotContainsString('remaining', strtolower((string) $payload));
     }
 

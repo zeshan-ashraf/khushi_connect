@@ -37,27 +37,32 @@ class PayoutLimitServiceTest extends TestCase
     {
         $user = $this->makeUser();
 
-        $this->assertFalse($this->service->hasReachedDailyLimit($user, self::PHONE));
         $this->assertSame(0.0, $this->service->getTodaySuccessfulPayoutTotal($user, self::PHONE));
+        $this->assertSame(100000.0, $this->service->getRemainingDailyLimit($user, self::PHONE));
+        $this->assertFalse($this->service->wouldExceedDailyLimit($user, self::PHONE, 50000));
     }
 
-    public function test_allows_when_total_is_40000(): void
+    public function test_allows_when_total_is_40000_and_request_fits(): void
     {
         $user = $this->makeUser();
         $this->insertPayout($user->id, 40000, Payout::STATUS_SUCCESS, 'easypaisa');
 
         $this->assertSame(40000.0, $this->service->getTodaySuccessfulPayoutTotal($user, self::PHONE));
-        $this->assertFalse($this->service->hasReachedDailyLimit($user, self::PHONE));
+        $this->assertSame(60000.0, $this->service->getRemainingDailyLimit($user, self::PHONE));
+        $this->assertFalse($this->service->wouldExceedDailyLimit($user, self::PHONE, 50000));
     }
 
-    public function test_allows_when_total_is_90000_even_if_next_request_would_overshoot(): void
+    public function test_at_90000_only_allows_up_to_10000(): void
     {
         $user = $this->makeUser();
         $this->insertPayout($user->id, 40000, Payout::STATUS_SUCCESS, 'easypaisa');
         $this->insertPayout($user->id, 50000, Payout::STATUS_SUCCESS, 'jazzcash');
 
         $this->assertSame(90000.0, $this->service->getTodaySuccessfulPayoutTotal($user, self::PHONE));
-        $this->assertFalse($this->service->hasReachedDailyLimit($user, self::PHONE));
+        $this->assertSame(10000.0, $this->service->getRemainingDailyLimit($user, self::PHONE));
+        $this->assertFalse($this->service->wouldExceedDailyLimit($user, self::PHONE, 10000));
+        $this->assertTrue($this->service->wouldExceedDailyLimit($user, self::PHONE, 10001));
+        $this->assertTrue($this->service->wouldExceedDailyLimit($user, self::PHONE, 50000));
     }
 
     public function test_blocks_when_total_reaches_exactly_100000(): void
@@ -65,15 +70,18 @@ class PayoutLimitServiceTest extends TestCase
         $user = $this->makeUser();
         $this->insertPayout($user->id, 100000, Payout::STATUS_SUCCESS, 'easypaisa');
 
-        $this->assertTrue($this->service->hasReachedDailyLimit($user, self::PHONE));
+        $this->assertSame(0.0, $this->service->getRemainingDailyLimit($user, self::PHONE));
+        $this->assertTrue($this->service->wouldExceedDailyLimit($user, self::PHONE, 1));
     }
 
-    public function test_allows_when_total_is_99999(): void
+    public function test_allows_when_total_is_99999_and_request_is_one(): void
     {
         $user = $this->makeUser();
         $this->insertPayout($user->id, 99999, Payout::STATUS_SUCCESS, 'jazzcash');
 
-        $this->assertFalse($this->service->hasReachedDailyLimit($user, self::PHONE));
+        $this->assertSame(1.0, $this->service->getRemainingDailyLimit($user, self::PHONE));
+        $this->assertFalse($this->service->wouldExceedDailyLimit($user, self::PHONE, 1));
+        $this->assertTrue($this->service->wouldExceedDailyLimit($user, self::PHONE, 2));
     }
 
     public function test_blocks_after_combined_total_exceeds_limit(): void
@@ -83,7 +91,8 @@ class PayoutLimitServiceTest extends TestCase
         $this->insertPayout($user->id, 50000, Payout::STATUS_SUCCESS, 'jazzcash');
 
         $this->assertSame(140000.0, $this->service->getTodaySuccessfulPayoutTotal($user, self::PHONE));
-        $this->assertTrue($this->service->hasReachedDailyLimit($user, self::PHONE));
+        $this->assertSame(0.0, $this->service->getRemainingDailyLimit($user, self::PHONE));
+        $this->assertTrue($this->service->wouldExceedDailyLimit($user, self::PHONE, 1));
     }
 
     public function test_combines_easypaisa_and_jazzcash_for_daily_total(): void
@@ -93,7 +102,7 @@ class PayoutLimitServiceTest extends TestCase
         $this->insertPayout($user->id, 40000, Payout::STATUS_SUCCESS, 'jazzcash');
 
         $this->assertSame(100000.0, $this->service->getTodaySuccessfulPayoutTotal($user, self::PHONE));
-        $this->assertTrue($this->service->hasReachedDailyLimit($user, self::PHONE));
+        $this->assertTrue($this->service->wouldExceedDailyLimit($user, self::PHONE, 1));
     }
 
     public function test_ignores_failed_and_pending_payouts(): void
@@ -105,7 +114,8 @@ class PayoutLimitServiceTest extends TestCase
         $this->insertPayout($user->id, 50000, 'pending', 'jazzcash');
 
         $this->assertSame(90000.0, $this->service->getTodaySuccessfulPayoutTotal($user, self::PHONE));
-        $this->assertFalse($this->service->hasReachedDailyLimit($user, self::PHONE));
+        $this->assertFalse($this->service->wouldExceedDailyLimit($user, self::PHONE, 10000));
+        $this->assertTrue($this->service->wouldExceedDailyLimit($user, self::PHONE, 10001));
     }
 
     public function test_user_totals_are_isolated(): void
@@ -116,8 +126,8 @@ class PayoutLimitServiceTest extends TestCase
         $this->insertPayout($userA->id, 100000, Payout::STATUS_SUCCESS, 'easypaisa');
         $this->insertPayout($userB->id, 10000, Payout::STATUS_SUCCESS, 'jazzcash');
 
-        $this->assertTrue($this->service->hasReachedDailyLimit($userA, self::PHONE));
-        $this->assertFalse($this->service->hasReachedDailyLimit($userB, self::PHONE));
+        $this->assertTrue($this->service->wouldExceedDailyLimit($userA, self::PHONE, 1));
+        $this->assertFalse($this->service->wouldExceedDailyLimit($userB, self::PHONE, 50000));
         $this->assertSame(10000.0, $this->service->getTodaySuccessfulPayoutTotal($userB, self::PHONE));
     }
 
@@ -142,7 +152,7 @@ class PayoutLimitServiceTest extends TestCase
         );
 
         $this->assertSame(10000.0, $this->service->getTodaySuccessfulPayoutTotal($user, self::PHONE));
-        $this->assertFalse($this->service->hasReachedDailyLimit($user, self::PHONE));
+        $this->assertFalse($this->service->wouldExceedDailyLimit($user, self::PHONE, 50000));
     }
 
     public function test_pakistan_timezone_day_boundary(): void
@@ -179,10 +189,12 @@ class PayoutLimitServiceTest extends TestCase
     public function test_per_user_daily_limit_overrides_config_default(): void
     {
         $user = $this->makeUser(['payout_daily_limit' => 50000]);
-        $this->insertPayout($user->id, 50000, Payout::STATUS_SUCCESS, 'easypaisa');
+        $this->insertPayout($user->id, 40000, Payout::STATUS_SUCCESS, 'easypaisa');
 
         $this->assertSame(50000.0, $this->service->getDailyLimit($user));
-        $this->assertTrue($this->service->hasReachedDailyLimit($user, self::PHONE));
+        $this->assertSame(10000.0, $this->service->getRemainingDailyLimit($user, self::PHONE));
+        $this->assertFalse($this->service->wouldExceedDailyLimit($user, self::PHONE, 10000));
+        $this->assertTrue($this->service->wouldExceedDailyLimit($user, self::PHONE, 10001));
     }
 
     public function test_null_user_limit_uses_config_default(): void
@@ -190,6 +202,15 @@ class PayoutLimitServiceTest extends TestCase
         $user = $this->makeUser(['payout_daily_limit' => null]);
 
         $this->assertSame(100000.0, $this->service->getDailyLimit($user));
+    }
+
+    public function test_remaining_80000_allows_50000_single_max(): void
+    {
+        $user = $this->makeUser();
+        $this->insertPayout($user->id, 20000, Payout::STATUS_SUCCESS, 'easypaisa');
+
+        $this->assertSame(80000.0, $this->service->getRemainingDailyLimit($user, self::PHONE));
+        $this->assertFalse($this->service->wouldExceedDailyLimit($user, self::PHONE, 50000));
     }
 
     private function makeUser(array $overrides = []): User

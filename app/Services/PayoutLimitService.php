@@ -47,14 +47,24 @@ final class PayoutLimitService
     }
 
     /**
-     * True when today's successful combined total is already at or above the daily limit.
-     *
-     * Intentionally does NOT project the requested amount:
-     * allow when currentTotal < limit, even if currentTotal + request would exceed it.
+     * Remaining daily capacity for this merchant + phone (never negative).
      */
-    public function hasReachedDailyLimit(User $user, string $phone): bool
+    public function getRemainingDailyLimit(User $user, string $phone): float
     {
-        return $this->getTodaySuccessfulPayoutTotal($user, $phone) >= $this->getDailyLimit($user);
+        $remaining = $this->getDailyLimit($user) - $this->getTodaySuccessfulPayoutTotal($user, $phone);
+
+        return max(0.0, $remaining);
+    }
+
+    /**
+     * True when the requested amount would exceed remaining daily capacity.
+     *
+     * Allow when: requestedAmount <= remaining
+     * Reject when: requestedAmount > remaining (including remaining = 0)
+     */
+    public function wouldExceedDailyLimit(User $user, string $phone, float $requestedAmount): bool
+    {
+        return $requestedAmount > $this->getRemainingDailyLimit($user, $phone);
     }
 
     /**

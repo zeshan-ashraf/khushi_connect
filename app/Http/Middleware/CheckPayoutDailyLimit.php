@@ -11,8 +11,7 @@ use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * Blocks payout requests when the user's combined successful daily total
- * has already reached their per-user daily limit.
+ * Blocks payout requests that would exceed the merchant+phone remaining daily limit.
  */
 class CheckPayoutDailyLimit
 {
@@ -32,7 +31,12 @@ class CheckPayoutDailyLimit
             return $next($request);
         }
 
-        if ($this->payoutLimitService->hasReachedDailyLimit($user, $phone)) {
+        $amount = $request->input('amount');
+        if (!is_numeric($amount)) {
+            return $next($request);
+        }
+
+        if ($this->payoutLimitService->wouldExceedDailyLimit($user, $phone, (float) $amount)) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'Daily payout limit exceeded.',

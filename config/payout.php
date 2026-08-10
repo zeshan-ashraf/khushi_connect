@@ -25,7 +25,8 @@ return [
     | daily_default: combined successful payouts (all gateways) per Pakistan
     | business day. Overridden per user via users.payout_daily_limit when set.
     |
-    | Daily check uses: currentSuccessfulTotal >= limit (NOT projected).
+    | Daily check uses remaining capacity:
+    | requestedAmount <= (dailyLimit - today'sSuccessfulTotal).
     |
     */
     'limits' => [
