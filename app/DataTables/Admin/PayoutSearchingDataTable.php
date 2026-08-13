@@ -28,6 +28,20 @@ class PayoutSearchingDataTable extends DataTable
                     $html .= ' <span class="badge bg-warning settled-badge">Settled</span>';
                 }
 
+                if (auth()->user()->user_role === 'Super Admin' && $query->status === 'pending') {
+                    $html .= '
+                        <select class="form-control status-dropdown mt-2"
+                                data-id="' . $query->id . '"
+                                style="width: 130px;">
+
+                            <option value="pending" selected>Pending</option>
+                            <option value="success">Success</option>
+                            <option value="failed">Failed</option>
+
+                        </select>
+                    ';
+                }
+
                 return '<div class="payout-status-cell">' . $html . '</div>';
             })
             ->editColumn('created_at', function ($query) {
