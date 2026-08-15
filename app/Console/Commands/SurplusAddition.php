@@ -5,7 +5,7 @@ namespace App\Console\Commands;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
-use App\Models\{TempAmountPayout,Settlement,SurplusAmount};
+use App\Models\{TempAmountPayout,Settlement,SurplusAmount,PayoutSetting};
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 
@@ -37,6 +37,7 @@ class SurplusAddition extends Command
 
             $tempAmount = TempAmountPayout::first();
             $surplus = SurplusAmount::first();
+            $payoutOption=PayoutSetting::where('value',1)->first();
 
             $totals = Settlement::whereDate('date', today())
                 ->where('user_id', '!=', 15)
@@ -49,19 +50,22 @@ class SurplusAddition extends Command
 
             $totalIbftAmount=$totals->ibftAmount * 1.007;
             $totalJCAmount=$totals->payoutSumJC * 1.005;
-            // $totalEPAmount=$totals->payoutSumEP * 1.007;
+            $totalEPAmount=0;
+            if($payoutOption == 'Khushi'){
+                $totalEPAmount=$totals->payoutSumEP * 1.007;
+            }
 
             $totalJCPayout = $totalIbftAmount + $totalJCAmount;
-            // $totalEPPayout = $totalEPAmount;
+            $totalEPPayout = $totalEPAmount;
 
             $surplus->update([
                 'jazzcash' => $surplus->jazzcash + $tempAmount->jc_amount - $totalJCPayout,
-                // 'easypaisa' => $surplus->easypaisa + $tempAmount->ep_amount - $totalEPPayout,
+                'easypaisa' => $surplus->easypaisa + $tempAmount->ep_amount - $totalEPPayout,
             ]);
 
             $tempAmount->update([
                 'jc_amount' => $totalJCPayout,
-                // 'ep_amount' => $totalEPPayout,
+                'ep_amount' => $totalEPPayout,
             ]);
 
             DB::commit();
