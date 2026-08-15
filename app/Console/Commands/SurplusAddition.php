@@ -49,19 +49,19 @@ class SurplusAddition extends Command
 
             $totalIbftAmount=$totals->ibftAmount * 1.007;
             $totalJCAmount=$totals->payoutSumJC * 1.005;
-            $totalEPAmount=$totals->payoutSumEP * 1.007;
+            // $totalEPAmount=$totals->payoutSumEP * 1.007;
 
             $totalJCPayout = $totalIbftAmount + $totalJCAmount;
-            $totalEPPayout = $totalEPAmount;
+            // $totalEPPayout = $totalEPAmount;
 
             $surplus->update([
                 'jazzcash' => $surplus->jazzcash + $tempAmount->jc_amount - $totalJCPayout,
-                'easypaisa' => $surplus->easypaisa + $tempAmount->ep_amount - $totalEPPayout,
+                // 'easypaisa' => $surplus->easypaisa + $tempAmount->ep_amount - $totalEPPayout,
             ]);
 
             $tempAmount->update([
                 'jc_amount' => $totalJCPayout,
-                'ep_amount' => $totalEPPayout,
+                // 'ep_amount' => $totalEPPayout,
             ]);
 
             DB::commit();
