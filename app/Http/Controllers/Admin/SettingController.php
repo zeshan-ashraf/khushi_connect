@@ -345,13 +345,20 @@ class SettingController extends Controller
     {
         $selectedId = $request->id;
 
-        PayoutSetting::query()->update(['value' => 0]);
+        // Set all payout settings to 0
+        PayoutSetting::query()->update([
+            'value' => 0
+        ]);
 
-        $setting = PayoutSetting::findOrFail($selectedId);
-        $setting->value = 1;
-        $setting->save();
-    
-        return redirect()->back();
+        // Set selected setting to 1
+        PayoutSetting::where('id', $selectedId)->update([
+            'value' => 1
+        ]);
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Payout setting updated successfully.'
+        ]);
     }
 
     public function saveNewUserVerificationSetting(Request $request)

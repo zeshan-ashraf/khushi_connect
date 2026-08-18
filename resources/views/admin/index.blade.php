@@ -468,7 +468,7 @@ thead .sticky-balance {
 </div>
 @endsection
 @push('js')
-
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
 document.addEventListener("DOMContentLoaded", function () {
     const userStats = @json($userStats);
@@ -613,14 +613,42 @@ document.addEventListener("DOMContentLoaded", function () {
 <script>
     $(document).ready(function () {
 
+        let previousPayoutRadio = $('.payout-radio:checked');
+
         $('.payout-radio').on('change', function () {
 
-            const id = $(this).data('id');
+            const radio = $(this);
+            const id = radio.data('id');
 
-            updateCheckedTogglePayout(id);
+            Swal.fire({
+                title: 'Are you sure?',
+                text: 'Do you want to change the payout setting?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, change it',
+                cancelButtonText: 'Cancel',
+                reverseButtons: true
+            }).then((result) => {
+
+                if (result.isConfirmed) {
+
+                    updateCheckedTogglePayout(id);
+
+                    // Update previous radio after successful confirmation
+                    previousPayoutRadio = radio;
+
+                } else {
+
+                    // Restore previous radio
+                    previousPayoutRadio.prop('checked', true);
+                    radio.prop('checked', false);
+                }
+            });
         });
 
+
         function updateCheckedTogglePayout(id) {
+
             var URL = '{{ route("admin.setting.payout_setting") }}';
 
             $.ajax({
@@ -630,13 +658,33 @@ document.addEventListener("DOMContentLoaded", function () {
                     'X-CSRF-TOKEN': '{{ csrf_token() }}',
                 },
                 contentType: 'application/json',
-                data: JSON.stringify({ id: id }),
+                data: JSON.stringify({
+                    id: id
+                }),
+
                 success: function (response) {
+
                     console.log(response);
+
+                    Swal.fire({
+                        title: 'Updated!',
+                        text: 'Payout setting has been changed successfully.',
+                        icon: 'success',
+                        timer: 1500,
+                        showConfirmButton: false
+                    });
                 },
+
                 error: function (xhr) {
+
                     console.error('Error:', xhr.responseText);
-                },
+
+                    Swal.fire({
+                        title: 'Error!',
+                        text: 'Failed to update payout setting.',
+                        icon: 'error'
+                    });
+                }
             });
         }
     });
