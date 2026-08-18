@@ -174,7 +174,9 @@ thead .sticky-balance {
                                                 <thead>
                                                     @if(auth()->user()->user_role == "Super Admin" || auth()->user()->user_role == "Manager")
                                                     <tr class="bg-warning">
+                                                        @if(auth()->user()->user_role == "Super Admin")
                                                         <th colspan="8">Payout EP Setting</th>
+                                                        @endif
                                                         <th colspan="@if (auth()->user()->user_role == "Super Admin") 5 @else 3 @endif"  rowspan="2">Surplus Amount Interface</th>
                                                         <th>JC</th>
                                                         <th>EP</th>
@@ -182,6 +184,7 @@ thead .sticky-balance {
                                                         
                                                     </tr>
                                                     <tr class="bg-warning">
+                                                        @if(auth()->user()->user_role == "Super Admin")
                                                         @foreach($payout_setting as $item)
                                                             <th  colspan="2">
                                                                 <div class="d-flex align-items-center gap-2">
@@ -201,6 +204,7 @@ thead .sticky-balance {
                                                                 </div>
                                                             </th>
                                                         @endforeach
+                                                        @endif
                                                         <th>{{number_format(round($surplusAmount->jazzcash,0))}}</th>
                                                         <th>{{number_format(round($surplusAmount->easypaisa,0))}}</th>
                                                         <th colspan="6"><a data-target="#attributeModal" class="btn btn-primary waves-effect waves-float waves-light open_modal" data-url="{{route('admin.setting.modal_sec')}}">Add Amount</a></th>

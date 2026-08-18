@@ -39,7 +39,7 @@ class CheckPayoutDailyLimit
         if ($this->payoutLimitService->wouldExceedDailyLimit($user, $phone, (float) $amount)) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Daily payout limit exceeded.',
+                'message' => 'User daily limit breached.',
             ], 429);
         }
 
