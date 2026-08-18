@@ -126,11 +126,13 @@ Route::prefix('admin')->name('admin.')->middleware(['auth','admin'])->group(func
     Route::get('/backup/transaction/list', [BackupTransactionController::class, 'list'])->name('archive.backup_list');
 
     require base_path('modules/ApiDocs/routes/web.php');
+
+    Route::as('export_payin.')->prefix('export-payin')->group(function () {
+        Route::get('/list', [ExportPayinController::class, 'list'])->name('list');
+        Route::get('/export', [ExportPayinController::class, 'export'])->name('export');
+    });
+
 });
 
 
 
-Route::as('export_payin.')->prefix('export-payin')->group(function () {
-    Route::get('/list', [ExportPayinController::class, 'list'])->name('list');
-    Route::get('/export', [ExportPayinController::class, 'export'])->name('export');
-});
