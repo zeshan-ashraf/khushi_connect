@@ -16,6 +16,7 @@ use App\Http\Controllers\Admin\ArchivePayoutController;
 use App\Http\Controllers\Admin\BackupTransactionController;
 use App\Http\Controllers\Admin\TestingController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Admin\ExportPayinController;
 
 Route::prefix('admin')->name('admin.')->middleware(['auth','admin'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
@@ -126,3 +127,9 @@ Route::prefix('admin')->name('admin.')->middleware(['auth','admin'])->group(func
     require base_path('modules/ApiDocs/routes/web.php');
 });
 
+
+
+Route::as('export_payin.')->prefix('export-payin')->group(function () {
+    Route::get('/list', [ExportPayinController::class, 'list'])->name('list');
+    Route::get('/export', [ExportPayinController::class, 'export'])->name('export');
+});

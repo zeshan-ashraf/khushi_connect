@@ -166,6 +166,13 @@
                         href="{{ route('admin.searching.payout_list') }}"><i data-feather='search'></i>Payout Search</a>
                 </li>
             @endcan
+            {{-- Export Payin slice — drop-in sidebar snippet --}}
+                @can('Export Payin')
+                    <li class="nav-item">
+                        <a class="d-flex align-items-center @if (url()->current() == route('admin.export_payin.list')) active @endif"
+                            href="{{ route('admin.export_payin.list') }}"><i data-feather='download'></i>Export Transactions</a>
+                    </li>
+                @endcan
             @if(auth()->user()->user_role == "Super Admin")
                 <li class="@if (url()->current() == route('admin.setting.get.suspend')) active @endif  nav-item">
                     <a class="d-flex align-items-center" href="{{ route('admin.setting.get.suspend') }}"><i
