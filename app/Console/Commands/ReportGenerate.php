@@ -117,7 +117,7 @@ class ReportGenerate extends Command
                         ->whereDate('created_at', Carbon::today())
                         ->sum('amount');       
                 }
-                if ($user->id == "24") {
+                if ($user->id == "14") {
                     $url = 'https://novapay.pk/api/get-nova-payout';
                     $response = Http::get($url);
                     $data = $response->json();
