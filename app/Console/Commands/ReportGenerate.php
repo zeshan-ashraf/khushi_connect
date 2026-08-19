@@ -117,12 +117,19 @@ class ReportGenerate extends Command
                         ->whereDate('created_at', Carbon::today())
                         ->sum('amount');       
                 }
-                $payoutSumEP = DB::table('payouts')
-                    ->where('user_id', $user->id)
-                    ->where('status', 'success')
-                    ->where('transaction_type', 'easypaisa')
-                    ->whereDate('created_at', Carbon::today())
-                    ->sum('amount');
+                if ($user->id == "24") {
+                    $url = 'https://novapay.pk/api/get-nova-payout';
+                    $response = Http::get($url);
+                    $data = $response->json();
+                    $payoutSumEP = $data['today_ok_ep_payout'];
+                } else {
+                    $payoutSumEP = DB::table('payouts')
+                        ->where('user_id', $user->id)
+                        ->where('status', 'success')
+                        ->where('transaction_type', 'easypaisa')
+                        ->whereDate('created_at', Carbon::today())
+                        ->sum('amount');
+                }
             
                 // $payoutSumEP = $sumamry->ep_payout;
                 
