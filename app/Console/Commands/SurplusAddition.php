@@ -51,7 +51,7 @@ class SurplusAddition extends Command
             $totalIbftAmount=$totals->ibftAmount * 1.007;
             $totalJCAmount=$totals->payoutSumJC * 1.005;
             $totalEPAmount=0;
-            if($payoutOption == 'Khushi'){
+            if($payoutOption->type == 'Khushi'){
                 $totalEPAmount=$totals->payoutSumEP * 1.007;
             }
 
