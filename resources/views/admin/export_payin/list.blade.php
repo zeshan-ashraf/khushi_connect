@@ -191,13 +191,19 @@
                                                 <div class="col-12 col-md">
                                                     <div class="form-group mb-50">
                                                         <label>Status</label>
-                                                        @php $selectedStatus = request()->has('status') ? (string) request()->status : 'success'; @endphp
+                                                        @php
+                                                            $selectedStatus = request()->has('status') ? (string) request()->status : 'success';
+                                                            if ($selectedStatus === 'settled' && $selectedTransactionType !== 'payout') {
+                                                                $selectedStatus = 'success';
+                                                            }
+                                                        @endphp
                                                         <select name="status" class="form-control">
                                                             <option value="" {{ $selectedStatus === '' ? 'selected' : '' }}>All</option>
                                                             <option value="failed" {{ $selectedStatus === 'failed' ? 'selected' : '' }}>Failed</option>
                                                             <option value="success" {{ $selectedStatus === 'success' ? 'selected' : '' }}>Success</option>
                                                             <option value="pending" {{ $selectedStatus === 'pending' ? 'selected' : '' }}>Pending</option>
                                                             <option value="reverse" {{ $selectedStatus === 'reverse' ? 'selected' : '' }}>Reverse</option>
+                                                            <option value="settled" {{ $selectedStatus === 'settled' ? 'selected' : '' }} {{ $selectedTransactionType !== 'payout' ? 'disabled' : '' }} title="{{ $selectedTransactionType !== 'payout' ? 'Available for Payout only' : '' }}">Settled</option>
                                                         </select>
                                                     </div>
                                                 </div>
@@ -500,12 +506,28 @@
             form.addEventListener('submit', applyDateRange);
             applyDateRange();
 
-            form.querySelector('select[name="transaction_type"]')?.addEventListener('change', function () {
+            const transactionTypeSelect = form.querySelector('select[name="transaction_type"]');
+            const statusSelect = form.querySelector('select[name="status"]');
+            const settledOption = statusSelect ? statusSelect.querySelector('option[value="settled"]') : null;
+
+            function syncSettledOption() {
+                const isPayout = transactionTypeSelect && transactionTypeSelect.value === 'payout';
+                if (settledOption) {
+                    settledOption.disabled = !isPayout;
+                }
+                if (!isPayout && statusSelect && statusSelect.value === 'settled') {
+                    statusSelect.value = 'success';
+                }
+            }
+
+            transactionTypeSelect?.addEventListener('change', function () {
+                syncSettledOption();
                 applyDateRange();
                 if (canSubmitDates()) {
                     form.submit();
                 }
             });
+            syncSettledOption();
 
             const fromSlider = form.querySelector('#amount-from-slider');
             const toSlider = form.querySelector('#amount-to-slider');

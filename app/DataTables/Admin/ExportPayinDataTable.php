@@ -52,8 +52,13 @@ class ExportPayinDataTable extends DataTable
             ->editColumn('status', function ($query) {
                 $reason = $query->pp_message;
                 $type = $query->status;
+                $html = view('admin.transaction.badge', get_defined_vars())->render();
 
-                return view('admin.transaction.badge', get_defined_vars());
+                if (static::isPayoutRequest() && ($query->is_settled ?? 'no') === 'yes') {
+                    $html .= ' <span class="badge bg-warning settled-badge">Settled</span>';
+                }
+
+                return $html;
             })
             ->editColumn('txn_type', function ($query) {
                 return static::formatNetwork($query->txn_type ?? null);
@@ -436,6 +441,7 @@ class ExportPayinDataTable extends DataTable
      *     amount_from: ?float,
      *     amount_to: ?float,
      *     status: ?string,
+     *     is_settled: ?string,
      *     user_id: ?int,
      *     network: ?string
      * }
@@ -458,8 +464,16 @@ class ExportPayinDataTable extends DataTable
         $status = request()->has('status')
             ? static::trimFilter('status')
             : 'success';
-        $allowedStatuses = self::STATUSES;
-        if ($status !== null && !in_array($status, $allowedStatuses, true)) {
+        $isSettled = null;
+
+        if ($status === 'settled') {
+            if (static::isPayoutRequest()) {
+                $isSettled = 'yes';
+                $status = null;
+            } else {
+                $status = 'success';
+            }
+        } elseif ($status !== null && !in_array($status, self::STATUSES, true)) {
             $status = null;
         }
 
@@ -480,6 +494,7 @@ class ExportPayinDataTable extends DataTable
             'amount_from' => $amountRange['amount_from'],
             'amount_to' => $amountRange['amount_to'],
             'status' => $status,
+            'is_settled' => $isSettled,
             'user_id' => $userId,
             'network' => $network,
         ];
@@ -650,7 +665,8 @@ class ExportPayinDataTable extends DataTable
     private static function payoutSummaryStats(): array
     {
         $filters = static::resolveFilters();
-        $selectedStatus = $filters['status'];
+        $isSettledFilter = ($filters['is_settled'] ?? null) === 'yes';
+        $selectedStatus = $isSettledFilter ? 'settled' : $filters['status'];
 
         $byStatus = [];
         foreach (self::STATUSES as $status) {
@@ -658,7 +674,10 @@ class ExportPayinDataTable extends DataTable
         }
 
         $aggregateFilters = $filters;
-        if ($selectedStatus !== null) {
+        if ($isSettledFilter) {
+            $aggregateFilters['status'] = null;
+            $aggregateFilters['is_settled'] = 'yes';
+        } elseif ($selectedStatus !== null) {
             $aggregateFilters['status'] = $selectedStatus;
         } else {
             $aggregateFilters['status'] = null;
@@ -692,6 +711,19 @@ class ExportPayinDataTable extends DataTable
             $dateLabel = Carbon::parse($filters['start_date'])->format('d-m-Y')
                 . ' to '
                 . Carbon::parse($filters['end_date'])->format('d-m-Y');
+        }
+
+        if ($isSettledFilter) {
+            return [
+                'date_label' => $dateLabel,
+                'selected_status' => 'settled',
+                'show_sr' => false,
+                'show_status_breakdown' => false,
+                'total_payin' => (float) collect($byStatus)->sum('amount'),
+                'total_orders' => $totalOrdersAll,
+                'success_rate' => 0.0,
+                'by_status' => $byStatus,
+            ];
         }
 
         if ($selectedStatus === null) {
@@ -784,6 +816,7 @@ class ExportPayinDataTable extends DataTable
             DB::raw('transaction_type as `txn_type`'),
             'amount',
             'status',
+            'is_settled',
             'created_at',
             DB::raw('message as `pp_message`'),
             DB::raw("'" . $table . "' as `table_type`"),
@@ -800,6 +833,9 @@ class ExportPayinDataTable extends DataTable
             })
             ->when($filters['status'], function ($q) use ($filters) {
                 $q->where('status', $filters['status']);
+            })
+            ->when(($filters['is_settled'] ?? null) === 'yes', function ($q) {
+                $q->where('is_settled', 'yes');
             })
             ->when($filters['network'], function ($q) use ($filters) {
                 $q->where('transaction_type', $filters['network']);
