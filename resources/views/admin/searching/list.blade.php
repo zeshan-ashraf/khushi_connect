@@ -4,7 +4,7 @@
 <link rel="stylesheet" href="{{ asset('admin/assets/dashboard/css/dataTables.bootstrap4.min.css') }}" />
 <style>
     #dataTable .badge {
-        font-size: 0.65rem;
+        font-size: .85rem;
         padding: 0.18em 0.4em;
         font-weight: 600;
         line-height: 1.2;
