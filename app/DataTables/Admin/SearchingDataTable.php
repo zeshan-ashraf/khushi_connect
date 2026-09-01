@@ -4,6 +4,7 @@ namespace App\DataTables\Admin;
 
 use App\Data\Searching\TransactionSearchFilters;
 use App\Services\TransactionSearchService;
+use App\Support\PayinCallbackTracker;
 use Yajra\DataTables\Services\DataTable;
 
 class SearchingDataTable extends DataTable
@@ -20,6 +21,9 @@ class SearchingDataTable extends DataTable
                 $type = $query->status;
 
                 return view('admin.transaction.badge', get_defined_vars());
+            })
+            ->editColumn('callback_sent', function ($query) {
+                return view('admin.transaction.callback_badge', PayinCallbackTracker::badgeData($query));
             })
             ->editColumn('created_at', function ($query) {
                 return $query->created_at ? $query->created_at->format('d-m-y H:i:s') : 'N/A';
@@ -60,7 +64,7 @@ class SearchingDataTable extends DataTable
                 }
 
                 return '';
-            })->rawColumns(['detail', 'reverse']);
+            })->rawColumns(['detail', 'reverse', 'callback_sent']);
     }
 
     public function query()
@@ -108,6 +112,7 @@ class SearchingDataTable extends DataTable
             ['data' => 'txn_type', 'name' => 'txn_type', 'title' => 'Trans type', 'orderable' => true, 'searchable' => true, 'width' => 30],
             ['data' => 'amount', 'name' => 'amount', 'title' => 'Amount', 'orderable' => true, 'searchable' => true, 'width' => 30],
             ['data' => 'status', 'name' => 'status', 'title' => 'Status', 'orderable' => true, 'searchable' => true, 'width' => 30],
+            ['data' => 'callback_sent', 'name' => 'callback_sent', 'title' => 'Callback', 'orderable' => false, 'searchable' => false, 'width' => 30],
             ['data' => 'created_at', 'name' => 'created_at', 'title' => 'Created at', 'orderable' => true, 'searchable' => true, 'width' => 30],
             ['data' => 'detail', 'name' => 'detail', 'title' => 'Action', 'orderable' => false, 'searchable' => false, 'width' => '15%'],
             ['data' => 'reverse', 'name' => 'reverse', 'title' => 'Change Status', 'orderable' => false, 'searchable' => false, 'width' => '15%'],

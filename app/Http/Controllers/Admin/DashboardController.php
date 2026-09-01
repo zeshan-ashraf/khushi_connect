@@ -7,7 +7,7 @@ use App\Models\{Payout,Transaction,User,Settlement, Setting, PayoutSetting, Surp
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Http;
+use App\Support\PayinCallbackTracker;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Artisan;
@@ -193,8 +193,7 @@ class DashboardController extends Controller
                 'status' => $transaction->status,
             ];
         
-            // Make an HTTP request
-            $response = Http::timeout(60)->post($transaction->url, $data);
+            PayinCallbackTracker::sendAndRecord($transaction, $transaction->url, $data);
         }
         
     }

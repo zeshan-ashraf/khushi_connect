@@ -6,6 +6,7 @@ namespace App\Support;
 
 use App\Models\Transaction;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -44,6 +45,16 @@ final class MerchantCallback
         $requestId = $requestId ?: uniqid();
         $url = (string) $transaction->url;
         $data = self::buildPayinPayload($transaction);
+        $model = $transaction instanceof Model ? $transaction : null;
+        $status = strtolower((string) ($data['status'] ?? ''));
+
+        if (trim($url) === '') {
+            PayinCallbackTracker::recordSkipped($model, 'empty callback url');
+
+            return false;
+        }
+
+        PayinCallbackTracker::markSending($model);
 
         try {
             Log::channel('payout')->info('[TestPaymentService] Sending callback notification', [
@@ -54,6 +65,8 @@ final class MerchantCallback
             ]);
 
             $response = self::post($url, $data, $user, $timeout);
+
+            PayinCallbackTracker::record($model, $status, $response);
 
             if ($response->successful()) {
                 Log::channel('payout')->info('[TestPaymentService] Callback successful', [
@@ -74,6 +87,8 @@ final class MerchantCallback
                 'url' => $url,
             ]);
         } catch (\Throwable $e) {
+            PayinCallbackTracker::record($model, $status, null, $e);
+
             Log::channel('error')->error('[TestPaymentService] Callback failed', [
                 'request_id' => $requestId,
                 'source' => $source,
