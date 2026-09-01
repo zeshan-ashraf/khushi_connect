@@ -210,14 +210,9 @@
                 try {
                     document.execCommand("copy");
 
-                    const icon = btn.querySelector("i");
-                    if (icon) {
-                        icon.classList.remove("fa-copy");
-                        icon.classList.add("fa-check");
+                    if (btn.querySelector("svg, i")) {
                         btn.classList.add("copied");
                         setTimeout(() => {
-                            icon.classList.remove("fa-check");
-                            icon.classList.add("fa-copy");
                             btn.classList.remove("copied");
                         }, 2000);
                     } else {

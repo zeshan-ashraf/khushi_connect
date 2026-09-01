@@ -9,23 +9,6 @@
         font-weight: 600;
         line-height: 1.2;
     }
-    #dataTable .copy-btn {
-        padding: 0;
-        margin-left: 0.25rem;
-        border: 0;
-        background: transparent;
-        line-height: 1;
-        color: #ea5455;
-        cursor: pointer;
-        box-shadow: none;
-    }
-    #dataTable .copy-btn i {
-        font-size: 0.7rem;
-    }
-    #dataTable .copy-btn.copied,
-    #dataTable .copy-btn.copied i {
-        color: #28c76f;
-    }
     #dataTable .btn-table-xs {
         padding: 0.12rem 0.4rem;
         font-size: 0.6875rem;
