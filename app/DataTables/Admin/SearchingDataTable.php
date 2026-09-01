@@ -20,7 +20,7 @@ class SearchingDataTable extends DataTable
                 $reason = $query->pp_message;
                 $type = $query->status;
 
-                return view('admin.transaction.badge', get_defined_vars());
+                return view('admin.transaction.badge', compact('reason', 'type'))->render();
             })
             ->editColumn('callback_sent', function ($query) {
                 return view('admin.transaction.callback_badge', PayinCallbackTracker::badgeData($query));
@@ -33,11 +33,9 @@ class SearchingDataTable extends DataTable
             })
             ->editColumn('detail', function ($query) {
                 $user = auth()->user();
-                $buttons = '';
-                $buttons .= '
-                <a href="' . route('admin.searching.callback.send', $query->id) . '" class="btn btn-success btn-table-xs">Send Callback</a>
-                <a href="' . route('admin.jazzcash.status-inquiry', ['id' => $query->txn_ref_no, 'type' => $query->txn_type]) . '" class="btn btn-primary btn-table-xs mt-1">Inquiry</a>
-                ';
+                $buttons = '<div class="d-flex flex-wrap justify-content-center align-items-center gap-1 searching-action-btns">';
+                $buttons .= '<a href="' . route('admin.searching.callback.send', $query->id) . '" class="btn btn-success btn-sm">Send Callback</a>';
+                $buttons .= '<a href="' . route('admin.jazzcash.status-inquiry', ['id' => $query->txn_ref_no, 'type' => $query->txn_type]) . '" class="btn btn-primary btn-sm">Inquiry</a>';
 
                 if ($user && method_exists($user, 'can') && $user->can('Reverse Transactions') && $query->status == 'success') {
                     $reverseRequested = isset($query->reverse_requested_at) ? $query->reverse_requested_at : null;
@@ -45,9 +43,11 @@ class SearchingDataTable extends DataTable
                     if (!$reverseRequested) {
                         $tableType = 'transactions';
 
-                        $buttons .= ' <button class="btn btn-warning btn-table-xs mt-1 mark-for-reversal-btn" data-id="' . $query->id . '" data-table-type="' . $tableType . '">Mark for Reversal</button>';
+                        $buttons .= '<button class="btn btn-warning btn-sm mark-for-reversal-btn" data-id="' . $query->id . '" data-table-type="' . $tableType . '">Mark for Reversal</button>';
                     }
                 }
+
+                $buttons .= '</div>';
 
                 return $buttons;
             })->rawColumns(['detail'])

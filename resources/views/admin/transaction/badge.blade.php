@@ -9,6 +9,7 @@
               title="{{ $reason }}">
             {{ $type }}
         </span>
+        @if(!empty($reason))
         <button type="button"
                 class="copy-btn"
                 data-text="{{ e($reason) }}"
@@ -21,6 +22,7 @@
                 <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
             </svg>
         </button>
+        @endif
     </span>
 @elseif($type == 'reverse')
     <span class="badge bg-secondary text-capitalize text-status">{{$type}}</span>

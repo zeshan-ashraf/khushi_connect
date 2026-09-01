@@ -9,11 +9,24 @@
         font-weight: 600;
         line-height: 1.2;
     }
-    #dataTable .btn-table-xs {
-        padding: 0.12rem 0.4rem;
-        font-size: 0.6875rem;
+    #dataTable .searching-action-btns {
+        gap: 4px;
+    }
+    #dataTable .searching-action-btns .btn-sm {
+        padding: 0.15rem 0.4rem;
+        font-size: 0.75rem;
         line-height: 1.2;
-        border-radius: 0.25rem;
+        white-space: nowrap;
+    }
+    #dataTable .status-dropdown-reverse {
+        min-height: 0;
+        height: auto;
+        padding: 0.15rem 0.4rem;
+        font-size: 0.75rem;
+        line-height: 1.2;
+        width: 100%;
+        max-width: 110px;
+        display: inline-block;
     }
     .dark-layout .dataTables_wrapper .table.dataTable thead .sorting_asc:before {
         opacity: 0 !important;
