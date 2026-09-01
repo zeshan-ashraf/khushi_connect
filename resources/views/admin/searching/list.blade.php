@@ -3,6 +3,35 @@
 @push('css')
 <link rel="stylesheet" href="{{ asset('admin/assets/dashboard/css/dataTables.bootstrap4.min.css') }}" />
 <style>
+    #dataTable .badge {
+        font-size: 0.65rem;
+        padding: 0.18em 0.4em;
+        font-weight: 600;
+        line-height: 1.2;
+    }
+    #dataTable .copy-btn {
+        padding: 0;
+        margin-left: 0.25rem;
+        border: 0;
+        background: transparent;
+        line-height: 1;
+        color: #ea5455;
+        cursor: pointer;
+        box-shadow: none;
+    }
+    #dataTable .copy-btn i {
+        font-size: 0.7rem;
+    }
+    #dataTable .copy-btn.copied,
+    #dataTable .copy-btn.copied i {
+        color: #28c76f;
+    }
+    #dataTable .btn-table-xs {
+        padding: 0.12rem 0.4rem;
+        font-size: 0.6875rem;
+        line-height: 1.2;
+        border-radius: 0.25rem;
+    }
     .dark-layout .dataTables_wrapper .table.dataTable thead .sorting_asc:before {
         opacity: 0 !important;
     }

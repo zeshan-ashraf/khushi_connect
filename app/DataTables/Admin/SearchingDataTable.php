@@ -35,8 +35,8 @@ class SearchingDataTable extends DataTable
                 $user = auth()->user();
                 $buttons = '';
                 $buttons .= '
-                <a href="' . route('admin.searching.callback.send', $query->id) . '" class="btn btn-success btn-sm">Send Callback</a>
-                <a href="' . route('admin.jazzcash.status-inquiry', ['id' => $query->txn_ref_no, 'type' => $query->txn_type]) . '" class="btn btn-primary btn-sm mt-1">Inquiry</a>
+                <a href="' . route('admin.searching.callback.send', $query->id) . '" class="btn btn-success btn-table-xs">Send Callback</a>
+                <a href="' . route('admin.jazzcash.status-inquiry', ['id' => $query->txn_ref_no, 'type' => $query->txn_type]) . '" class="btn btn-primary btn-table-xs mt-1">Inquiry</a>
                 ';
 
                 if ($user && method_exists($user, 'can') && $user->can('Reverse Transactions') && $query->status == 'success') {
@@ -45,7 +45,7 @@ class SearchingDataTable extends DataTable
                     if (!$reverseRequested) {
                         $tableType = 'transactions';
 
-                        $buttons .= ' <button class="btn btn-warning btn-sm mt-1 mark-for-reversal-btn" data-id="' . $query->id . '" data-table-type="' . $tableType . '">Mark for Reversal</button>';
+                        $buttons .= ' <button class="btn btn-warning btn-table-xs mt-1 mark-for-reversal-btn" data-id="' . $query->id . '" data-table-type="' . $tableType . '">Mark for Reversal</button>';
                     }
                 }
 
@@ -64,7 +64,7 @@ class SearchingDataTable extends DataTable
                 }
 
                 return '';
-            })->rawColumns(['detail', 'reverse', 'callback_sent']);
+            })->rawColumns(['detail', 'reverse', 'callback_sent', 'status']);
     }
 
     public function query()

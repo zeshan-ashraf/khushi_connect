@@ -188,9 +188,11 @@
   </script>
     <script>
         document.addEventListener("click", function (e) {
-            if (e.target.classList.contains("copy-btn")) {
+            const btn = e.target.closest(".copy-btn");
+            if (!btn) {
+                return;
+            }
 
-                let btn = e.target;
                 let encodedText = btn.getAttribute("data-text");
 
                 // ✅ Decode HTML entities (fix &quot;)
@@ -208,22 +210,33 @@
                 try {
                     document.execCommand("copy");
 
-                    btn.innerText = "Copied!";
-                    btn.classList.remove("btn-light");
-                    btn.classList.add("btn-success");
+                    const icon = btn.querySelector("i");
+                    if (icon) {
+                        icon.classList.remove("fa-copy");
+                        icon.classList.add("fa-check");
+                        btn.classList.add("copied");
+                        setTimeout(() => {
+                            icon.classList.remove("fa-check");
+                            icon.classList.add("fa-copy");
+                            btn.classList.remove("copied");
+                        }, 2000);
+                    } else {
+                        btn.innerText = "Copied!";
+                        btn.classList.remove("btn-light");
+                        btn.classList.add("btn-success");
 
-                    setTimeout(() => {
-                        btn.innerText = "Copy";
-                        btn.classList.remove("btn-success");
-                        btn.classList.add("btn-light");
-                    }, 2000);
+                        setTimeout(() => {
+                            btn.innerText = "Copy";
+                            btn.classList.remove("btn-success");
+                            btn.classList.add("btn-light");
+                        }, 2000);
+                    }
 
                 } catch (err) {
                     console.error(err);
                 }
 
                 document.body.removeChild(textarea);
-            }
         });
     </script>
     <script src="{{asset('admin/js/custom.js')}}"></script>

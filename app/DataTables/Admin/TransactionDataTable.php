@@ -64,7 +64,7 @@ class TransactionDataTable extends DataTable
             })
             ->editColumn('amount',function ($query){
                 return $query->amount;
-             }) ->rawColumns(['status-inqury', 'callback_sent']);
+             }) ->rawColumns(['status-inqury', 'callback_sent', 'status']);
     }
 
     public function query()

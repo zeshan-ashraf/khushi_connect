@@ -40,3 +40,20 @@ WE WILL RELEASE FUTURE UPDATES SO IN ORDER TO NOT OVERWRITE YOUR STYLES IT'S BET
   	display: inline-block;
 }
 
+.copy-btn {
+    padding: 0;
+    border: 0;
+    background: transparent;
+    line-height: 1;
+    color: #ea5455;
+    cursor: pointer;
+    box-shadow: none;
+}
+.copy-btn i {
+    font-size: 0.7rem;
+}
+.copy-btn.copied,
+.copy-btn.copied i {
+    color: #28c76f;
+}
+
