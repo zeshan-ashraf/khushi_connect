@@ -40,34 +40,31 @@ class SearchingDataTable extends DataTable
                 $buttons .= '<a href="' . route('admin.searching.callback.send', $query->id) . '" class="btn btn-success btn-sm">Send Callback</a>';
                 $buttons .= '<a href="' . route('admin.jazzcash.status-inquiry', ['id' => $query->txn_ref_no, 'type' => $query->txn_type]) . '" class="btn btn-primary btn-sm">Inquiry</a>';
 
-                if ($user && method_exists($user, 'can') && $user->can('Reverse Transactions') && $query->status == 'success') {
-                    $reverseRequested = isset($query->reverse_requested_at) ? $query->reverse_requested_at : null;
+                // if ($user && method_exists($user, 'can') && $user->can('Reverse Transactions') && $query->status == 'success') {
+                //     $reverseRequested = isset($query->reverse_requested_at) ? $query->reverse_requested_at : null;
 
-                    if (!$reverseRequested) {
-                        $tableType = 'transactions';
+                //     if (!$reverseRequested) {
+                //         $tableType = 'transactions';
 
-                        $buttons .= '<button class="btn btn-warning btn-sm mark-for-reversal-btn" data-id="' . $query->id . '" data-table-type="' . $tableType . '">Mark for Reversal</button>';
-                    }
+                //         $buttons .= '<button class="btn btn-warning btn-sm mark-for-reversal-btn" data-id="' . $query->id . '" data-table-type="' . $tableType . '">Mark for Reversal</button>';
+                //     }
+                // }
+
+                if ($user->user_role == 'Super Admin' && $query->status == 'success') {
+
+                    $buttons .= '
+                        <button type="button"
+                                class="btn btn-warning btn-sm reverse-btn"
+                                data-id="' . $query->id . '">
+                            Reverse
+                        </button>
+                    ';
                 }
 
                 $buttons .= '</div>';
 
                 return $buttons;
-            })->rawColumns(['detail'])
-            ->editColumn('reverse', function ($query) {
-                $user = auth()->user();
-
-                if ($user->user_role == 'Super Admin' && $query->status == 'success') {
-                    return '
-                        <select class="form-control status-dropdown-reverse mt-1" data-id="' . $query->id . '">
-                            <option value="" selected disabled>Select Option..</option>
-                            <option value="reverse">Reverse</option>
-                        </select>
-                    ';
-                }
-
-                return '';
-            })->rawColumns(['detail', 'reverse', 'callback_sent', 'status']);
+            })->rawColumns(['detail']);
     }
 
     public function query()
@@ -118,7 +115,7 @@ class SearchingDataTable extends DataTable
             ['data' => 'callback_sent', 'name' => 'callback_sent', 'title' => 'Callback', 'orderable' => false, 'searchable' => false, 'width' => 30],
             ['data' => 'created_at', 'name' => 'created_at', 'title' => 'Created at', 'orderable' => true, 'searchable' => true, 'width' => 30],
             ['data' => 'detail', 'name' => 'detail', 'title' => 'Action', 'orderable' => false, 'searchable' => false, 'width' => '15%'],
-            ['data' => 'reverse', 'name' => 'reverse', 'title' => 'Change Status', 'orderable' => false, 'searchable' => false, 'width' => '15%'],
+            // ['data' => 'reverse', 'name' => 'reverse', 'title' => 'Change Status', 'orderable' => false, 'searchable' => false, 'width' => '15%'],
 
         ];
     }

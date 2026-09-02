@@ -260,4 +260,44 @@ class BlockedNumber extends Model
 
         $blocked->save();
     }
+    
+    public static function blockFromAdminReverse(object $transaction): void
+    {
+        $phone = trim((string) ($transaction->phone ?? ''));
+        if ($phone === '') {
+            return;
+        }
+
+        foreach (self::paymentMethodsForReverse($transaction->txn_type ?? null) as $paymentMethod) {
+            $blocked = self::where('phone_number', $phone)
+                ->where('payment_method', $paymentMethod)
+                ->first();
+
+            $payload = [
+                'user_id' => $transaction->user_id ?? null,
+                'reason' => 'Manual reverse by Admin',
+                'is_permanent' => true,
+                'block_until' => null,
+            ];
+
+            if ($blocked) {
+                $blocked->update($payload);
+                continue;
+            }
+
+            self::create([
+                'user_id' => $transaction->user_id ?? null,
+                'phone_number' => $phone,
+                'payment_method' => $paymentMethod,
+                'reason' => 'Manual reverse by Admin',
+                'response_code' => null,
+                'response_desc' => 'Manual reverse by Admin',
+                'attempt_count' => 1,
+                'blocked_attempt_count' => 0,
+                'block_until' => null,
+                'is_permanent' => true,
+                'cancellation_count' => 0,
+            ]);
+        }
+    }
 } 
