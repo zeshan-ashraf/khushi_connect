@@ -260,7 +260,7 @@ class BlockedNumber extends Model
 
         $blocked->save();
     }
-    
+
     public static function blockFromAdminReverse(object $transaction): void
     {
         $phone = trim((string) ($transaction->phone ?? ''));
@@ -299,5 +299,15 @@ class BlockedNumber extends Model
                 'cancellation_count' => 0,
             ]);
         }
+    }
+    private static function paymentMethodsForReverse(?string $txnType): array
+    {
+        $normalized = strtolower(trim((string) $txnType));
+
+        return match ($normalized) {
+            'jazzcash', 'jc', 'jazz' => ['jazzcash'],
+            'easypaisa', 'ep', 'easy' => ['easypaisa'],
+            default => ['jazzcash', 'easypaisa'],
+        };
     }
 } 
