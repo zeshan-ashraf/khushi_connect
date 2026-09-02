@@ -64,7 +64,8 @@ class SearchingDataTable extends DataTable
                 $buttons .= '</div>';
 
                 return $buttons;
-            })->rawColumns(['detail']);
+            })
+            ->rawColumns(['status', 'callback_sent', 'detail']);
     }
 
     public function query()
