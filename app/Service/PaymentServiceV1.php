@@ -100,9 +100,6 @@ class PaymentServiceV1
         // Generate secure hash and add to post data
         $pp_SecureHash = $this->jazzcashSecureHash($post_data);
         $post_data['pp_SecureHash'] = $pp_SecureHash;
-        if($user->email == "testing@khushipay.com"){
-            dd($post_data);
-        }
         // Create transaction and store it in the request for later use
         $transaction = $this->orderInitialProcess($request, $pp_TxnRefNo);
         $request->merge(['transaction_model' => $transaction]);
