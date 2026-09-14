@@ -80,27 +80,30 @@
     overflow-x: auto;
 }
 
-.sticky-client,
-.sticky-balance {
+.settlement-poll-table-wrap {
+    overflow-x: auto;
+    overflow-y: visible;
+}
+.settlement-poll-table-wrap > table.settlement-grid {
+    border-collapse: separate;
+    border-spacing: 0;
+}
+.settlement-poll-table-wrap .sticky-col-left {
     position: sticky;
-    background: #fff;
-    z-index: 2;
-}
-
-.sticky-client {
     left: 0;
+    z-index: 4;
     min-width: 180px;
+    white-space: nowrap;
+    background-color: #a0a0a0 !important;
+    background-clip: padding-box;
+    font-weight: 700 !important;
+    color: #000 !important;
 }
-
-.sticky-balance {
-    left: 180px; /* same width as sticky-client */
-    min-width: 150px;
+.settlement-poll-table-wrap .table:not(.table-dark):not(.table-light) thead:not(.table-dark) th.sticky-col-left {
+    z-index: 6;
 }
-
-thead .sticky-client,
-thead .sticky-balance {
-    z-index: 3;
-    background: #f8f9fa;
+.settlement-poll-table-wrap.is-scrolled-x .sticky-col-left {
+    box-shadow: 8px 0 10px -6px rgba(0, 0, 0, 0.28);
 }
             
         </style>
@@ -169,8 +172,8 @@ thead .sticky-balance {
                             <div class="col-lg-12 col-12">
                                 <div class="card card-company-table">
                                     <div class="card-body p-0">
-                                        <div class="table-responsive">
-                                            <table class="table table-bordered">
+                                        <div class="table-responsive settlement-poll-table-wrap">
+                                            <table class="table table-bordered settlement-grid">
                                                 <thead>
                                                     @if(auth()->user()->user_role == "Super Admin" || auth()->user()->user_role == "Manager")
                                                     <tr class="bg-warning">
@@ -212,7 +215,7 @@ thead .sticky-balance {
                                                     </tr>
                                                     @endif
                                                     <tr>
-                                                        <th rowspan="2">
+                                                        <th rowspan="2" class="sticky-col-left">
                                                             Client
                                                             @if(auth()->user()->user_role == "Super Admin")
                                                                 <div class="dropdown" style="display:inline-block;">
@@ -290,7 +293,7 @@ thead .sticky-balance {
                                                     
                                                         @if(auth()->user()->user_role == "Super Admin" || auth()->user()->user_role == "Manager" || auth()->user()->id == $user->id)
                                                         <tr data-user-id="{{ $user->id }}">
-                                                            <td class="client">{{ $user->name }}</td>
+                                                            <td class="client sticky-col-left">{{ $user->name }}</td>
                                                     
                                                             @if(auth()->user()->user_role == "Super Admin" || auth()->user()->id == $user->id)
                                                                 <td>{{ number_format($item['prev_balance']) }}</td>
@@ -349,7 +352,7 @@ thead .sticky-balance {
                                                     
                                                     @if(auth()->user()->user_role == "Super Admin" || auth()->user()->user_role == "Manager")
                                                         <tr>
-                                                            <td class="client font-weight-bold">Total</td>
+                                                            <td class="client font-weight-bold sticky-col-left">Total</td>
                                                         
                                                             @if(auth()->user()->user_role == "Super Admin")
                                                                 <td class="font-weight-bold">{{ number_format($totals['prev_balance']) }}</td>
@@ -468,6 +471,29 @@ thead .sticky-balance {
 </div>
 @endsection
 @push('js')
+<script>
+(function () {
+    function updateSettlementStickyShadow() {
+        var wrap = document.querySelector('.settlement-poll-table-wrap');
+        if (!wrap) return;
+        wrap.classList.toggle('is-scrolled-x', wrap.scrollLeft > 1);
+    }
+
+    function initSettlementStickyColumn() {
+        var wrap = document.querySelector('.settlement-poll-table-wrap');
+        if (!wrap) return;
+
+        updateSettlementStickyShadow();
+        wrap.addEventListener('scroll', updateSettlementStickyShadow, { passive: true });
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initSettlementStickyColumn);
+    } else {
+        initSettlementStickyColumn();
+    }
+})();
+</script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
 document.addEventListener("DOMContentLoaded", function () {
